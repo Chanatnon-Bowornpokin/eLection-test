@@ -1,41 +1,19 @@
 /**
  * ข้อมูลตัวเลือกวิธียืนยันตัวตน (OTP / PIN)
- * รองรับการใส่ <br> แยกตามหน้าจอ Desktop, Tablet, Mobile เพื่อให้ปรับแต่งการตัดคำได้อย่างอิสระ
+ * ใช้ข้อมูลชุดเดียว ไม่แยก desktop / tablet / mobile
  */
 const VOTE_VERIFY_DATA = [
     {
         id: 'otp',
         title: 'OTP',
-        defaultSelected: true, // ค่าเริ่มต้นเลือก OTP
-        desktop: {
-            title: 'OTP',
-            description: 'ระบบจะจัดส่งรหัสผ่านแบบใช้ครั้งเดียว (OTP) จำนวน 6 หลัก ไปยังหมายเลขโทรศัพท์มือถือที่ท่านได้ลงทะเบียนไว้ เพื่อยืนยันสิทธิและเริ่มกระบวนการลงคะแนน'
-        },
-        tablet: {
-            title: 'OTP',
-            description: 'ระบบจะจัดส่งรหัสผ่านแบบใช้ครั้งเดียว (OTP) จำนวน 6 หลัก ไปยังหมายเลขโทรศัพท์<br>มือถือที่ท่านได้ลงทะเบียนไว้ เพื่อยืนยันสิทธิและเริ่มกระบวนการลงคะแนน'
-        },
-        mobile: {
-            title: 'OTP',
-            description: 'ระบบจะจัดส่งรหัสผ่านแบบใช้ครั้งเดียว (OTP)<br>จำนวน 6 หลัก ไปยังหมายเลขโทรศัพท์มือถือที่ท่าน<br>ได้ลงทะเบียนไว้ เพื่อยืนยันสิทธิและ เริ่มกระบวนการ<br>ลงคะแนน'
-        }
+        description: 'ระบบจะจัดส่งรหัสผ่านแบบใช้ครั้งเดียว (OTP) จำนวน 6 หลัก ไปยังหมายเลขโทรศัพท์มือถือที่ท่านได้ลงทะเบียนไว้ เพื่อยืนยันสิทธิและเริ่มกระบวนการลงคะแนน',
+        defaultSelected: true
     },
     {
         id: 'pin',
         title: 'PIN',
-        defaultSelected: false,
-        desktop: {
-            title: 'PIN',
-            description: 'ยืนยันสิทธิทันทีด้วยรหัส PIN ความปลอดภัย 6 หลักที่คุณได้กำหนดไว้ล่วงหน้าขณะลงทะเบียนบัญชีผู้มีสิทธิเลือกตั้ง โดยไม่ต้องรอรับข้อความ SMS'
-        },
-        tablet: {
-            title: 'PIN',
-            description: 'ยืนยันสิทธิทันทีด้วยรหัส PIN ความปลอดภัย 6 หลัก ที่คุณได้กำหนดไว้ล่วงหน้า<br>ขณะลงทะเบียนบัญชีผู้มีสิทธิเลือกตั้ง โดยไม่ต้องรอรับข้อความ SMS'
-        },
-        mobile: {
-            title: 'PIN',
-            description: 'ยืนยันสิทธิทันทีด้วยรหัส PIN ความปลอดภัย 6 หลัก<br>ที่คุณได้กำหนดไว้ล่วงหน้าขณะลงทะเบียนบัญชีผู้มีสิทธิ<br>เลือกตั้ง โดยไม่ต้องรอรับข้อความ SMS'
-        }
+        description: 'ยืนยันสิทธิทันทีด้วยรหัส PIN ความปลอดภัย 6 หลักที่คุณได้กำหนดไว้ล่วงหน้าขณะลงทะเบียนบัญชีผู้มีสิทธิเลือกตั้ง โดยไม่ต้องรอรับข้อความ SMS',
+        defaultSelected: false
     }
 ];
 
@@ -48,10 +26,16 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
 }[character]));
 
 function escapeHtmlWithBreaks(value) {
+    if (!value) return '';
     return String(value)
-        .split(/<br\s*\/?>/i)
-        .map(escapeHtml)
-        .join('<br>');
+        .replace(/<span\s+class=["']phrase["']>([\s\S]*?)<\/span>/gi, '###SPAN_PHRASE_START###$1###SPAN_PHRASE_END###')
+        .replace(/<wbr\s*\/?>/gi, '###WBR###')
+        .replace(/<br\s*\/?>/gi, '###BR###')
+        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+        .replace(/###SPAN_PHRASE_START###/g, '<span class="phrase">')
+        .replace(/###SPAN_PHRASE_END###/g, '</span>')
+        .replace(/###WBR###/g, '<wbr>')
+        .replace(/###BR###/g, '<br>');
 }
 
 // ดึง event id จาก URL query parameter เช่น ?id=house-election-2569
@@ -96,14 +80,8 @@ function renderVerifyCards() {
 
     listContainer.innerHTML = VOTE_VERIFY_DATA.map(item => {
         const isSelected = item.id === selectedMethod;
-        const titleDesktop = escapeHtmlWithBreaks(item.desktop?.title || item.title || '');
-        const descDesktop = escapeHtmlWithBreaks(item.desktop?.description || '');
-
-        const titleTablet = escapeHtmlWithBreaks(item.tablet?.title || item.title || '');
-        const descTablet = escapeHtmlWithBreaks(item.tablet?.description || item.desktop?.description || '');
-
-        const titleMobile = escapeHtmlWithBreaks(item.mobile?.title || item.title || '');
-        const descMobile = escapeHtmlWithBreaks(item.mobile?.description || item.desktop?.description || '');
+        const title = escapeHtmlWithBreaks(item.title || '');
+        const desc = escapeHtmlWithBreaks(item.description || '');
 
         return `
             <article class="vote-verify-card ${isSelected ? 'is-selected' : ''}" data-method="${escapeHtml(item.id)}" role="radio" aria-checked="${isSelected}" tabindex="0">
@@ -113,20 +91,9 @@ function renderVerifyCards() {
                     </span>
                 </div>
                 <div class="vote-verify-body">
-                    <!-- Desktop -->
-                    <div class="vote-verify-content vote-verify-content--desktop">
-                        <h2 class="vote-verify-card-title bold">${titleDesktop}</h2>
-                        <p class="vote-verify-card-desc regular">${descDesktop}</p>
-                    </div>
-                    <!-- Tablet -->
-                    <div class="vote-verify-content vote-verify-content--tablet">
-                        <h2 class="vote-verify-card-title bold">${titleTablet}</h2>
-                        <p class="vote-verify-card-desc regular">${descTablet}</p>
-                    </div>
-                    <!-- Mobile -->
-                    <div class="vote-verify-content vote-verify-content--mobile">
-                        <h2 class="vote-verify-card-title bold">${titleMobile}</h2>
-                        <p class="vote-verify-card-desc regular">${descMobile}</p>
+                    <div class="vote-verify-content">
+                        <h2 class="vote-verify-card-title bold">${title}</h2>
+                        <p class="vote-verify-card-desc regular">${desc}</p>
                     </div>
                 </div>
             </article>

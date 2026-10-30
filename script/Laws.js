@@ -1,51 +1,25 @@
+// ฐานข้อมูลกฎหมายน่ารู้ (lawsData)
+// ใช้ข้อมูลชุดเดียว ไม่แยก desktop / tablet / mobile
+// ควบคุมการแสดงผลและการตัดคำอัตโนมัติด้วย CSS Grid และ Semantic Chunking
+
 const lawsData = [
 	{
 		id: 1,
 		image: "img/Laws/1.png",
-		desktop: {
-			title: "รัฐธรรมนูญแห่งราชอาณาจักรไทย พ.ศ.๒๕๖๐",
-			description: "คือกฎหมายสูงสุดในการปกครองประเทศไทย ฉบับที่ ๒๐ ประกาศใช้บังคับเมื่อวันที่ ๖ เมษายน พ.ศ.๒๕๖๐ โดยผ่านการเห็นชอบจากประชาชนในการทำประชามติ<br>เมื่อ พ.ศ. ๒๕๕๙"
-		},
-		tablet: {
-			title: "รัฐธรรมนูญแห่งราชอาณาจักรไทย พ.ศ.๒๕๖๐",
-			description: "คือกฎหมายสูงสุดในการปกครองประเทศไทย ฉบับที่ ๒๐ ประกาศใช้บังคับเมื่อ<br>วันที่ ๖ เมษายน พ.ศ. ๒๕๖๐ โดยผ่านการเห็นชอบจากประชาชนในการทำประชามติ<br>เมื่อ พ.ศ. ๒๕๕๙"
-		},
-		mobile: {
-			title: "รัฐธรรมนูญแห่งราชอาณาจักรไทย พ.ศ.๒๕๖๐",
-			description: "คือกฎหมายสูงสุดในการปกครองประเทศไทย ฉบับที่ ๒๐ ประกาศใช้บังคับเมื่อวันที่ ๖ เมษายน<br>พ.ศ. ๒๕๖๐ โดยผ่านการเห็นชอบจากประชาชนในการทำประชามติเมื่อ พ.ศ. ๒๕๕๙"
-		}
+		title: '<span class="phrase">รัฐธรรมนูญแห่งราชอาณาจักรไทย</span> <span class="phrase">พ.ศ. ๒๕๖๐</span>',
+		description: "คือกฎหมายสูงสุดในการปกครองประเทศไทย ฉบับที่ ๒๐ ประกาศใช้บังคับเมื่อวันที่ ๖ เมษายน พ.ศ. ๒๕๖๐ โดยผ่านการเห็นชอบจากประชาชนในการทำประชามติเมื่อ พ.ศ. ๒๕๕๙"
 	},
 	{
 		id: 3,
 		image: "img/Laws/3.png",
-		desktop: {
-			title: "การเลือกตั้งบอร์ดประกันสังคม (ผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน)",
-			description: "ประกาศคณะกรรมการการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน เรื่อง ให้มีการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน<br>(ลงวันที่ ๒๕ พฤษภาคม พ.ศ. ๒๕๖๙)"
-		},
-		tablet: {
-			title: "การเลือกตั้งบอร์ดประกันสังคม<br>(ผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน)",
-			description: "ประกาศคณะกรรมการการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน<br>เรื่อง ให้มีการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน<br>(ลงวันที่ ๒๕ พฤษภาคม พ.ศ. ๒๕๖๙)"
-		},
-		mobile: {
-			title: "การเลือกตั้งบอร์ดประกันสังคม<br>(ผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน)",
-			description: "ประกาศคณะกรรมการการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน เรื่อง ให้มีการเลือกตั้ง<br>ผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน (ลงวันที่ ๒๕ พฤษภาคม พ.ศ. ๒๕๖๙)"
-		}
+		title: '<span class="phrase">การเลือกตั้งบอร์ดประกันสังคม</span> <span class="phrase">(ผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน)</span>',
+		description: "ประกาศคณะกรรมการการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน เรื่อง ให้มีการเลือกตั้งผู้แทนฝ่ายนายจ้างและผู้แทนฝ่ายผู้ประกันตน (ลงวันที่ ๒๕ พฤษภาคม พ.ศ. ๒๕๖๙)"
 	},
 	{
 		id: 2,
 		image: "img/Laws/2.png",
-		desktop: {
-			title: "พรบ.ประกอบรัฐธรรมนูญ ว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ฉบับที่ ๒) พ.ศ. ๒๕๖๖",
-			description: "พระราชบัญญัติประกอบรัฐธรรมนูญว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ฉบับที่ ๒) พ.ศ. ๒๕๖๖ คือกฎหมายแก้ไขปรับปรุงระบบการเลือกตั้ง ส.ส.<br>ของไทยให้เป็น ระบบบัตรเลือกตั้ง ๒ ใบ จำนวน ส.ส. ๕๐๐ คน : แบบแบ่งเขต ๔๐๐ คน และแบบบัญชีรายชื่อ ๑๐๐ คน"
-		},
-		tablet: {
-			title: "พรบ.ประกอบรัฐธรรมนูญ<br>ว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร<br>(ฉบับที่ ๒) พ.ศ. ๒๕๖๖",
-			description: "พระราชบัญญัติประกอบรัฐธรรมนูญว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร<br>(ฉบับที่ ๒) พ.ศ. ๒๕๖๖ คือกฎหมายแก้ไขปรับปรุงระบบการเลือกตั้ง ส.ส. ของไทย<br>ให้เป็น ระบบบัตรเลือกตั้ง ๒ ใบ จำนวน ส.ส. ๕๐๐ คน : แบบแบ่งเขต ๔๐๐ คน <br>และแบบบัญชีรายชื่อ ๑๐๐ คน"
-		},
-		mobile: {
-			title: "พรบ.ประกอบรัฐธรรมนูญ ว่าด้วยการเลือกตั้งสมาชิก<br>สภาผู้แทนราษฎร (ฉบับที่ ๒) พ.ศ. ๒๕๖๖",
-			description: "พระราชบัญญัติประกอบรัฐธรรมนูญว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ฉบับที่ ๒) พ.ศ. ๒๕๖๖<br>คือกฎหมายแก้ไขปรับปรุงระบบการเลือกตั้ง ส.ส. ของไทยให้เป็น ระบบบัตรเลือกตั้ง ๒ ใบ<br>จำนวน ส.ส. ๕๐๐ คน : แบบแบ่งเขต ๔๐๐ คน และแบบบัญชีรายชื่อ ๑๐๐ คน"
-		}
+		title: '<span class="phrase">พรบ.ประกอบรัฐธรรมนูญ</span> <span class="phrase">ว่าด้วยการเลือกตั้ง</span><span class="phrase">สมาชิกสภาผู้แทนราษฎร</span> <span class="phrase">(ฉบับที่ ๒) พ.ศ. ๒๕๖๖</span>',
+		description: "พระราชบัญญัติประกอบรัฐธรรมนูญว่าด้วยการเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ฉบับที่ ๒) พ.ศ. ๒๕๖๖ คือกฎหมายแก้ไขปรับปรุงระบบการเลือกตั้ง ส.ส. ของไทยให้เป็น ระบบบัตรเลือกตั้ง ๒ ใบ จำนวน ส.ส. ๕๐๐ คน : แบบแบ่งเขต ๔๐๐ คน และแบบบัญชีรายชื่อ ๑๐๐ คน"
 	}
 ];
 
@@ -60,23 +34,16 @@ function escapeLawHtml(value) {
 }
 
 function escapeLawHtmlWithBreaks(value) {
+	if (!value) return '';
 	return String(value)
-		.split(/<br\s*\/?>/i)
-		.map(escapeLawHtml)
-		.join('<br>');
-}
-
-function renderLawVersion(law, device) {
-	const content = law[device];
-
-	return `
-		<div class="NewsCardVersion NewsCardVersion--${device}">
-			<div class="NewsImageFrame NewsImageFrame--${device}">
-				<img src="${escapeLawHtml(law.image)}" class="imgNewsCard" alt="">
-			</div>
-			<div class="NewsCardName bold">${escapeLawHtmlWithBreaks(content.title)}</div>
-			<div class="NewsCardDesc LawCardDesc regular">${escapeLawHtmlWithBreaks(content.description)}</div>
-		</div>`;
+		.replace(/<span\s+class=["']phrase["']>([\s\S]*?)<\/span>/gi, '###SPAN_PHRASE_START###$1###SPAN_PHRASE_END###')
+		.replace(/<wbr\s*\/?>/gi, '###WBR###')
+		.replace(/<br\s*\/?>/gi, '###BR###')
+		.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+		.replace(/###SPAN_PHRASE_START###/g, '<span class="phrase">')
+		.replace(/###SPAN_PHRASE_END###/g, '</span>')
+		.replace(/###WBR###/g, '<wbr>')
+		.replace(/###BR###/g, '<br>');
 }
 
 const lawsList = document.getElementById('lawsList');
@@ -84,8 +51,10 @@ const lawsList = document.getElementById('lawsList');
 if (lawsList) {
 	lawsList.innerHTML = lawsData.map(law => `
 		<article class="NewsCard LawCard" data-law-id="${law.id}">
-			${renderLawVersion(law, 'desktop')}
-			${renderLawVersion(law, 'tablet')}
-			${renderLawVersion(law, 'mobile')}
+			<div class="NewsImageFrame">
+				<img src="${escapeLawHtml(law.image)}" class="imgNewsCard" alt="">
+			</div>
+			<div class="NewsCardName bold">${escapeLawHtmlWithBreaks(law.title)}</div>
+			<div class="NewsCardDesc LawCardDesc regular">${escapeLawHtmlWithBreaks(law.description)}</div>
 		</article>`).join('');
 }

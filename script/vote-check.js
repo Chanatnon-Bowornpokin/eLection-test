@@ -19,10 +19,16 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
 }[character]));
 
 function escapeHtmlWithBreaks(value) {
+    if (!value) return '';
     return String(value)
-        .split(/<br\s*\/?>/i)
-        .map(escapeHtml)
-        .join('<br>');
+        .replace(/<span\s+class=["']phrase["']>([\s\S]*?)<\/span>/gi, '###SPAN_PHRASE_START###$1###SPAN_PHRASE_END###')
+        .replace(/<wbr\s*\/?>/gi, '###WBR###')
+        .replace(/<br\s*\/?>/gi, '###BR###')
+        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+        .replace(/###SPAN_PHRASE_START###/g, '<span class="phrase">')
+        .replace(/###SPAN_PHRASE_END###/g, '</span>')
+        .replace(/###WBR###/g, '<wbr>')
+        .replace(/###BR###/g, '<br>');
 }
 
 function getTitle(election, device) {
@@ -85,17 +91,13 @@ function renderElections() {
             : false;
         const deadline = election.voteDeadline ? escapeHtml(election.voteDeadline) : '';
 
-        const titleDesktop = escapeHtmlWithBreaks(getTitle(election, 'desktop'));
-        const titleTablet = escapeHtmlWithBreaks(getTitle(election, 'tablet'));
-        const titleMobile = escapeHtmlWithBreaks(getTitle(election, 'mobile'));
+        const title = escapeHtmlWithBreaks(election.title);
 
         return `
             <article class="vote-election-card${voted ? ' is-voted' : ''}" data-election-id="${escapeHtml(electionId)}">
                 <div class="vote-election-copy">
                     <span class="vote-election-level">${escapeHtml(election.level)}</span>
-                    <h2 class="vote-election-title vote-election-title--desktop">${titleDesktop}</h2>
-                    <h2 class="vote-election-title vote-election-title--tablet">${titleTablet}</h2>
-                    <h2 class="vote-election-title vote-election-title--mobile">${titleMobile}</h2>
+                    <h2 class="vote-election-title">${title}</h2>
                     <p class="vote-election-meta">
                         <span class="vote-election-date">${escapeHtml(date)}</span>${deadline ? ` <span class="vote-election-deadline">${deadline}</span>` : ''}
                     </p>

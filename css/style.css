@@ -20,6 +20,12 @@ body {
     font-weight: 200;
 }
 
+/* ป้องกันกลุ่มคำ/วลีสำคัญภาษาไทยฉีกขาดจากกันข้ามบรรทัด */
+.phrase {
+    display: inline-block;
+    white-space: nowrap;
+}
+
 
 .topic {
     font-size: 24px;
@@ -579,8 +585,7 @@ img.btn-sub-icon {
     margin-bottom: 5px;
 }
 
-.event-name--mobile,
-.event-name--tablet {
+.event-name {
     white-space: normal;
     display: inline-block;
     line-height: 1.25;
@@ -602,24 +607,6 @@ img.btn-sub-icon {
         "name"
         "desc";
     row-gap: 0;
-}
-
-.event-name--desktop,
-.event-name--tablet {
-    display: none !important;
-}
-
-.event-name--mobile {
-    display: inline !important;
-}
-.NewsCardVersion--desktop,
-
-    .NewsCardVersion--tablet {
-    display: none;
-}
-
-.NewsCardVersion--mobile {
-    display: contents;
 }
 
 .NewsImageFrame {
@@ -685,7 +672,7 @@ img.btn-sub-icon {
     margin-bottom: -17px;
 }
 
-.LawCard .NewsImageFrame--mobile {
+.LawCard .NewsImageFrame {
     border-bottom: 1px solid #000;
 }
 
@@ -716,7 +703,7 @@ img.btn-sub-icon {
     font: 600 10.692px/normal "Prompt", sans-serif;
 }
 
-.NewsCard[data-news-id="2"] .NewsImageFrame--mobile .imgNewsCard {
+.NewsCard[data-news-id="2"] .NewsImageFrame .imgNewsCard {
     top: -98.63%;
     right: auto;
     bottom: auto;
@@ -726,7 +713,7 @@ img.btn-sub-icon {
     max-width: none;
 }
 
-.NewsCard[data-news-id="3"] .NewsImageFrame--mobile .imgNewsCard {
+.NewsCard[data-news-id="3"] .NewsImageFrame .imgNewsCard {
     top: -5%;
     right: auto;
     bottom: auto;
@@ -867,27 +854,7 @@ img.btn-sub-icon {
         line-height: normal;
     }
 
-    .NewsCardVersion--mobile {
-        display: none;
-    }
-
-    .event-name--mobile {
-        display: none !important;
-    }
-
-    .event-name--desktop {
-        display: none !important;
-    }
-
-    .event-name--tablet {
-        display: inline !important;
-    }
-
-    .NewsCardVersion--tablet {
-        display: contents;
-    }
-
-    .NewsCard[data-news-id="3"] .NewsImageFrame--tablet .imgNewsCard {
+    .NewsCard[data-news-id="3"] .NewsImageFrame .imgNewsCard {
         top: 0;
         right: 0;
         bottom: 0;
@@ -898,7 +865,7 @@ img.btn-sub-icon {
         object-position: center;
     }
 
-    .NewsCard[data-news-id="2"] .NewsImageFrame--tablet .imgNewsCard {
+    .NewsCard[data-news-id="2"] .NewsImageFrame .imgNewsCard {
         top: -10%;
         right: auto;
         bottom: auto;
@@ -1085,15 +1052,18 @@ img.btn-sub-icon {
     .NewsCardName {
         font-size: 18px;
         padding: 10px 8px 2px 8px;
-        line-height: 1.273;
-        white-space: nowrap;
-        overflow: visible;
-        text-overflow: clip;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: normal;
+        text-wrap: balance;
     }
 
     .NewsCardDesc {
         font-size: 12px;
         padding: 2px 8px 4px 8px;
+        overflow-wrap: break-word;
+        text-wrap: pretty;
     }
 
     .NewsCardDate {
@@ -1476,19 +1446,24 @@ img.btn-sub-icon {
     .NewsCardName {
         font-size: 24px;
         padding: 12px 10px 2px 10px;
-        line-height: 1.273;
-        white-space: nowrap;
-        overflow: visible;
-        text-overflow: clip;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: normal;
+        text-wrap: balance;
     }
 
     .NewsCardDesc {
         font-size: 16px;
         padding: 2px 10px 4px 10px;
+        overflow-wrap: break-word;
+        text-wrap: pretty;
     }
 
     .NewsCardDesc {
         font-size: 22px;
+        overflow-wrap: break-word;
+        text-wrap: pretty;
     }
 
     .LawCard {
@@ -1497,6 +1472,8 @@ img.btn-sub-icon {
 
     .LawCardDesc {
         margin-top: 4px;
+        overflow-wrap: break-word;
+        text-wrap: pretty;
     }
 
     .NewsCardDate {
@@ -1517,28 +1494,14 @@ img.btn-sub-icon {
         display: inline !important;
     }
 
-    .NewsCardVersion--tablet {
-        display: none;
-    }
-
-
-
-    .event-name--desktop {
+    .event-name {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        display: inline !important;
+        display: inline-block;
     }
 
-    .event-name--tablet {
-        display: none !important;
-    }
-
-    .NewsCardVersion--desktop {
-        display: contents;
-    }
-
-    .NewsCard[data-news-id="2"] .NewsImageFrame--desktop .imgNewsCard {
+    .NewsCard[data-news-id="2"] .NewsImageFrame .imgNewsCard {
         top: -12.5%;
         right: auto;
         bottom: auto;

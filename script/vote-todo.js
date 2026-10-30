@@ -7,10 +7,16 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
 }[character]));
 
 function escapeHtmlWithBreaks(value) {
+    if (!value) return '';
     return String(value)
-        .split(/<br\s*\/?>/i)
-        .map(escapeHtml)
-        .join('<br>');
+        .replace(/<span\s+class=["']phrase["']>([\s\S]*?)<\/span>/gi, '###SPAN_PHRASE_START###$1###SPAN_PHRASE_END###')
+        .replace(/<wbr\s*\/?>/gi, '###WBR###')
+        .replace(/<br\s*\/?>/gi, '###BR###')
+        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+        .replace(/###SPAN_PHRASE_START###/g, '<span class="phrase">')
+        .replace(/###SPAN_PHRASE_END###/g, '</span>')
+        .replace(/###WBR###/g, '<wbr>')
+        .replace(/###BR###/g, '<br>');
 }
 
 // รับ eventId ปัจจุบันจาก URL param (fallback เป็นรายการแรกใน EVENTS หรือ key แรกใน VOTE_TODO_DATA)
@@ -58,28 +64,14 @@ function renderVoteTodos(currentEventId) {
     const todos = VOTE_TODO_DATA[currentEventId] || VOTE_TODO_DATA['house-election-2569'] || [];
 
     listContainer.innerHTML = todos.map(item => {
-        const titleDesktop = escapeHtmlWithBreaks(item.desktop?.title || '');
-        const descDesktop = escapeHtmlWithBreaks(item.desktop?.description || '');
-
-        const titleTablet = escapeHtmlWithBreaks(item.tablet?.title || item.desktop?.title || '');
-        const descTablet = escapeHtmlWithBreaks(item.tablet?.description || item.desktop?.description || '');
-
-        const titleMobile = escapeHtmlWithBreaks(item.mobile?.title || item.desktop?.title || '');
-        const descMobile = escapeHtmlWithBreaks(item.mobile?.description || item.desktop?.description || '');
+        const title = escapeHtmlWithBreaks(item.title || '');
+        const desc = escapeHtmlWithBreaks(item.description || '');
 
         return `
             <article class="vote-todo-card">
-                <div class="vote-todo-content vote-todo-content--desktop">
-                    <h2 class="vote-todo-card-title">${titleDesktop}</h2>
-                    <p class="vote-todo-card-desc">${descDesktop}</p>
-                </div>
-                <div class="vote-todo-content vote-todo-content--tablet">
-                    <h2 class="vote-todo-card-title">${titleTablet}</h2>
-                    <p class="vote-todo-card-desc">${descTablet}</p>
-                </div>
-                <div class="vote-todo-content vote-todo-content--mobile">
-                    <h2 class="vote-todo-card-title">${titleMobile}</h2>
-                    <p class="vote-todo-card-desc">${descMobile}</p>
+                <div class="vote-todo-content">
+                    <h2 class="vote-todo-card-title">${title}</h2>
+                    <p class="vote-todo-card-desc">${desc}</p>
                 </div>
             </article>
         `;

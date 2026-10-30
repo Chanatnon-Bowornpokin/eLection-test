@@ -119,20 +119,20 @@
     line-height: 20px;
 }
 
+/* ป้องกันกลุ่มคำ/วลีสำคัญภาษาไทยฉีกขาดจากกันข้ามบรรทัด */
+.phrase {
+    display: inline-block;
+    white-space: nowrap;
+}
+
 .vote-election-title {
     margin: 0 0 4px 10px;
     color: #000;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.273;
-}
-
-.vote-election-title--desktop,
-.vote-election-title--tablet {
-    display: none;
-}
-
-.vote-election-title--mobile {
+    text-wrap: balance;
+    overflow-wrap: break-word;
     display: block;
     max-width: 100%;
 }
@@ -289,7 +289,7 @@
         display: none;
     }
 
-    .vote-election-title--mobile {
+    .vote-election-title {
         display: block;
         max-width: 100%;
         margin: 0 0 4px 10px;
@@ -410,12 +410,7 @@
         line-height: 21px;
     }
 
-    .vote-election-title--desktop,
-    .vote-election-title--mobile {
-        display: none;
-    }
-
-    .vote-election-title--tablet {
+    .vote-election-title {
         display: block;
         max-width: 100%;
         margin: 0 0 4px 10px;
@@ -542,12 +537,7 @@
         line-height: 24px;
     }
 
-    .vote-election-title--tablet,
-    .vote-election-title--mobile {
-        display: none;
-    }
-
-    .vote-election-title--desktop {
+    .vote-election-title {
         display: block;
         max-width: 100%;
         margin: 0 0 4px 10px;

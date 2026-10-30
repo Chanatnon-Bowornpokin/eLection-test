@@ -32,14 +32,7 @@
     margin-left: 8px;
 }
 
-/* ควบคุมการแสดงผลตามอุปกรณ์ */
-.vote-verify-content--desktop {
-    display: none;
-}
-.vote-verify-content--tablet {
-    display: none;
-}
-.vote-verify-content--mobile {
+.vote-verify-content {
     display: block;
 }
 
@@ -145,16 +138,7 @@
         margin-left: 14px;
     }
 
-    /* ควบคุมการแสดงผล */
-    .vote-verify-content--desktop {
-        display: none;
-    }
-    .vote-verify-content--tablet {
-        display: block;
-    }
-    .vote-verify-content--mobile {
-        display: none;
-    }
+
 
     .vote-verify-list {
         gap: 16px;
@@ -214,16 +198,7 @@
         margin-left: 18px;
     }
 
-    /* ควบคุมการแสดงผล */
-    .vote-verify-content--desktop {
-        display: block;
-    }
-    .vote-verify-content--tablet {
-        display: none;
-    }
-    .vote-verify-content--mobile {
-        display: none;
-    }
+
 
     .vote-verify-list {
         gap: 24px;

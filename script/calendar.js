@@ -13,10 +13,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function escWithBreaks(s) {
+    if (!s) return '';
     return String(s)
-        .split(/<br\s*\/?>/i)
-        .map(esc)
-        .join('<br>');
+        .replace(/<span\s+class=["']phrase["']>([\s\S]*?)<\/span>/gi, '###SPAN_PHRASE_START###$1###SPAN_PHRASE_END###')
+        .replace(/<wbr\s*\/?>/gi, '###WBR###')
+        .replace(/<br\s*\/?>/gi, '###BR###')
+        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+        .replace(/###SPAN_PHRASE_START###/g, '<span class="phrase">')
+        .replace(/###SPAN_PHRASE_END###/g, '</span>')
+        .replace(/###WBR###/g, '<wbr>')
+        .replace(/###BR###/g, '<br>');
 }
 
 const now = FAKE_TODAY ? new Date(FAKE_TODAY + 'T00:00:00') : new Date();
@@ -62,11 +68,7 @@ function renderUpcoming() {
 
     listEl.innerHTML = upcoming.map(e => {
         const [, mm, dd] = e.date.split('-');
-        // ใช้ calendarTitle ก่อน (เฉพาะหน้า Home) ถ้าไม่มีค่อย fallback ไป title
-        const pick = d => e[d]?.calendarTitle ?? e[d]?.title ?? e.title;
-        const titleMobile = escWithBreaks(pick('mobile'));
-        const titleTablet = escWithBreaks(pick('tablet'));
-        const titleDesktop = escWithBreaks(pick('desktop'));
+        const title = escWithBreaks(e.calendarTitle || e.title);
 
         return `
         <div class="eventCard">
@@ -75,11 +77,7 @@ function renderUpcoming() {
                 <div class="datesec-day">${dd}</div>
             </div>
             <div class="event-level">${esc(e.level)}</div>
-            <div class="event-name">
-                <span class="event-name--desktop">${titleDesktop}</span>
-                <span class="event-name--tablet">${titleTablet}</span>
-                <span class="event-name--mobile">${titleMobile}</span>
-            </div>
+            <div class="event-name">${title}</div>
             <div class="event-time">${esc(e.time)}</div>
         </div>`;
     }).join('');

@@ -1,25 +1,15 @@
-// title         = ชื่อที่ใช้ในหน้า Vote-Check (การ์ดตรวจสอบสิทธิ์)
-// calendarTitle = ชื่อที่ใช้ในการ์ด "กำหนดการที่กำลังจะมาถึง" หน้า Home (index.html)
-// ใส่ <br> เพื่อบังคับขึ้นบรรทัดใหม่ได้ทั้งสองแบบ
+// ฐานข้อมูลรายการการเลือกตั้ง (EVENTS)
+// รองรับ Semantic Chunking ด้วย <span class="phrase"> เพื่อให้ข้อความตัดคำเป็นก้อนประโยคที่สมบูรณ์ในทุกหน้าจอ
+// ใช้ข้อความชุดเดียว ไม่แยก desktop / tablet / mobile อีกต่อไป
+
 const EVENTS = [
     {
         id: 'referendum-2569-03',
         date: '2026-02-08',
         level: 'ระดับประเทศ',
         banner: '../img/Banner/Referendum_Banner.png',
-        title: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569',
-        desktop: {
-            title: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569',
-            calendarTitle: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569'
-        },
-        tablet: {
-            title: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569',
-            calendarTitle: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569'
-        },
-        mobile: {
-            title: 'การออกเสียงประชามติ<br>ครั้งที่ 3 ปี 2569',
-            calendarTitle: 'การออกเสียงประชามติ ครั้งที่ 3 ปี 2569'
-        },
+        title: '<span class="phrase">การออกเสียงประชามติ</span> <span class="phrase">ครั้งที่ 3 ปี 2569</span>',
+        calendarTitle: '<span class="phrase">การออกเสียงประชามติ</span> <span class="phrase">ครั้งที่ 3 ปี 2569</span>',
         time: '08:00 - 17:00 น.',
         voteDeadline: 'ปิดหีบเลือกตั้งเวลา 17.00 น.',
         hasVoted: false
@@ -29,21 +19,10 @@ const EVENTS = [
         date: '2026-02-08',
         level: 'ระดับประเทศ',
         banner: '../img/Banner/House_Election.png',
-        title: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.) ครั้งที่ 28',
-        desktop: {
-            title: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.) ครั้งที่ 28',
-            calendarTitle: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.) ครั้งที่ 28'
-        },
-        tablet: {
-            title: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.)<br>ครั้งที่ 28',
-            calendarTitle: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.)<br>ครั้งที่ 28'
-        },
-        mobile: {
-            title: 'การเลือกตั้งสมาชิก<br>สภาผู้แทนราษฎร (ส.ส.)<br>ครั้งที่ 28',
-            calendarTitle: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.)<br>ครั้งที่ 28'
-        },
+        title: '<span class="phrase">การเลือกตั้ง</span><span class="phrase">สมาชิกสภาผู้แทนราษฎร (ส.ส.)</span> <span class="phrase">ครั้งที่ 28</span>',
+        calendarTitle: '<span class="phrase">การเลือกตั้ง</span><span class="phrase">สมาชิกสภาผู้แทนราษฎร (ส.ส.)</span> <span class="phrase">ครั้งที่ 28</span>',
         time: '08:00 - 17:00 น.',
         voteDeadline: 'ปิดหีบเลือกตั้งเวลา 17.00 น.',
         hasVoted: false
-    },
+    }
 ];
