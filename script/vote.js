@@ -58,7 +58,7 @@ function renderCurrentBallot(currentEventId) {
 
     if (isReferendum) {
         // --- 1. บัตรออกเสียงประชามติ (มีใบเดียว) ---
-        voteTitle.textContent = 'ออกเสียงประชามติ : ท่านเห็นชอบว่าสมควรมีรัฐธรรมนูญฉบับใหม่หรือไม่';
+        voteTitle.innerHTML = '<span class="phrase">ออกเสียงประชามติ :</span> <span class="phrase">ท่านเห็นชอบว่า</span><span class="phrase">สมควรมีรัฐธรรมนูญฉบับใหม่หรือไม่</span>';
         voteDesc.innerHTML = 'โปรดเลือก "เห็นชอบ" หรือ "ไม่เห็นชอบ" เพียง 1 ตัวเลือก<br>หรือเลือกไม่แสดงความคิดเห็น';
         abstainLabel.innerHTML = 'ไม่แสดง<br>ความคิดเห็น';
 
@@ -88,7 +88,7 @@ function renderCurrentBallot(currentEventId) {
         // --- 2. การเลือกตั้ง ส.ส. (2 ใบ) ---
         if (currentStep === 1) {
             // บัตรใบที่ 1: ส.ส. แบบแบ่งเขต
-            voteTitle.textContent = 'ลงคะแนน ใบที่ 1 : เลือก ส.ส. แบบแบ่งเขต';
+            voteTitle.innerHTML = '<span class="phrase">ลงคะแนน ใบที่ 1 :</span> <span class="phrase">เลือก ส.ส. แบบแบ่งเขต</span>';
             voteDesc.innerHTML = 'โปรดเลือกผู้สมัครที่ต้องการลงคะแนนเพียง 1 หมายเลข<br>หรือเลือกไม่ประสงค์ลงคะแนน';
             abstainLabel.innerHTML = 'ไม่ประสงค์<br>ลงคะแนน';
 
@@ -96,7 +96,7 @@ function renderCurrentBallot(currentEventId) {
             if (backBtn) backBtn.style.display = 'none';
         } else {
             // บัตรใบที่ 2: ส.ส. แบบบัญชีรายชื่อ
-            voteTitle.textContent = 'ลงคะแนน ใบที่ 2 : เลือก ส.ส. แบบบัญชีรายชื่อ';
+            voteTitle.innerHTML = '<span class="phrase">ลงคะแนน ใบที่ 2 :</span> <span class="phrase">เลือก ส.ส. แบบบัญชีรายชื่อ</span>';
             voteDesc.innerHTML = 'โปรดเลือกหมายเลขพรรคเพียง 1 หมายเลข<br>หรือ เลือกไม่ประสงค์ลงคะแนน';
             abstainLabel.innerHTML = 'ไม่ประสงค์<br>ลงคะแนน';
 

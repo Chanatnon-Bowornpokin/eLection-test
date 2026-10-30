@@ -87,6 +87,7 @@ function ensureStagingEnvelope(currentEventId) {
 function getReceiptLinesForEvent(currentEventId) {
     if (currentEventId === 'referendum-2569-03') {
         return {
+            titleHtml: '<span class="phrase">การออกเสียงประชามติ</span> <span class="phrase">ครั้งที่ 3 ปี 2569</span>',
             titleLine1: 'การออกเสียงประชามติ',
             titleLine2: 'ครั้งที่ 3 ปี 2569',
             dateText: '8 กุมภาพันธ์ 2569'
@@ -94,6 +95,7 @@ function getReceiptLinesForEvent(currentEventId) {
     }
 
     return {
+        titleHtml: '<span class="phrase">การเลือกตั้งสมาชิกสภาผู้แทนราษฎร</span> <span class="phrase">(ส.ส.)</span> <span class="phrase">ครั้งที่ 28</span>',
         titleLine1: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.)',
         titleLine2: 'ครั้งที่ 28',
         dateText: '8 กุมภาพันธ์ 2569'
@@ -122,7 +124,7 @@ function initHeroAndReceipt(currentEventId) {
     const hashEl = document.getElementById('receiptTrackingHash');
 
     if (titleEl) {
-        titleEl.innerHTML = `${electionCopy.titleLine1}<br>${electionCopy.titleLine2}`;
+        titleEl.innerHTML = electionCopy.titleHtml;
     }
     if (dateEl) {
         dateEl.textContent = electionCopy.dateText;

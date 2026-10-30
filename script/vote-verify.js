@@ -6,13 +6,13 @@ const VOTE_VERIFY_DATA = [
     {
         id: 'otp',
         title: 'OTP',
-        description: 'ระบบจะจัดส่งรหัสผ่านแบบใช้ครั้งเดียว (OTP) จำนวน 6 หลัก ไปยังหมายเลขโทรศัพท์มือถือที่ท่านได้ลงทะเบียนไว้ เพื่อยืนยันสิทธิและเริ่มกระบวนการลงคะแนน',
+        description: '<span class="phrase">ระบบจะจัดส่งรหัสผ่าน</span><span class="phrase">แบบใช้ครั้งเดียว (OTP)</span> <span class="phrase">จำนวน 6 หลัก</span> <span class="phrase">ไปยังหมายเลขโทรศัพท์มือถือ</span><span class="phrase">ที่ท่านได้ลงทะเบียนไว้</span> <span class="phrase">เพื่อยืนยันสิทธิ</span><span class="phrase">และเริ่มกระบวนการลงคะแนน</span>',
         defaultSelected: true
     },
     {
         id: 'pin',
         title: 'PIN',
-        description: 'ยืนยันสิทธิทันทีด้วยรหัส PIN ความปลอดภัย 6 หลักที่คุณได้กำหนดไว้ล่วงหน้าขณะลงทะเบียนบัญชีผู้มีสิทธิเลือกตั้ง โดยไม่ต้องรอรับข้อความ SMS',
+        description: '<span class="phrase">ยืนยันสิทธิทันที</span><span class="phrase">ด้วยรหัส PIN</span> <span class="phrase">ความปลอดภัย 6 หลัก</span><span class="phrase">ที่คุณได้กำหนดไว้</span><span class="phrase">ล่วงหน้า</span><span class="phrase">ขณะลงทะเบียน</span><span class="phrase">บัญชีผู้มีสิทธิเลือกตั้ง</span> <span class="phrase">โดยไม่ต้องรอรับข้อความ SMS</span>',
         defaultSelected: false
     }
 ];

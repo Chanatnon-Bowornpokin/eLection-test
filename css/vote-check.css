@@ -123,6 +123,7 @@
 .phrase {
     display: inline-block;
     white-space: nowrap;
+    max-width: 100%;
 }
 
 .vote-election-title {
@@ -131,7 +132,6 @@
     font-size: 16px;
     font-weight: 700;
     line-height: 1.273;
-    text-wrap: balance;
     overflow-wrap: break-word;
     display: block;
     max-width: 100%;
