@@ -1,0 +1,603 @@
+/* ==========================================================================
+   Vote Page Styles (Vote.html)
+   Reuses base styles from style.css, vote-check.css, and vote-todo.css
+   Matches exact Figma design: Outer border, 2-column grid, table-like layout
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (< 768px)
+   -------------------------------------------------------------------------- */
+.vote-main.page-container {
+    padding: 14px 20px 24px;
+    background: #f5f5f7;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* กรอบบัตรเลือกตั้งสีขาว ขอบมนและเส้นขอบสีดำหนาตาม Figma (เป็นหนึ่งเดียวกับหน้าตรวจสอบ) */
+.vote-paper-card {
+    background: #ffffff;
+    border: 4px solid #000000;
+    border-radius: 9.6px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 380px;
+    margin: 4px auto 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ส่วนหัวข้อด้านบนของบัตร มีเส้นขอบดำคั่นด้านล่างความหนาเท่ากรอบนอก */
+.vote-paper-header {
+    border-bottom: 4px solid #000000;
+    padding: 12px 10px 10px;
+    text-align: center;
+}
+
+.vote-paper-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #000000;
+    margin: 0 0 4px 0;
+}
+
+.vote-paper-desc {
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #000000;
+    margin: 0;
+}
+
+/* ส่วนเนื้อหาตัวเลือก (ตาราง 2 คอลัมน์) */
+.vote-paper-body {
+    padding: 14px 10px 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ตาราง ส.ส. 2 คอลัมน์คู่ (1-10 และ 11-20) */
+.mp-ballot-grid {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.mp-ballot-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    max-width: 165px;
+}
+
+/* แถวหัวตาราง (เบอร์ | ช่องลงคะแนน) */
+.ballot-header-row {
+    display: flex;
+    width: 100%;
+    height: 24px;
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.ballot-header-cell-num {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 11px;
+    font-weight: 600;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+.ballot-header-cell-mark {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+/* แถวเลือกแต่ละเบอร์ในตาราง */
+.ballot-row {
+    display: flex;
+    width: 100%;
+    height: 38px;
+    border: 1.5px solid #000000;
+    margin-top: -1.5px; /* ทำให้เส้นตารางเชื่อมต่อกันสนิท */
+    background: #ffffff;
+    cursor: pointer;
+    box-sizing: border-box;
+    user-select: none;
+    transition: background-color 0.12s ease;
+}
+
+.ballot-row:hover {
+    background-color: #f7f7fa;
+}
+
+/* ช่องแสดงหมายเลข / ข้อความ */
+.ballot-cell-num {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 15px;
+    font-weight: 600;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+/* ช่องทำเครื่องหมายกากบาท */
+.ballot-cell-mark {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+/* สัญลักษณ์กากบาท Guide (สีเทาจาง) */
+.vote-cross-mark {
+    font-size: 26px;
+    color: #d1d1d6; /* สีเทาจางๆ เหมือนใน figma ไกด์ไว้ */
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+/* เมื่อถูกเลือก (Active / Selected) */
+.ballot-row.is-selected {
+    background-color: #fff8f8;
+}
+
+.ballot-row.is-selected .ballot-cell-mark .vote-cross-mark {
+    color: #e52b2b; /* กากบาทสีแดงสด */
+    transform: scale(1.12);
+}
+
+/* บัตรประชามติ (2 กล่อง ซ้าย-ขวา สไตล์ตาราง) */
+.referendum-table-grid {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.referendum-table-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    max-width: 165px;
+}
+
+.referendum-col-header {
+    border: 1.5px solid #000000;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.referendum-col-box {
+    border: 1.5px solid #000000;
+    border-top: none; /* ติดกับหัวด้านบน ไม่เว้นระยะ */
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    cursor: pointer;
+    box-sizing: border-box;
+    user-select: none;
+    transition: background-color 0.12s ease;
+}
+
+.referendum-col-box:hover {
+    background-color: #f7f7fa;
+}
+
+.referendum-col-box.is-selected {
+    background-color: #fff8f8;
+}
+
+.referendum-col-box.is-selected .vote-cross-mark {
+    color: #e52b2b;
+    transform: scale(1.15);
+}
+
+.referendum-col-box .vote-cross-mark {
+    font-size: 54px;
+}
+
+/* ส่วนล่างของบัตร: ไม่ประสงค์ลงคะแนน / ไม่แสดงความคิดเห็น กึ่งกลางเสมอ */
+.vote-paper-footer {
+    padding: 10px 10px 16px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vote-abstain-row {
+    display: flex;
+    width: 100%;
+    max-width: 165px;
+    height: 48px;
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    cursor: pointer;
+    box-sizing: border-box;
+    user-select: none;
+    transition: background-color 0.12s ease;
+}
+
+.vote-abstain-row:hover {
+    background-color: #f7f7fa;
+}
+
+.vote-abstain-label-cell {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000000;
+    text-align: center;
+    line-height: 1.25;
+    padding: 2px 4px;
+    box-sizing: border-box;
+}
+
+.vote-abstain-box-cell {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.vote-abstain-box-cell .vote-cross-mark {
+    font-size: 32px;
+}
+
+.vote-abstain-row.is-selected {
+    background-color: #fff8f8;
+}
+
+.vote-abstain-row.is-selected .vote-abstain-box-cell .vote-cross-mark {
+    color: #e52b2b;
+    transform: scale(1.15);
+}
+
+/* ปุ่ม Action ด้านล่าง ใช้ดีไซน์เดียวกับ vote-todo.css (.vote-todo-actions & .vote-todo-btn) */
+.vote-todo-actions {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    width: 100%;
+}
+
+.vote-todo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 34px;
+    border-radius: 9.6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.vote-todo-btn-back {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0px 1.125px 3.9375px rgba(0, 0, 0, 0.25);
+}
+
+.vote-todo-btn-back:hover {
+    background: #f0f0f2;
+}
+
+.vote-todo-btn-next {
+    background: #000000;
+    color: #ffffff;
+}
+
+.vote-todo-btn-next:hover:not(:disabled) {
+    background: #2b2b2b;
+}
+
+.vote-todo-btn-next.is-disabled,
+.vote-todo-btn-next[disabled] {
+    background: #848484 !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.vote-todo-btn-next:not(.is-disabled):hover {
+    background: #222222;
+}
+
+.vote-main .secbreak {
+    width: 100%;
+    margin-top: 30px;
+    border-top: 1.91px solid #d9d9d9;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (min-width: 768px and < 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+    .vote-main.page-container {
+        padding: 18px 80px 30px;
+    }
+
+    .vote-paper-card {
+        border-width: 4.5px;
+        border-radius: 9.6px;
+        max-width: 480px;
+        margin-bottom: 24px;
+    }
+
+    .vote-paper-header {
+        border-bottom-width: 4.5px;
+        padding: 16px 14px 14px;
+    }
+
+    .vote-paper-title {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .vote-paper-desc {
+        font-size: 14px;
+    }
+
+    .vote-paper-body {
+        padding: 20px 16px 14px;
+    }
+
+    .mp-ballot-grid {
+        gap: 14px;
+    }
+
+    .mp-ballot-column {
+        max-width: 210px;
+    }
+
+    .ballot-header-row {
+        height: 30px;
+        border-width: 2px;
+    }
+
+    .ballot-header-cell-num {
+        border-right-width: 2px;
+        font-size: 13px;
+    }
+
+    .ballot-header-cell-mark {
+        font-size: 12px;
+    }
+
+    .ballot-row {
+        height: 48px;
+        border-width: 2px;
+        margin-top: -2px;
+    }
+
+    .ballot-cell-num {
+        border-right-width: 2px;
+        font-size: 18px;
+    }
+
+    .vote-cross-mark {
+        font-size: 34px;
+    }
+
+    .referendum-table-grid {
+        gap: 20px;
+    }
+
+    .referendum-table-col {
+        max-width: 210px;
+    }
+
+    .referendum-col-header {
+        border-width: 2px;
+        font-size: 18px;
+        padding: 10px 6px;
+    }
+
+    .referendum-col-box {
+        border-width: 2px;
+        height: 130px;
+    }
+
+    .referendum-col-box .vote-cross-mark {
+        font-size: 70px;
+    }
+
+    .vote-paper-footer {
+        padding: 14px 16px 22px;
+    }
+
+    .vote-abstain-row {
+        max-width: 210px;
+        height: 58px;
+        border-width: 2px;
+    }
+
+    .vote-abstain-label-cell {
+        border-right-width: 2px;
+        font-size: 14px;
+    }
+
+    .vote-abstain-box-cell .vote-cross-mark {
+        font-size: 40px;
+    }
+
+    .vote-todo-actions {
+        margin-top: 26px;
+        gap: 80px;
+    }
+
+    .vote-todo-btn {
+        width: 258px;
+        height: 40px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-main.page-container {
+        padding: 20px 80px 37px;
+    }
+
+    .vote-paper-card {
+        border-width: 6px;
+        border-radius: 17px;
+        max-width: 580px;
+        margin-bottom: 28px;
+    }
+
+    .vote-paper-header {
+        border-bottom-width: 6px;
+        padding: 22px 20px 18px;
+    }
+
+    .vote-paper-title {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .vote-paper-desc {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .vote-paper-body {
+        padding: 24px 24px 18px;
+    }
+
+    .mp-ballot-grid {
+        gap: 20px;
+    }
+
+    .mp-ballot-column {
+        max-width: 250px;
+    }
+
+    .ballot-header-row {
+        height: 36px;
+        border-width: 2.5px;
+    }
+
+    .ballot-header-cell-num {
+        border-right-width: 2.5px;
+        font-size: 15px;
+    }
+
+    .ballot-header-cell-mark {
+        font-size: 14px;
+    }
+
+    .ballot-row {
+        height: 56px;
+        border-width: 2.5px;
+        margin-top: -2.5px;
+    }
+
+    .ballot-cell-num {
+        border-right-width: 2.5px;
+        font-size: 22px;
+    }
+
+    .vote-cross-mark {
+        font-size: 42px;
+    }
+
+    .referendum-table-grid {
+        gap: 28px;
+    }
+
+    .referendum-table-col {
+        max-width: 250px;
+    }
+
+    .referendum-col-header {
+        border-width: 2.5px;
+        font-size: 22px;
+        padding: 12px 8px;
+    }
+
+    .referendum-col-box {
+        border-width: 2.5px;
+        height: 155px;
+    }
+
+    .referendum-col-box .vote-cross-mark {
+        font-size: 84px;
+    }
+
+    .vote-paper-footer {
+        padding: 16px 24px 28px;
+    }
+
+    .vote-abstain-row {
+        max-width: 250px;
+        height: 68px;
+        border-width: 2.5px;
+    }
+
+    .vote-abstain-label-cell {
+        border-right-width: 2.5px;
+        font-size: 16px;
+    }
+
+    .vote-abstain-box-cell .vote-cross-mark {
+        font-size: 48px;
+    }
+
+    .vote-todo-actions {
+        margin-top: 36px;
+        gap: 120px;
+    }
+
+    .vote-todo-btn {
+        width: 438px;
+        height: 52px;
+        font-size: 28px;
+        border-radius: 17px;
+    }
+}

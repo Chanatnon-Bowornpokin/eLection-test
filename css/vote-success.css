@@ -1,0 +1,433 @@
+/* ==========================================================================
+   Vote-Success Page Styles (Digital Receipt & Privacy Info)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (Default: < 768px)
+   -------------------------------------------------------------------------- */
+.vote-success-main.page-container {
+    padding: 16px 20px 24px;
+    background: #f5f5f7;
+    box-sizing: border-box;
+}
+
+/* ส่วนที่ 1: การ์ดใบเสร็จดิจิทัล (Digital Receipt) */
+.vote-receipt-section {
+    width: 100%;
+    max-width: 372px;
+    margin: 6px auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vote-receipt-card {
+    width: 100%;
+    min-height: 324px;
+    background: #ffffff;
+    border-radius: 9.6px;
+    box-shadow: 0px 2px 3.5px rgba(0, 0, 0, 0.25);
+    padding: 22.5px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.vote-receipt-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-receipt-check-icon {
+    font-size: 83.5px;
+    line-height: 1;
+    color: #22C55E;
+}
+
+.vote-receipt-title-group {
+    text-align: center;
+    width: 100%;
+}
+
+.vote-receipt-status {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #000000;
+    margin: 0 0 2px;
+}
+
+.vote-receipt-election-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #000000;
+    margin: 0 0 4px;
+}
+
+.vote-receipt-election-date {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #000000;
+    margin: 0;
+}
+
+.vote-receipt-meta-box {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+}
+
+.vote-receipt-meta-text {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000000;
+    text-align: left;
+    margin: 0;
+}
+
+.vote-receipt-hash {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #000000;
+    text-align: center;
+    margin: 0;
+    word-break: break-word;
+}
+
+/* ปุ่ม คัดลอกรหัส และ บันทึก ใต้ใบเสร็จ */
+.vote-receipt-tools {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.vote-receipt-tool-btn {
+    width: 139px;
+    height: 28px;
+    background: #ffffff;
+    color: #000000;
+    border: 0.5px solid #000000;
+    border-radius: 8.5px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+.vote-receipt-tool-btn:hover {
+    background: #f0f0f2;
+}
+
+.vote-receipt-tool-btn:active {
+    transform: scale(0.98);
+}
+
+/* เส้นคั่นกลางหน้า */
+.vote-success-mid-divider {
+    margin: 22px 0 18px;
+}
+
+/* ส่วนที่ 2: การรักษาความลับและสิทธิการลงคะแนน (ชิดขอบ col-1) */
+.vote-privacy-section {
+    width: 100%;
+}
+
+.vote-privacy-heading {
+    width: 100%;
+    max-width: none;
+    text-align: left;
+    margin: 0 0 12px;
+}
+
+.vote-privacy-heading .topic {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #000000;
+    margin: 0;
+}
+
+/* ปรับขนาดการ์ดสำหรับ Mobile ให้ตรงกับ Figma #564:4419 */
+.vote-privacy-section .vote-todo-list {
+    gap: 12px;
+}
+
+.vote-privacy-section .vote-todo-card {
+    padding: 12px 14px;
+    border-radius: 8.5px;
+    box-shadow: 0px 1.5px 3px rgba(0, 0, 0, 0.22);
+}
+
+.vote-privacy-section .vote-todo-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+
+.vote-privacy-section .vote-todo-card-desc {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+/* ส่วนที่ 3: ปุ่ม โหวตใหม่ และ กลับสู่หน้าหลัก (ซ้าย-ขวา) */
+.vote-success-actions {
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+.vote-success-actions .vote-todo-btn {
+    width: 139px;
+    height: 34px;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (iPad: min-width: 768px and max-width: 991.98px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .vote-success-main.page-container {
+        padding: 26px 80px 38px;
+    }
+
+    .vote-receipt-section {
+        max-width: 396px;
+        margin-top: 0;
+    }
+
+    .vote-receipt-card {
+        min-height: 324px;
+        border-radius: 9.6px;
+        box-shadow: 0px 2px 3.5px rgba(0, 0, 0, 0.25);
+        padding: 22.5px 20px;
+        gap: 18px;
+    }
+
+    .vote-receipt-check-icon {
+        font-size: 83.5px;
+    }
+
+    .vote-receipt-status {
+        font-size: 12px;
+    }
+
+    .vote-receipt-election-title {
+        font-size: 18px;
+    }
+
+    .vote-receipt-election-date {
+        font-size: 12px;
+    }
+
+    .vote-receipt-meta-text {
+        font-size: 12px;
+    }
+
+    .vote-receipt-hash {
+        font-size: 12px;
+    }
+
+    .vote-receipt-tools {
+        margin-top: 23px;
+    }
+
+    .vote-receipt-tool-btn {
+        width: 119px;
+        height: 28px;
+        font-size: 12px;
+        border-radius: 8.5px;
+    }
+
+    .vote-success-mid-divider {
+        margin: 24px 0 18px;
+    }
+
+    .vote-privacy-heading {
+        width: 100%;
+        max-width: 674px;
+        margin: 0 auto 14px;
+        text-align: left;
+    }
+
+    .vote-privacy-heading .topic {
+        font-size: 28px;
+    }
+
+    .vote-privacy-section .vote-todo-list {
+        max-width: 674px;
+        margin: 0 auto;
+        gap: 16px;
+    }
+
+    .vote-privacy-section .vote-todo-card {
+        padding: 16px 15px;
+        border-radius: 9.6px;
+        box-shadow: 0px 2px 3.5px rgba(0, 0, 0, 0.25);
+    }
+
+    .vote-privacy-section .vote-todo-card-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .vote-privacy-section .vote-todo-card-desc {
+        font-size: 16px;
+        line-height: 1.45;
+    }
+
+    .vote-success-actions {
+        max-width: 674px;
+        margin: 28px auto 12px;
+        justify-content: space-between;
+        gap: 32px;
+    }
+
+    .vote-success-actions .vote-todo-btn {
+        width: 258px;
+        height: 40px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-success-main.page-container {
+        padding: 36px 80px 40px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .vote-receipt-section {
+        max-width: 666px;
+        margin: 40px auto 0;
+    }
+
+    .vote-receipt-card {
+        min-height: 648px;
+        border-radius: 17px;
+        box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+        padding: 45px 36px;
+        gap: 40px;
+    }
+
+    .vote-receipt-check-icon {
+        font-size: 167px;
+    }
+
+    .vote-receipt-status {
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+
+    .vote-receipt-election-title {
+        font-size: 30px;
+        line-height: 1.35;
+        margin-bottom: 8px;
+    }
+
+    .vote-receipt-election-date {
+        font-size: 24px;
+    }
+
+    .vote-receipt-meta-box {
+        padding: 10px;
+    }
+
+    .vote-receipt-meta-text {
+        font-size: 24px;
+        line-height: 1.5;
+    }
+
+    .vote-receipt-hash {
+        font-size: 24px;
+    }
+
+    .vote-receipt-tools {
+        margin-top: 60px;
+    }
+
+    .vote-receipt-tool-btn {
+        width: 210px;
+        height: 55px;
+        border-radius: 17px;
+        border: 0.5px solid #000000;
+        font-size: 24px;
+    }
+
+    .vote-success-mid-divider {
+        margin: 78px 0 22px;
+    }
+
+    .vote-privacy-heading {
+        width: 100%;
+        max-width: none;
+        margin: 0 0 22px;
+        text-align: left;
+    }
+
+    .vote-privacy-heading .topic {
+        font-size: 32px;
+    }
+
+    .vote-privacy-section .vote-todo-list {
+        width: 100%;
+        gap: 24px;
+    }
+
+    .vote-privacy-section .vote-todo-card {
+        padding: 32px 30px;
+        border-radius: 17px;
+        box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    }
+
+    .vote-privacy-section .vote-todo-card-title {
+        font-size: 30px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .vote-privacy-section .vote-todo-card-desc {
+        font-size: 32px;
+        line-height: 1.45;
+    }
+
+    .vote-success-actions {
+        margin-top: 48px;
+        margin-bottom: 16px;
+        gap: 120px;
+        justify-content: center;
+    }
+
+    .vote-success-actions .vote-todo-btn {
+        width: 438px;
+        height: 62px;
+        font-size: 28px;
+        border-radius: 17px;
+    }
+}
+

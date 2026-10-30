@@ -1,0 +1,598 @@
+/* Base styles: default design (Mobile: < 576px) */
+.vote-check-header {
+    background: #fff;
+}
+
+.vote-check-header .navbar {
+    display: flex;
+    height: 65px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.vote-check-header .toplogo {
+    margin: 0;
+}
+
+.vote-check-header .topLogo {
+    display: block;
+    width: 105px;
+    height: 27px;
+    margin: 0;
+}
+
+.vote-check-header .userIcon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.vote-check-header .personIcon {
+    font-size: 27px;
+}
+
+.vote-check-hero {
+    position: relative;
+}
+
+.vote-check-hero img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 409.05 / 121;
+    object-fit: cover;
+}
+
+.vote-check-main.page-container {
+    padding: 9px 20px 8px;
+    background: #f5f5f7;
+}
+
+.vote-check-heading {
+    display: flex;
+    min-height: 31px;
+    align-items: center;
+    margin: 0 0 13px;
+}
+
+.vote-check-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: #000;
+    text-decoration: none;
+}
+
+.vote-check-back .fa-arrow-left {
+    flex: 0 0 10px;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.vote-check-back .topic {
+    margin: 0;
+    color: #000;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 31px;
+}
+
+.vote-check-list {
+    display: grid;
+    gap: 25px;
+    margin: 0;
+}
+
+.vote-election-card {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 13.4px 15.3px 14px;
+    border-radius: 16.27px;
+    background: #fff;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+}
+
+.vote-election-copy {
+    min-width: 0;
+    padding-right: 125px;
+}
+
+.vote-election-level {
+    display: table;
+    min-height: 24px;
+    margin: 0 0 5px 9px;
+    padding: 2px 13px;
+    border-radius: 16px;
+    background: #f5f5f7;
+    color: #000;
+    font-size: 13.4px;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.vote-election-title {
+    margin: 0 0 4px 10px;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.273;
+}
+
+.vote-election-title--desktop,
+.vote-election-title--tablet {
+    display: none;
+}
+
+.vote-election-title--mobile {
+    display: block;
+    max-width: 100%;
+}
+
+.vote-election-meta {
+    margin: 0 0 0 10px;
+    color: #000;
+    font-size: 11px;
+    font-weight: 200;
+    line-height: 1.4;
+}
+
+.vote-election-meta .vote-election-deadline {
+    display: block;
+}
+
+.vote-election-status-wrap {
+    display: flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 10.5px;
+    margin: 7px 0 0 9px;
+    color: #000;
+    font-size: 17.2px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.vote-election-indicator {
+    display: block;
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+}
+
+.vote-election-action {
+    position: absolute;
+    top: 74.65px;
+    right: 21.36px;
+    display: inline-flex;
+    width: 109.11px;
+    height: 29.67px;
+    align-items: center;
+    justify-content: center;
+    padding: 4.79px 9.57px;
+    border: 0.48px solid #000;
+    border-radius: 16.27px;
+    background: #fff;
+    color: #000;
+    font-family: inherit;
+    font-size: 13.4px;
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.vote-election-action:hover {
+    background: #000;
+    color: #fff;
+}
+
+.vote-election-action:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+.vote-check-divider {
+    height: 0;
+    margin: 30px 9px 0;
+    border: 0;
+    border-top: 1.91px solid #d9d9d9;
+}
+
+
+/* ========================================================
+   sm: Small devices (width >= 576px and width < 768px)
+   ======================================================== */
+@media (width >= 576px) and (width < 768px) {
+    .vote-check-header .navbar {
+        height: 65px;
+        padding: 0 20px;
+    }
+
+    .vote-check-header .topLogo {
+        width: 105px;
+        height: 27px;
+        margin: 0;
+    }
+
+    .vote-check-header .userIcon {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        margin: 0;
+    }
+
+    .vote-check-header .personIcon {
+        font-size: 27px;
+    }
+
+    .vote-check-hero img {
+        aspect-ratio: 409.05 / 121;
+    }
+
+    .vote-check-main.page-container {
+        padding: 9px 20px 8px;
+    }
+
+    .vote-check-heading {
+        min-height: 31px;
+        margin-bottom: 13px;
+    }
+
+    .vote-check-back {
+        gap: 11px;
+    }
+
+    .vote-check-back .fa-arrow-left {
+        flex-basis: 10px;
+        font-size: 20px;
+    }
+
+    .vote-check-back .topic {
+        font-size: 20px;
+        line-height: 31px;
+    }
+
+    .vote-check-list {
+        gap: 25px;
+    }
+
+    .vote-election-card {
+        padding: 13.4px 15.3px 14px;
+        border-radius: 16.27px;
+    }
+
+    .vote-election-copy {
+        padding-right: 125px;
+    }
+
+    .vote-election-level {
+        min-height: 24px;
+        margin: 0 0 5px 9px;
+        padding: 2px 13px;
+        font-size: 13.4px;
+        line-height: 20px;
+    }
+
+    .vote-election-title--desktop,
+    .vote-election-title--tablet {
+        display: none;
+    }
+
+    .vote-election-title--mobile {
+        display: block;
+        max-width: 100%;
+        margin: 0 0 4px 10px;
+        font-size: 16px;
+        line-height: 1.273;
+    }
+
+    .vote-election-meta {
+        margin-left: 10px;
+        font-size: 11px;
+    }
+
+    .vote-election-meta .vote-election-deadline {
+        display: block;
+    }
+
+    .vote-election-status-wrap {
+        min-height: 32px;
+        gap: 10.5px;
+        margin: 7px 0 0 9px;
+        font-size: 17.2px;
+    }
+
+    .vote-election-indicator {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+    }
+
+    .vote-election-action {
+        top: 74.65px;
+        right: 21.36px;
+        width: 109.11px;
+        height: 29.67px;
+        padding: 4.79px 9.57px;
+        border: 0.48px solid #000;
+        border-radius: 16.27px;
+        font-size: 13.4px;
+    }
+
+    .vote-check-divider {
+        margin: 30px 9px 0;
+        border-top: 1.91px solid #d9d9d9;
+    }
+}
+
+
+/* ========================================================
+   md: Medium devices / Tablets (width >= 768px and width < 992px)
+   ======================================================== */
+@media (width >= 768px) and (width < 992px) {
+    .vote-check-header .navbar {
+        height: 111px;
+        padding: 0 80px;
+    }
+
+    .vote-check-header .topLogo {
+        width: 177px;
+        height: 45px;
+    }
+
+    .vote-check-header .userIcon {
+        width: 82px;
+        height: 82px;
+        flex-basis: 82px;
+    }
+
+    .vote-check-header .personIcon {
+        font-size: 65px;
+    }
+
+    .vote-check-hero img {
+        aspect-ratio: 834 / 247;
+    }
+
+    .vote-check-main.page-container {
+        padding: 14px 80px 38px;
+    }
+
+    .vote-check-heading {
+        min-height: 37px;
+        margin: 0 0 17px 0;
+    }
+
+    .vote-check-back {
+        gap: 16px;
+    }
+
+    .vote-check-back .fa-arrow-left {
+        flex-basis: 16px;
+        font-size: 24px;
+    }
+
+    .vote-check-back .topic {
+        font-size: 28px;
+        line-height: 37px;
+    }
+
+    .vote-check-list {
+        gap: 16px;
+    }
+
+    .vote-election-card {
+        padding: 14px 16px 14px;
+        border-radius: 17px;
+    }
+
+    .vote-election-copy {
+        width: calc(100% - 170px);
+        padding-right: 0;
+    }
+
+    .vote-election-level {
+        min-height: 25px;
+        margin: 0 0 5px 9px;
+        padding: 2px 14px;
+        font-size: 14px;
+        line-height: 21px;
+    }
+
+    .vote-election-title--desktop,
+    .vote-election-title--mobile {
+        display: none;
+    }
+
+    .vote-election-title--tablet {
+        display: block;
+        max-width: 100%;
+        margin: 0 0 4px 10px;
+        font-size: 20px;
+        line-height: 1.273;
+    }
+
+    .vote-election-meta {
+        max-width: 100%;
+        margin-left: 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .vote-election-meta .vote-election-deadline {
+        display: inline;
+    }
+
+    .vote-election-status-wrap {
+        min-height: 32px;
+        gap: 11px;
+        margin: 7px 0 0 9px;
+        font-size: 16px;
+    }
+
+    .vote-election-indicator {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
+    }
+
+    .vote-election-action {
+        top: 67px;
+        right: 24.11px;
+        width: 150.67px;
+        height: 41px;
+        padding: 20px 10px;
+        border: 0.5px solid #000;
+        border-radius: 17px;
+        font-size: 16px;
+    }
+
+    .vote-check-divider {
+        margin: 31px 0 0;
+        border-top: 2px solid #d9d9d9;
+    }
+}
+
+
+/* ========================================================
+   lg: Large devices / Desktops (width >= 992px)
+   ======================================================== */
+@media (width >= 992px) {
+    .vote-check-header .navbar {
+        height: 111px;
+        padding: 0 85px 0 80px;
+    }
+
+    .vote-check-header .topLogo {
+        width: 267px;
+        height: 68px;
+    }
+
+    .vote-check-header .userIcon {
+        width: 82px;
+        height: 82px;
+        flex-basis: 82px;
+    }
+
+    .vote-check-header .personIcon {
+        font-size: 65px;
+    }
+
+    .vote-check-hero img {
+        aspect-ratio: 1512 / 457;
+    }
+
+    .vote-check-main.page-container {
+        padding: 20px 80px 37px;
+    }
+
+    .vote-check-heading {
+        min-height: 48px;
+        margin: 0 0 28px;
+    }
+
+    .vote-check-back {
+        gap: 16px;
+    }
+
+    .vote-check-back .fa-arrow-left {
+        flex-basis: 16px;
+        font-size: 24px;
+    }
+
+    .vote-check-back .topic {
+        font-size: 32px;
+        line-height: 48px;
+    }
+
+    .vote-check-list {
+        width: 100%;
+        gap: 18px;
+        margin: 0;
+    }
+
+    .vote-election-card {
+        width: 100%;
+        padding: 14px 16px 14px;
+        border-radius: 17px;
+    }
+
+    .vote-election-copy {
+        width: calc(100% - 250px);
+        max-width: 997px;
+        padding-right: 0;
+    }
+
+    .vote-election-level {
+        min-height: 28px;
+        margin: 0 0 4px 9px;
+        padding: 2px 14px;
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    .vote-election-title--tablet,
+    .vote-election-title--mobile {
+        display: none;
+    }
+
+    .vote-election-title--desktop {
+        display: block;
+        max-width: 100%;
+        margin: 0 0 4px 10px;
+        font-size: 36px;
+        line-height: 1.273;
+    }
+
+    .vote-election-meta {
+        max-width: 100%;
+        margin-left: 10px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .vote-election-meta .vote-election-deadline {
+        display: inline;
+    }
+
+    .vote-election-status-wrap {
+        min-height: 32px;
+        gap: 11px;
+        margin: 7px 0 0 9px;
+        font-size: 18px;
+    }
+
+    .vote-election-indicator {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
+    }
+
+    .vote-election-action {
+        top: 70px;
+        right: 59.45px;
+        width: 227.9px;
+        height: 51px;
+        padding: 20px 10px;
+        border: 0.5px solid #000;
+        border-radius: 17px;
+        font-size: 24px;
+    }
+
+    .vote-check-divider {
+        width: 100%;
+        margin: 46px 0 0;
+        border-top: 2px solid #d9d9d9;
+    }
+}

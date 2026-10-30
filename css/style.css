@@ -1,0 +1,1565 @@
+/* Base styles: default design. */
+body {
+    background-color: #F5F5F7;
+    font-family: "Prompt", sans-serif;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.medium {
+    font-weight: 500;
+}
+
+.regular {
+    font-weight: 400;
+}
+
+.exLight {
+    font-weight: 200;
+}
+
+
+.topic {
+    font-size: 24px;
+    margin-bottom: 6px;
+}
+
+.sub-topic {
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.topLogo {
+    aspect-ratio: 105/27;
+    height: 27px;
+    margin: 16px 0 22px 20px;
+}
+
+.navbar {
+    height: 65px;
+    background-color: #fff;
+    z-index: 999;
+}
+
+.userIcon {
+    border: 1.43px solid #000;
+    border-radius: 50px;
+    aspect-ratio: 82/82;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 20px 11px 0;
+}
+
+.personIcon {
+    font-size: 30px;
+}
+
+.page-container {
+    padding-inline: 20px;
+}
+
+.main-btn-row {
+    --bs-gutter-x: 12px;
+    margin-top: 20px;
+    /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+}
+
+.sub-btn-row {
+    --bs-gutter-x: 8px;
+    margin-top: 10px;
+    /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+}
+
+.main-btn {
+    width: 100%;
+    aspect-ratio: 178.75 / 104.87;
+    background-color: #fff;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.25);
+}
+
+.sub-btn {
+    width: 100%;
+    aspect-ratio: 115.5 / 73.34;
+    background-color: #fff;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.25);
+}
+
+.btn-main-icon {
+    font-size: 50px;
+    color: #000;
+}
+
+.btn-main-text {
+    font-size: 20px;
+    color: #000;
+    font-weight: bold;
+}
+
+img.btn-sub-icon {
+    height: 30px;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+.btn-sub-icon {
+    font-size: 36px;
+    color: #000;
+}
+
+
+.btn-sub-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+}
+
+.secbreak {
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+.carousel-item-shadow {
+    position: relative;
+}
+
+.hero-cta-group,
+.hero-cta--single {
+    position: absolute;
+    z-index: 1;
+    bottom: 16.95%;
+    left: 6.1%;
+}
+
+.hero-cta-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    height: 10.6%;
+    width: 40%;
+}
+
+.hero-cta {
+    display: inline-flex;
+    min-width: 41.5%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 5%;
+    padding: 0 1.6%;
+    border: 1px solid #000;
+    border-radius: 999px;
+    background-color: #000;
+    color: #fff;
+    font-size: clamp(3px, 1.06vw, 16px);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.hero-cta--single {
+    display: inline-flex;
+    width: 24.3%;
+    min-width: 0;
+    height: 10.6%;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+    padding: 0 1.6%;
+    border: 1px solid #000;
+    border-radius: 999px;
+    background-color: #000;
+    color: #fff;
+    font-size: clamp(3px, 1.06vw, 16px);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.hero-cta--light {
+    min-width: 36.5%;
+    border-color: #ddd;
+    background-color: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    color: #000;
+}
+
+.hero-cta:hover,
+.hero-cta:focus-visible {
+    color: #fff;
+    text-decoration: none;
+}
+
+.hero-cta--light:hover,
+.hero-cta--light:focus-visible {
+    color: #000;
+}
+
+.report-banner {
+    position: relative;
+}
+
+.report-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.site-footer-main {
+    position: relative;
+    min-height: 520px;
+    padding: 30px 20px 64px;
+    background-color: #000;
+    color: #fff;
+}
+
+.site-footer-content {
+    display: grid;
+    grid-template-columns: 63% 37%;
+    grid-template-areas:
+        "brand brand"
+        "links links"
+        "learn contact";
+    max-width: 1512px;
+    margin-inline: auto;
+}
+
+.footer-brand {
+    grid-area: brand;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.footer-logo {
+    display: block;
+    width: 119px;
+    height: auto;
+}
+
+.footer-social {
+    position: absolute;
+    right: 26px;
+    bottom: 64px;
+    display: flex;
+    gap: 20px;
+}
+
+.footer-social-icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #000;
+    font-size: 11px;
+}
+
+.footer-links {
+    grid-area: links;
+    display: grid;
+    grid-template-columns: 63% 37%;
+    margin-bottom: 15px;
+}
+
+.footer-links h2,
+.footer-learn h2,
+.footer-contact h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.footer-links h2 {
+    grid-column: 1;
+}
+
+.footer-link-list,
+.footer-simple-list,
+.footer-contact-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.footer-link-list {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 63% 37%;
+    row-gap: 10px;
+    margin-top: 13px;
+}
+
+.footer-link-list li {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.footer-link-list li:nth-child(1) { grid-column: 1; grid-row: 1; }
+.footer-link-list li:nth-child(2) { grid-column: 1; grid-row: 2; }
+.footer-link-list li:nth-child(3) { grid-column: 1; grid-row: 3; }
+.footer-link-list li:nth-child(4) { grid-column: 1; grid-row: 4; }
+.footer-link-list li:nth-child(5) { grid-column: 2; grid-row: 1; }
+.footer-link-list li:nth-child(6) { grid-column: 2; grid-row: 2; }
+.footer-link-list li:nth-child(7) { grid-column: 2; grid-row: 3; }
+.footer-link-list li:nth-child(8) { grid-column: 2; grid-row: 4; }
+
+.footer-link-list a,
+.footer-simple-list li,
+.footer-contact-list li {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 200;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.footer-learn {
+    grid-area: learn;
+}
+
+.footer-simple-list {
+    display: grid;
+    row-gap: 10px;
+    margin-top: 20px;
+}
+
+.footer-contact {
+    grid-area: contact;
+}
+
+.footer-contact-list {
+    display: grid;
+    row-gap: 12px;
+    margin-top: 20px;
+}
+
+.footer-contact-list li {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    column-gap: 16px;
+    align-items: center;
+}
+
+.footer-contact-list i {
+    width: 22px;
+    color: #fff;
+    font-size: 20px;
+    text-align: center;
+}
+
+.carousel-inner-shadow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 1.13px 12px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* ===================== Calendar (default and sm) ===================== */
+.cal {
+    --cal-radius: 16px;
+    --cal-border: 2px;
+    --cal-line: 1px;
+    --cal-day-fs: 11px;
+    --cal-dow-fs: 9px;
+    --cal-title-fs: 16px;
+    --cal-mark: 18px;
+    --cal-nav-fs: 20px;
+    --cal-head-pad: 4px 10px;
+
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: var(--cal-border) solid #000;
+    border-radius: var(--cal-radius);
+    overflow: hidden;
+    width: 100%;
+    max-width: 251px;
+    aspect-ratio: 251 / 201.16;
+    margin-inline: auto;
+}
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--cal-head-pad);
+}
+
+.cal-title {
+    font-size: var(--cal-title-fs);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.cal-nav {
+    background: none;
+    border: 0;
+    color: #000;
+    font-size: var(--cal-nav-fs);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.cal-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: auto repeat(var(--weeks, 6), minmax(0, 1fr));
+}
+
+.cal-dow {
+    background: #fff;
+    font-size: var(--cal-dow-fs);
+    line-height: 1.3;
+    text-align: center;
+    padding: 2px 0;
+    border-top: var(--cal-border) solid #000;
+    border-bottom: var(--cal-border) solid #000;
+    border-right: var(--cal-line) solid #000;
+}
+
+.cal-day {
+    background: #fff;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--cal-day-fs);
+    border-bottom: var(--cal-border) solid #000;
+    border-right: var(--cal-line) solid #000;
+}
+
+.cal-dow:nth-child(7n),
+.cal-day:nth-child(7n) {
+    border-right: 0;
+}
+
+.cal-day:nth-last-child(-n+7) {
+    border-bottom: 0;
+}
+
+.cal-mark {
+    display: grid;
+    place-items: center;
+    width: var(--cal-mark);
+    height: var(--cal-mark);
+    border-radius: 50%;
+    background: #fff;
+}
+
+.cal-mark.has-event {
+    background: #22c55e;
+}
+
+/* ===================== Event cards ===================== */
+.eventCard {
+    --ev-radius: 10px;
+    --ev-height: auto;
+    min-height: 48px;
+    --ev-date-w: 44px;
+    --ev-month-fs: 8px;
+    --ev-day-fs: 22px;
+    --ev-level-fs: 8px;
+    --ev-name-fs: 14px;
+    --ev-time-fs: 11px;
+
+    display: grid;
+    grid-template-columns: var(--ev-date-w) 1fr;
+    grid-template-rows: 1fr auto auto auto 1fr;
+    /* แถวยืดบน/ล่าง ดันข้อความไว้กลาง */
+    column-gap: 6px;
+    width: 100%;
+    max-width: 475px;
+    height: var(--ev-height);
+    background: #fff;
+    border-radius: var(--ev-radius);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.datesec {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    /* กินทุกแถว เต็มความสูงการ์ด */
+    background: #22c55e;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.datesec-month {
+    font-size: var(--ev-month-fs);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.datesec-day {
+    font-size: var(--ev-day-fs);
+    font-weight: 500;
+}
+
+.event-level,
+.event-name,
+.event-time {
+    grid-column: 2;
+    min-width: 0;
+    /* ให้ ellipsis ทำงานใน grid */
+    padding-right: 6px;
+    line-height: 1.15;
+}
+
+.event-name {
+    overflow: visible !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    text-overflow: unset !important;
+}
+
+.event-level {
+    font-size: var(--ev-level-fs);
+    color: #555;
+    margin-top: 4px;
+}
+
+.event-name {
+    font-size: var(--ev-name-fs);
+    font-weight: 700;
+    line-height: 1.5;
+    /* กันไม้โท/สระบนโดนตัดจาก overflow: hidden */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* ชื่อยาวเกินจะตัดด้วย ... แทนที่การ์ดจะสูงขึ้น */
+}
+
+.event-time {
+    font-size: var(--ev-time-fs);
+    font-weight: 500;
+}
+
+.event-name {
+    overflow: visible !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    text-overflow: unset !important;
+}
+
+.event-level {
+    grid-row: 2;
+}
+
+.event-name {
+    grid-row: 3;
+}
+
+.event-time {
+    grid-row: 4;
+    margin-bottom: 5px;
+}
+
+.event-name--mobile,
+.event-name--tablet {
+    white-space: normal;
+    display: inline-block;
+    line-height: 1.25;
+}
+
+.NewsCard {
+    background-color: #fff;
+    border-radius: 17px;
+    width: 100%;
+    box-shadow: 0 4px 3.5px 0 rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    padding: 0;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "img"
+        "date"
+        "name"
+        "desc";
+    row-gap: 0;
+}
+
+.event-name--desktop,
+.event-name--tablet {
+    display: none !important;
+}
+
+.event-name--mobile {
+    display: inline !important;
+}
+.NewsCardVersion--desktop,
+
+    .NewsCardVersion--tablet {
+    display: none;
+}
+
+.NewsCardVersion--mobile {
+    display: contents;
+}
+
+.NewsImageFrame {
+    grid-area: img;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 133px;
+    border-radius: 17px 17px 0 0;
+}
+
+.imgNewsCard {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.NewsCardDate {
+    grid-area: date;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: -15px;
+    font-size: 12px;
+    line-height: normal;
+}
+
+.NewsCardName {
+    grid-area: name;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: -15px;
+    font-size: 11.664px;
+    line-height: 1.273;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.NewsCardDesc {
+    grid-area: desc;
+    text-align: left;
+    padding: 10px;
+    font-size: 7.776px;
+    line-height: normal;
+}
+
+.NewsCard+.NewsCard {
+    margin-top: 20px;
+}
+
+.LawCard {
+    grid-template-areas:
+        "img"
+        "name"
+        "desc";
+}
+
+.LawCard .NewsCardName {
+    margin-bottom: -17px;
+}
+
+.LawCard .NewsImageFrame--mobile {
+    border-bottom: 1px solid #000;
+}
+
+.LawCard[data-law-id="1"] .imgNewsCard,
+.LawCard[data-law-id="2"] .imgNewsCard,
+.LawCard[data-law-id="3"] .imgNewsCard {
+    object-fit: contain;
+}
+
+.NewsMoreRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.NewsMoreButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 139px;
+    height: 32px;
+    padding: 8.019px 16.038px;
+    border: 0;
+    border-radius: 9.088px;
+    background: #fff;
+    box-shadow: 0 2.138px 0.535px rgba(0, 0, 0, 0.25);
+    color: #000;
+    font: 600 10.692px/normal "Prompt", sans-serif;
+}
+
+.NewsCard[data-news-id="2"] .NewsImageFrame--mobile .imgNewsCard {
+    top: -98.63%;
+    right: auto;
+    bottom: auto;
+    left: -10.5%;
+    width: auto;
+    height: 322.17%;
+    max-width: none;
+}
+
+.NewsCard[data-news-id="3"] .NewsImageFrame--mobile .imgNewsCard {
+    top: -5%;
+    right: auto;
+    bottom: auto;
+    left: 0.02%;
+    width: auto;
+    height: 156.55%;
+    max-width: none;
+}
+
+/* sm intentionally repeats the default sizing and typography. */
+@media (width >=576px) and (width <768px) {
+    .topic {
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+
+    .sub-topic {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+
+    .page-container {
+        padding-inline: 20px;
+    }
+
+    .main-btn-row {
+        --bs-gutter-x: 12px;
+        margin-top: 20px;
+    }
+
+    .sub-btn-row {
+        --bs-gutter-x: 8px;
+        margin-top: 10px;
+    }
+
+    .cal {
+        --cal-radius: 16px;
+        --cal-border: 2px;
+        --cal-line: 1px;
+        --cal-day-fs: 11px;
+        --cal-dow-fs: 9px;
+        --cal-title-fs: 16px;
+        --cal-mark: 18px;
+        --cal-nav-fs: 20px;
+        --cal-head-pad: 4px 10px;
+
+        max-width: 251px;
+        aspect-ratio: 251 / 201.16;
+        margin-inline: auto;
+    }
+
+    .eventCard {
+        --ev-radius: 10px;
+        --ev-height: auto;
+    min-height: 48px;
+        --ev-date-w: 44px;
+        --ev-month-fs: 8px;
+        --ev-day-fs: 22px;
+        --ev-level-fs: 8px;
+        --ev-name-fs: 14px;
+        --ev-time-fs: 11px;
+
+        column-gap: 6px;
+        width: 100%;
+        max-width: 475px;
+    }
+
+    .NewsImageFrame {
+        height: 133px;
+    }
+
+    .NewsCardDate,
+    .NewsCardName,
+    .NewsCardDesc {
+        font-size: 12px;
+    }
+
+    .NewsCardName {
+        font-size: 11.664px;
+        line-height: 1.273;
+    }
+
+    .NewsCardDesc {
+        font-size: 7.776px;
+    }
+
+    .NewsMoreRow {
+        margin-top: 10px;
+    }
+
+    .NewsMoreButton {
+        width: 139px;
+        height: 32px;
+        padding: 8.019px 16.038px;
+        border-radius: 9.088px;
+        font-size: 10.692px;
+    }
+}
+
+/* // Medium devices (tablets, 768px and up) */
+@media (width >=768px) {
+
+    .calendar-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 24px;
+        margin-inline: 0;
+    }
+
+    .calendar-row>div {
+        width: auto;
+        min-width: 0;
+        padding-inline: 0;
+    }
+
+    .calendar-row>div:last-child {
+        margin-top: 0;
+    }
+
+    .eventCard {
+        --ev-radius: 10px;
+        --ev-name-fs: 12px;
+        --ev-time-fs: 10px;
+
+
+
+        column-gap: 10px;
+    }
+
+    .event-level,
+    .event-name,
+    .event-time {
+        padding-right: 12px;
+    }
+
+    .event-name,
+    .event-time {
+        line-height: normal;
+    }
+
+    .NewsCardVersion--mobile {
+        display: none;
+    }
+
+    .event-name--mobile {
+        display: none !important;
+    }
+
+    .event-name--desktop {
+        display: none !important;
+    }
+
+    .event-name--tablet {
+        display: inline !important;
+    }
+
+    .NewsCardVersion--tablet {
+        display: contents;
+    }
+
+    .NewsCard[data-news-id="3"] .NewsImageFrame--tablet .imgNewsCard {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .NewsCard[data-news-id="2"] .NewsImageFrame--tablet .imgNewsCard {
+        top: -10%;
+        right: auto;
+        bottom: auto;
+        left: -10%;
+        width: 120%;
+        height: 120%;
+        object-position: center top;
+        max-width: none;
+    }
+
+    .NewsMoreRow {
+        margin-top: 10px;
+        margin-bottom: -10px;
+    }
+
+    .NewsMoreButton {
+        width: 119px;
+        height: 30px;
+        padding: 7.5px 15px;
+        border-radius: 8.5px;
+        box-shadow: 0 2px 0.5px rgba(0, 0, 0, 0.25);
+        font-size: 10px;
+    }
+
+    .topic {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .sub-topic {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .navbar {
+        height: 111px;
+    }
+
+    .topLogo {
+        aspect-ratio: 177/45;
+        height: 45px;
+        margin: 33px 0 33px 80px;
+    }
+
+    .userIcon {
+        border: 1.43px solid #000;
+        border-radius: 50px;
+        aspect-ratio: 82/82;
+        height: 78px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0px 80px 14px 0;
+    }
+
+    .personIcon {
+        font-size: 65px;
+    }
+
+    .page-container {
+        padding-inline: 80px;
+    }
+
+    .main-btn-row {
+        --bs-gutter-x: 26px;
+        margin-top: 30px;
+        /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+    }
+
+    .sub-btn-row {
+        --bs-gutter-x: 18px;
+        margin-top: 15px;
+        /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+    }
+
+    .main-btn {
+        width: 100%;
+        aspect-ratio: 322.12 / 188.33;
+        background-color: #fff;
+        border: 0;
+        border-radius: 25px;
+        box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.25);
+    }
+
+    .sub-btn {
+        width: 100%;
+        aspect-ratio: 208.14 / 132.16;
+        background-color: #fff;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-main-icon {
+        font-size: 100px;
+        color: #000;
+    }
+
+    .btn-main-text {
+        font-size: 30px;
+        color: #000;
+        font-weight: bold;
+    }
+
+    img.btn-sub-icon {
+        height: 70px;
+        width: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 12px;
+        margin-bottom: 4px;
+    }
+
+    .btn-sub-icon {
+        font-size: 76px;
+        color: #000;
+        margin-top: 10px;
+    }
+
+    .btn-sub-text {
+        font-size: 20px;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .secbreak {
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+
+    /* Calendar: md */
+    .cal {
+        --cal-radius: 24px;
+        --cal-border: 2px;
+        --cal-line: 1px;
+        --cal-day-fs: 14px;
+        --cal-dow-fs: 11px;
+        --cal-title-fs: 20px;
+        --cal-mark: 24px;
+        --cal-nav-fs: 24px;
+        --cal-head-pad: 6px 14px;
+        max-width: 316.6px;
+        aspect-ratio: 316.6 / 254.68;
+        margin-inline: auto;
+    }
+
+    /* Event card: md */
+    .event-name--mobile,
+.event-name--tablet {
+    white-space: normal;
+    display: inline-block;
+    line-height: 1.25;
+}
+
+.NewsCard {
+        box-shadow: 0 4px 2px 0 rgba(0, 0, 0, 0.25);
+        padding: 0 15px;
+        overflow: visible;
+
+        grid-template-columns: 170px 1fr;
+        grid-template-areas:
+            "img  name"
+            "img  desc"
+            "img  date";
+        column-gap: 16px;
+        row-gap: 0;
+        align-items: center;
+    }
+
+    .NewsImageFrame {
+        width: 170px;
+        height: 116px;
+        border-radius: 17px;
+    }
+
+    .NewsCardName,
+    .NewsCardDesc,
+    .NewsCardDate {
+        text-align: left;
+        line-height: 1.4;
+    }
+
+    .NewsCardName {
+        font-size: 18px;
+        padding: 10px 8px 2px 8px;
+        line-height: 1.273;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .NewsCardDesc {
+        font-size: 12px;
+        padding: 2px 8px 4px 8px;
+    }
+
+    .NewsCardDate {
+        font-size: 11px;
+        padding: 2px 8px 6px 8px;
+        white-space: nowrap;
+    }
+
+    .NewsCardName,
+    .NewsCardDate {
+        margin-bottom: 0;
+    }
+
+    .LawCard {
+        padding: 10px 15px;
+        grid-template-columns: 170px 1fr;
+        grid-template-areas:
+            "img name"
+            "img desc";
+        column-gap: 16px;
+        align-items: center;
+    }
+
+    .LawCard .NewsImageFrame {
+        width: 170px;
+        height: 116px;
+        align-self: center;
+        border: 1px solid #000;
+        border-radius: 17px;
+    }
+
+    .LawCard .NewsCardName {
+        margin-bottom: 0;
+    }
+
+    .LawCard[data-law-id="1"] .NewsCardName {
+        margin-bottom: -25px;
+    }
+
+    .LawCard[data-law-id="1"] .imgNewsCard,
+    .LawCard[data-law-id="2"] .imgNewsCard,
+    .LawCard[data-law-id="3"] .imgNewsCard {
+        object-fit: contain;
+    }
+
+}
+
+/* // Large devices (lg, 992px and up) */
+@media (width >=992px) {
+
+    .site-footer-main {
+        height: 402px;
+        min-height: 0;
+        padding: 29px 0 0;
+    }
+
+    .site-footer-content {
+        grid-template-columns: 1.33fr 1fr 1fr 0.61fr;
+        grid-template-areas: "brand links learn contact";
+        padding-inline: 80px;
+    }
+
+    .footer-brand {
+        align-items: flex-start;
+        margin-top: 92px;
+        margin-bottom: 0;
+    }
+
+    .footer-logo {
+        width: 267px;
+    }
+
+    .footer-social {
+        position: static;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .footer-social-icon {
+        width: 37px;
+        height: 37px;
+        font-size: 22px;
+    }
+
+    .footer-links {
+        display: block;
+        margin-bottom: 0;
+    }
+
+    .footer-links h2,
+    .footer-learn h2,
+    .footer-contact h2 {
+        font-size: 32px;
+    }
+
+    .footer-link-list {
+        display: block;
+        margin-top: 16px;
+    }
+
+    .footer-link-list li:nth-child(n) {
+        display: block;
+        margin-bottom: 16px;
+    }
+
+    .footer-link-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .footer-link-list a,
+    .footer-simple-list li,
+    .footer-contact-list li {
+        font-size: 16px;
+    }
+
+    .footer-simple-list {
+        row-gap: 24px;
+        margin-top: 12px;
+    }
+
+    .footer-contact-list {
+        row-gap: 27px;
+        margin-top: 24px;
+    }
+
+    .footer-contact-list li {
+        grid-template-columns: 34px 1fr;
+        column-gap: 26px;
+    }
+
+    .footer-contact-list i {
+        width: 34px;
+        font-size: 26px;
+    }
+
+    .topic {
+        font-size: 40px;
+        margin-bottom: 40px;
+    }
+
+    .sub-topic {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .navbar {
+        height: 111px;
+    }
+
+    .topLogo {
+        aspect-ratio: 267/68;
+        height: 68px;
+        margin: 16px 0 27px 80px;
+    }
+
+    .userIcon {
+        border: 1.43px solid #000;
+        border-radius: 50px;
+        aspect-ratio: 82/82;
+        height: 82px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0px 85px 14px 0;
+    }
+
+    .personIcon {
+        font-size: 65px;
+    }
+
+    .page-container {
+        padding-inline: 80px;
+        /* margin ตาม Figma */
+    }
+
+    .main-btn-row {
+        --bs-gutter-x: 52px;
+        margin-top: 86px;
+        /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+    }
+
+    .sub-btn-row {
+        --bs-gutter-x: 52px;
+        margin-top: 86px;
+        /* ระยะห่างระหว่างปุ่มตามดีไซน์ */
+    }
+
+    .main-btn {
+        width: 100%;
+        aspect-ratio: 650 / 380.33;
+        background-color: #fff;
+        border: 0;
+        border-radius: 50px;
+        box-shadow: 0 4px 20px 5px rgba(0, 0, 0, 0.25);
+    }
+
+    .sub-btn {
+        width: 100%;
+        aspect-ratio: 420 / 266.68;
+        background-color: #fff;
+        border: 0;
+        border-radius: 50px;
+        box-shadow: 0 4px 20px 5px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-main-icon {
+        font-size: 280px;
+        color: #000;
+    }
+
+    .btn-main-text {
+        font-size: 80px;
+        font-weight: bold;
+    }
+
+    img.btn-sub-icon {
+        height: 180px;
+        width: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 18px;
+        margin-top: 18px;
+    }
+
+    .btn-sub-icon {
+        font-size: 200px;
+        color: #000;
+        margin-bottom: 10px;
+    }
+
+    .btn-sub-text {
+        font-size: 50px;
+        font-weight: bold;
+    }
+
+    .secbreak {
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    /* Calendar: lg */
+    .cal {
+        --cal-radius: 40px;
+        --cal-border: 4px;
+        --cal-line: 2px;
+        --cal-day-fs: 22px;
+        --cal-dow-fs: 16px;
+        --cal-title-fs: 32px;
+        --cal-mark: 44px;
+        --cal-nav-fs: 36px;
+        --cal-head-pad: 12px 24px;
+        max-width: 650px;
+        aspect-ratio: 650 / 522;
+        margin-inline: auto;
+    }
+
+    .eventCard {
+        --ev-radius: 15.38px;
+        --ev-height: 75px;
+        --ev-date-w: 77.93px;
+        --ev-month-fs: 15.85px;
+        --ev-day-fs: 34px;
+        --ev-level-fs: 9px;
+        --ev-name-fs: 20px;
+        --ev-time-fs: 12px;
+
+        column-gap: 0;
+        grid-template-rows: 1fr auto auto auto 1fr;
+        grid-template-columns: var(--ev-date-w) minmax(0, 1fr);
+        width: min(650px, 100%);
+        max-width: 100%;
+        box-shadow: 0 2.21px 2.21px rgba(0, 0, 0, 0.25);
+    }
+
+    .datesec {
+        border-radius: 11.23px 0 0 11.23px;
+        line-height: 1;
+    }
+
+    .datesec-month {
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .datesec-day {
+        line-height: 1.5;
+    }
+
+    .event-name {
+    overflow: visible !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    text-overflow: unset !important;
+}
+
+.event-level {
+        justify-self: start;
+        width: fit-content;
+        margin-top: 0;
+        margin-left: 6.6px;
+        padding: 1.32px 8px;
+        background: #f5f5f7;
+        border-radius: 11.23px;
+        color: #000;
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .event-name {
+        padding-left: 6.6px;
+        padding-right: 14px;
+        line-height: 1.5;
+    }
+
+    .event-time {
+        font-weight: 500;
+        line-height: 1.4;
+        padding-left: 6.6px;
+    }
+
+    .event-name--mobile,
+.event-name--tablet {
+    white-space: normal;
+    display: inline-block;
+    line-height: 1.25;
+}
+
+.NewsCard {
+        box-shadow: 0 4px 2px 0 rgba(0, 0, 0, 0.25);
+        padding: 10px 20px;
+        overflow: visible;
+
+        grid-template-columns: 222px 1fr;
+        grid-template-areas:
+            "img  name"
+            "img  desc"
+            "img  date";
+        column-gap: 22px;
+        row-gap: 0;
+        align-items: center;
+    }
+
+    .LawCard {
+        min-height: 172px;
+        grid-template-areas:
+            "img name"
+            "img desc";
+    }
+
+    .LawCard .NewsImageFrame {
+        width: 222px;
+        height: 152px;
+        align-self: center;
+    }
+
+    .LawCard[data-law-id="1"] .imgNewsCard,
+    .LawCard[data-law-id="2"] .imgNewsCard,
+    .LawCard[data-law-id="3"] .imgNewsCard {
+        object-fit: contain;
+    }
+
+    .NewsImageFrame {
+        width: 222px;
+        height: 152px;
+        border-radius: 17px;
+    }
+
+    .NewsCardName,
+    .NewsCardDesc,
+    .NewsCardDate {
+        text-align: left;
+    }
+
+    .NewsCardDesc,
+    .NewsCardDate {
+        line-height: 1.5;
+    }
+
+    .NewsCardName {
+        font-size: 24px;
+        padding: 12px 10px 2px 10px;
+        line-height: 1.273;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .NewsCardDesc {
+        font-size: 16px;
+        padding: 2px 10px 4px 10px;
+    }
+
+    .NewsCardDesc {
+        font-size: 22px;
+    }
+
+    .LawCard {
+        font-size: 22px;
+    }
+
+    .LawCardDesc {
+        margin-top: 4px;
+    }
+
+    .NewsCardDate {
+        font-size: 14px;
+        padding: 2px 10px 8px 10px;
+        white-space: nowrap;
+    }
+
+    .event-name--mobile {
+        display: none !important;
+    }
+
+    .event-name--desktop {
+        display: none !important;
+    }
+
+    .event-name--tablet {
+        display: inline !important;
+    }
+
+    .NewsCardVersion--tablet {
+        display: none;
+    }
+
+
+
+    .event-name--desktop {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline !important;
+    }
+
+    .event-name--tablet {
+        display: none !important;
+    }
+
+    .NewsCardVersion--desktop {
+        display: contents;
+    }
+
+    .NewsCard[data-news-id="2"] .NewsImageFrame--desktop .imgNewsCard {
+        top: -12.5%;
+        right: auto;
+        bottom: auto;
+        left: -12.5%;
+        width: 125%;
+        height: 125%;
+        object-position: center top;
+        max-width: none;
+    }
+
+    .NewsMoreRow {
+        margin-top: 20px;
+    }
+
+    .NewsMoreButton {
+        width: 260px;
+        height: 60px;
+        padding: 15px 30px;
+        border-radius: 17px;
+        box-shadow: 0 4px 1px rgba(0, 0, 0, 0.25);
+        font-size: 20px;
+    }
+
+}

@@ -1,0 +1,349 @@
+/* ==========================================================================
+   Vote-Todo Page Styles (Desktop / Tablet / Mobile)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (Default: < 768px)
+   -------------------------------------------------------------------------- */
+.vote-todo-main.page-container {
+    padding: 14px 20px 24px;
+    background: #f5f5f7;
+}
+
+.vote-todo-heading {
+    margin: 10px 0 16px;
+}
+
+.vote-todo-heading .topic {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+    color: #000;
+}
+
+/* ควบคุมการแสดงผลแยกตามอุปกรณ์ (ค่าเริ่มต้นแสดงเฉพาะ Mobile) */
+.vote-todo-content--desktop {
+    display: none;
+}
+.vote-todo-content--tablet {
+    display: none;
+}
+.vote-todo-content--mobile {
+    display: block;
+}
+
+/* รายการการ์ดข้อพึงปฏิบัติ */
+.vote-todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vote-todo-card {
+    background: #ffffff;
+    border-radius: 9.6px;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    padding: 24px 20px;
+    box-sizing: border-box;
+}
+
+.vote-todo-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #000;
+    margin: 0 0 10px 0;
+}
+
+.vote-todo-card-desc {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+    margin: 0;
+}
+
+/* กล่อง Checkbox ยินยัน */
+.vote-todo-agreement {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-checkbox-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.custom-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.custom-checkbox-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.custom-checkbox-box .fa-check {
+    font-size: 16px;
+    color: #000;
+    display: none;
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-box .fa-check {
+    display: block;
+}
+
+.custom-checkbox-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    line-height: 1.4;
+}
+
+/* ปุ่ม Action ด้านล่าง (ย้อนกลับ & ถัดไป) */
+.vote-todo-actions {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+}
+
+.vote-todo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 34px;
+    border-radius: 9.6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.vote-todo-btn-back {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0px 1.125px 3.9375px rgba(0, 0, 0, 0.25);
+}
+
+.vote-todo-btn-back:hover {
+    background: #f0f0f2;
+}
+
+.vote-todo-btn-next {
+    background: #000000;
+    color: #ffffff;
+}
+
+.vote-todo-btn-next.is-disabled,
+.vote-todo-btn-next[disabled] {
+    background: #848484 !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.vote-todo-btn-next:not(.is-disabled):hover {
+    background: #222222;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (iPad: min-width: 768px and max-width: 991.98px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .vote-todo-main.page-container {
+        padding: 24px 80px 38px;
+    }
+
+    .vote-todo-heading {
+        margin: 16px 0 20px;
+    }
+
+    .vote-todo-heading .topic {
+        font-size: 28px;
+        line-height: 1.3;
+    }
+
+    /* ควบคุมการแสดงผล */
+    .vote-todo-content--desktop {
+        display: none;
+    }
+    .vote-todo-content--tablet {
+        display: block;
+    }
+    .vote-todo-content--mobile {
+        display: none;
+    }
+
+    .vote-todo-list {
+        gap: 20px;
+        max-width: 674px;
+        margin: 0 auto;
+    }
+
+    .vote-todo-card {
+        border-radius: 17px;
+        padding: 32px 30px;
+    }
+
+    .vote-todo-card-title {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    .vote-todo-card-desc {
+        font-size: 20px;
+        line-height: 1.5;
+    }
+
+    .vote-todo-agreement {
+        margin-top: 32px;
+    }
+
+    .custom-checkbox-wrap {
+        gap: 12px;
+    }
+
+    .custom-checkbox-box {
+        width: 36px;
+        height: 33px;
+        flex: 0 0 36px;
+    }
+
+    .custom-checkbox-box .fa-check {
+        font-size: 20px;
+    }
+
+    .custom-checkbox-label {
+        font-size: 20px;
+    }
+
+    .vote-todo-actions {
+        margin-top: 26px;
+        gap: 80px;
+    }
+
+    .vote-todo-btn {
+        width: 258px;
+        height: 40px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-todo-main.page-container {
+        padding: 20px 80px 37px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .vote-todo-heading {
+        margin: 20px 0 26px;
+    }
+
+    .vote-todo-heading .topic {
+        font-size: 32px;
+        line-height: 1.3;
+    }
+
+    /* ควบคุมการแสดงผล */
+    .vote-todo-content--desktop {
+        display: block;
+    }
+    .vote-todo-content--tablet {
+        display: none;
+    }
+    .vote-todo-content--mobile {
+        display: none;
+    }
+
+    .vote-todo-list {
+        gap: 24px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .vote-todo-card {
+        border-radius: 17px;
+        padding: 32px 30px;
+    }
+
+    .vote-todo-card-title {
+        font-size: 30px;
+        margin-bottom: 14px;
+    }
+
+    .vote-todo-card-desc {
+        font-size: 24px;
+        line-height: 1.5;
+    }
+
+    .vote-todo-agreement {
+        margin-top: 40px;
+        justify-content: flex-start;
+        padding-left: 10px;
+    }
+
+    .custom-checkbox-wrap {
+        gap: 16px;
+    }
+
+    .custom-checkbox-box {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+    }
+
+    .custom-checkbox-box .fa-check {
+        font-size: 24px;
+    }
+
+    .custom-checkbox-label {
+        font-size: 24px;
+    }
+
+    .vote-todo-actions {
+        margin-top: 36px;
+        gap: 120px;
+        justify-content: center;
+    }
+
+    .vote-todo-btn {
+        width: 438px;
+        height: 52px;
+        font-size: 28px;
+        border-radius: 17px;
+    }
+}
+

@@ -1,0 +1,524 @@
+/* ==========================================================================
+   Vote-Review Page Styles (Vote-Review.html)
+   Reuses base styles from style.css, vote-check.css, vote-todo.css, and vote.css
+   Matches exact Figma design (#564:4304 Mobile, #564:3614 Tablet, #564:2407 Desktop):
+   - Heading left-aligned at col-1
+   - Description centered
+   - Mobile: Cards stacked top-to-bottom (column)
+   - Tablet & Desktop: Cards side-by-side left-to-right (row)
+   - Card border & border-radius unified with Vote.html (.vote-paper-card)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (< 768px) — Figma #564:4304
+   -------------------------------------------------------------------------- */
+.vote-review-main.page-container {
+    padding: 14px 20px 24px;
+    background: #f5f5f7;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* หัวข้อหลัก ชิดขอบซ้าย col-1 เสมอ */
+.vote-review-heading {
+    width: 100%;
+    max-width: none;
+    margin: 10px 0 8px;
+    text-align: left;
+}
+
+.vote-review-title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #000000;
+    margin: 0;
+}
+
+/* คำอธิบายกึ่งกลางหน้าจอเสมอ */
+.vote-review-desc-wrap {
+    width: 100%;
+    margin: 6px 0 20px;
+    text-align: center;
+}
+
+.vote-review-desc {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #000000;
+    margin: 0;
+}
+
+/* กลุ่มการ์ดสรุปผลการลงคะแนน: Mobile เรียงบนลงล่าง */
+.vote-review-cards-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 368px;
+    margin: 0 auto;
+}
+
+/* การ์ดสรุปบัตรแต่ละใบ (ขอบมนและเส้นขอบสีดำหนาเป็นหนึ่งเดียวกับ .vote-paper-card ใน Vote.html) */
+.review-paper-card {
+    background: #ffffff;
+    border: 4px solid #000000;
+    border-radius: 9.6px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ส่วนหัวของการ์ดสรุป พร้อมเส้นคั่นดำด้านล่างความหนาเท่ากรอบนอก */
+.review-paper-header {
+    border-bottom: 4px solid #000000;
+    padding: 10px 10px 8px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.review-paper-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.review-paper-subtitle {
+    font-size: 18px;
+    font-weight: 400;
+    color: #000000;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* พื้นที่แสดงตารางผลที่เลือก */
+.review-paper-body {
+    padding: 16px 10px 14px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.review-table-wrap {
+    width: 100%;
+    max-width: 186px;
+}
+
+/* แถวหัวตาราง เบอร์ | ช่องลงคะแนน */
+.review-table-head {
+    display: flex;
+    width: 100%;
+    height: 32px;
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.review-table-cell-num {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 15.5px;
+    font-weight: 400;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+.review-table-cell-mark {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 400;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+/* แถวช่องตัวเลือกที่ผู้ใช้กา */
+.review-table-row {
+    display: flex;
+    width: 100%;
+    height: 79px;
+    border: 1.5px solid #000000;
+    border-top: none;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.review-choice-num {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 24px;
+    font-weight: 400;
+    color: #000000;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.review-choice-num--text {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 0 4px;
+}
+
+.review-choice-mark {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.review-choice-mark .vote-cross-mark {
+    font-size: 52px;
+    color: #ff0000;
+}
+
+/* กรณีเลือกไม่ประสงค์ลงคะแนน / ไม่แสดงความคิดเห็น */
+.review-abstain-row {
+    display: flex;
+    width: 100%;
+    height: 79px;
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.review-abstain-label {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1.5px solid #000000;
+    font-size: 13px;
+    font-weight: 600;
+    color: #000000;
+    text-align: center;
+    line-height: 1.25;
+    padding: 2px 4px;
+    box-sizing: border-box;
+}
+
+.review-abstain-mark {
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.review-abstain-mark .vote-cross-mark {
+    font-size: 52px;
+    color: #ff0000;
+}
+
+/* ปุ่มแก้ไขในการ์ด */
+.review-paper-footer {
+    padding: 0 10px 14px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.review-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 116.5px;
+    height: 31px;
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 9.6px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.review-edit-btn:hover {
+    background: #f0f0f2;
+}
+
+/* ปุ่ม Action ด้านล่าง (ใช้ร่วมกับ vote-todo.css) */
+.vote-review-main .vote-todo-actions {
+    margin-top: 24px;
+}
+
+.vote-review-main .secbreak {
+    width: 100%;
+    margin-top: 30px;
+    border-top: 1.91px solid #d9d9d9;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (min-width: 768px and < 992px) — Figma #564:3614
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+    .vote-review-main.page-container {
+        padding: 18px 80px 30px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* หัวข้อหลัก ชิดซ้าย col-1 */
+    .vote-review-heading {
+        width: 100%;
+        max-width: none;
+        margin: 12px 0 10px;
+        text-align: left;
+    }
+
+    .vote-review-title {
+        font-size: 28px;
+    }
+
+    /* คำอธิบายกึ่งกลาง */
+    .vote-review-desc-wrap {
+        width: 100%;
+        margin: 8px 0 26px;
+        text-align: center;
+    }
+
+    .vote-review-desc {
+        font-size: 18px;
+    }
+
+    /* Tablet วางการ์ดซ้าย-ขวา (row) ตาม Figma #753:2636 */
+    .vote-review-cards-wrap {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 24.5px;
+        width: 100%;
+        max-width: 675px;
+        margin: 0 auto;
+    }
+
+    .review-paper-card {
+        flex: 1 1 0;
+        max-width: 325px;
+        border-width: 4.5px;
+        border-radius: 9.6px;
+    }
+
+    .review-paper-header {
+        border-bottom-width: 4.5px;
+        padding: 8px 8px 6px;
+    }
+
+    .review-paper-title {
+        font-size: 16px;
+    }
+
+    .review-paper-subtitle {
+        font-size: 16px;
+    }
+
+    .review-paper-body {
+        padding: 14px 10px 14px;
+    }
+
+    .review-table-wrap {
+        max-width: 165px;
+    }
+
+    .review-table-head {
+        height: 28px;
+        border-width: 2px;
+    }
+
+    .review-table-cell-num {
+        border-right-width: 2px;
+        font-size: 14px;
+    }
+
+    .review-table-cell-mark {
+        font-size: 11px;
+    }
+
+    .review-table-row,
+    .review-abstain-row {
+        height: 70px;
+        border-width: 2px;
+    }
+
+    .review-choice-num {
+        border-right-width: 2px;
+        font-size: 22px;
+    }
+
+    .review-choice-num--text {
+        font-size: 14px;
+    }
+
+    .review-choice-mark .vote-cross-mark,
+    .review-abstain-mark .vote-cross-mark {
+        font-size: 46px;
+    }
+
+    .review-abstain-label {
+        border-right-width: 2px;
+        font-size: 12px;
+    }
+
+    .review-paper-footer {
+        padding: 0 10px 12px;
+    }
+
+    .review-edit-btn {
+        width: 103.5px;
+        height: 27.5px;
+        font-size: 12px;
+        border-radius: 8.5px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px) — Figma #564:2407
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-review-main.page-container {
+        padding: 20px 80px 37px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* หัวข้อหลัก ชิดซ้าย col-1 */
+    .vote-review-heading {
+        width: 100%;
+        max-width: none;
+        margin: 16px 0 14px;
+        text-align: left;
+    }
+
+    .vote-review-title {
+        font-size: 32px;
+    }
+
+    /* คำอธิบายกึ่งกลาง */
+    .vote-review-desc-wrap {
+        width: 100%;
+        margin: 10px 0 34px;
+        text-align: center;
+    }
+
+    .vote-review-desc {
+        font-size: 32px;
+    }
+
+    /* Desktop วางการ์ดซ้าย-ขวา (row) ตาม Figma #564:2455 */
+    .vote-review-cards-wrap {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 49px;
+        width: 100%;
+        max-width: 1350px;
+        margin: 0 auto;
+    }
+
+    .review-paper-card {
+        flex: 1 1 0;
+        max-width: 650px;
+        border-width: 6px;
+        border-radius: 17px;
+    }
+
+    .review-paper-header {
+        border-bottom-width: 6px;
+        padding: 14px 16px 12px;
+    }
+
+    .review-paper-title {
+        font-size: 32px;
+    }
+
+    .review-paper-subtitle {
+        font-size: 32px;
+    }
+
+    .review-paper-body {
+        padding: 26px 16px 26px;
+    }
+
+    .review-table-wrap {
+        max-width: 330px;
+    }
+
+    .review-table-head {
+        height: 56px;
+        border-width: 2.5px;
+    }
+
+    .review-table-cell-num {
+        border-right-width: 2.5px;
+        font-size: 28px;
+    }
+
+    .review-table-cell-mark {
+        font-size: 21.5px;
+    }
+
+    .review-table-row,
+    .review-abstain-row {
+        height: 140px;
+        border-width: 2.5px;
+    }
+
+    .review-choice-num {
+        border-right-width: 2.5px;
+        font-size: 43px;
+    }
+
+    .review-choice-num--text {
+        font-size: 26px;
+    }
+
+    .review-choice-mark .vote-cross-mark,
+    .review-abstain-mark .vote-cross-mark {
+        font-size: 92px;
+    }
+
+    .review-abstain-label {
+        border-right-width: 2.5px;
+        font-size: 22px;
+    }
+
+    .review-paper-footer {
+        padding: 0 16px 22px;
+    }
+
+    .review-edit-btn {
+        width: 207px;
+        height: 55px;
+        font-size: 24px;
+        border-radius: 17px;
+    }
+}

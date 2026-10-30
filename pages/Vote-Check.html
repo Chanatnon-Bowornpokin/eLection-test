@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ตรวจสอบสถานะการลงคะแนน</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+
+    <link href="../fontawesome/css/fontawesome.css" rel="stylesheet">
+    <link href="../fontawesome/css/brands.css" rel="stylesheet">
+    <link href="../fontawesome/css/solid.css" rel="stylesheet">
+    <link href="../css/style.css?v=20261030_v2" rel="stylesheet">
+    <link href="../css/vote-check.css?v=20261030_v2" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header class="vote-check-header">
+        <div class="navbar">
+            <div class="toplogo">
+                <img src="../img/Logo/Logo.png" class="topLogo" alt="eLection">
+            </div>
+            <div class="userIcon" aria-label="บัญชีผู้ใช้">
+                <span class="material-symbols-outlined personIcon" aria-hidden="true">person</span>
+            </div>
+        </div>
+        <div class="vote-check-hero">
+            <img src="../img/Banner/Check_Vote.png" alt="ระบบลงคะแนนเลือกตั้ง สิทธิลงคะแนนของท่าน ตรวจสอบรายการและเลือกการเลือกตั้งเพื่อเริ่มต้นลงคะแนน">
+            <div class="carousel-inner-shadow"></div>
+        </div>
+    </header>
+
+    <main class="container-fluid page-container vote-check-main">
+        <div class="vote-check-heading">
+            <a class="vote-check-back" href="../index.html#vote" aria-label="ย้อนกลับไปหน้าลงคะแนน">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                <h1 class="bold topic">สิทธิลงคะแนนของท่าน</h1>
+            </a>
+        </div>
+        <div class="vote-check-list" id="electionList" aria-live="polite"></div>
+        <hr class="secbreak">
+    </main>
+
+    <footer class="site-footer">
+        <div class="report-banner">
+            <img src="../img/Banner/Report_Banner.png" alt="แจ้งเหตุผิดปกติเกี่ยวกับการเลือกตั้ง">
+        </div>
+
+        <div class="site-footer-main">
+            <div class="site-footer-content">
+                <div class="footer-brand">
+                    <img class="footer-logo" src="../img/Logo/Wh-Logo.png" alt="eLection">
+                    <div class="footer-social" aria-label="ช่องทางโซเชียลมีเดีย">
+                        <span class="footer-social-icon" role="img" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                        </span>
+                        <span class="footer-social-icon" role="img" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <nav class="footer-links" aria-label="Links">
+                    <h2>Links</h2>
+                    <ul class="footer-link-list">
+                        <li><a href="#vote">ลงคะแนน</a></li>
+                        <li><a href="#candidate-policy">นโยบายผู้สมัคร</a></li>
+                        <li><a href="#eligibility">ตรวจสอบสิทธิ</a></li>
+                        <li><a href="#results">ผลการเลือกตั้ง</a></li>
+                        <li><a href="#service-locations">จุดบริการ</a></li>
+                        <li><a href="#calendar">ปฏิทิน</a></li>
+                        <li><a href="#news">ประชาสัมพันธ์</a></li>
+                        <li><a href="#laws">ข้อกฎหมาย</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-learn" aria-label="Learn More">
+                    <h2>Learn More</h2>
+                    <ul class="footer-simple-list">
+                        <li>About Us</li>
+                        <li>FAQ</li>
+                        <li>Support</li>
+                    </ul>
+                </nav>
+
+                <div class="footer-contact">
+                    <h2>Contact Us</h2>
+                    <ul class="footer-contact-list">
+                        <li>
+                            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                            <span>Email</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                            <span>Phone Number</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Address</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="../script/events.js?v=20261030_v2"></script>
+    <script src="../script/vote-check.js?v=20261030_v2"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

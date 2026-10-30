@@ -1,0 +1,573 @@
+/* ==========================================================================
+   Vote OTP & PIN Verification Page Styles
+   Reuses base styles from style.css, vote-check.css, and vote-todo.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (< 768px)
+   -------------------------------------------------------------------------- */
+.vote-otp-pin-main {
+    padding: 14px 20px 24px;
+    background: #f5f5f7;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vote-otp-pin-main .secbreak {
+    width: 100%;
+    margin-top: 30px;
+    border-top: 1.91px solid #d9d9d9;
+}
+
+.vote-otp-pin-heading {
+    margin: 10px 0 12px;
+    width: 100%;
+    text-align: left;
+}
+
+.vote-otp-pin-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #000000;
+}
+
+/* คำอธิบายใต้หัวข้อ */
+.vote-otp-pin-desc-wrap {
+    margin: 12px 0 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.vote-otp-pin-desc {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #000000;
+    font-weight: 500;
+}
+
+.vote-otp-ref {
+    color: #666666;
+    font-weight: 400;
+    display: inline-block;
+    margin-top: 2px;
+}
+
+/* กลุ่มช่องกรอกตัวเลข 6 หลัก (Digit Boxes) */
+.vote-digit-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto 16px;
+}
+
+.vote-digit-input {
+    width: calc((100% - 40px) / 6);
+    max-width: 54px;
+    height: 68px;
+    background: #ffffff;
+    border: 1.5px solid #d4d4d8;
+    border-radius: 12px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+    font-family: 'Prompt', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #000000;
+    text-align: center;
+    caret-color: #000000;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    box-sizing: border-box;
+    outline: none;
+    padding: 0;
+}
+
+.vote-digit-input:focus {
+    border-color: #000000;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.vote-digit-input.has-value {
+    border-color: #101010;
+}
+
+/* ปุ่มสลับ แสดง/ซ่อน PIN */
+.vote-pin-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 14px;
+    width: 100%;
+}
+
+.vote-pin-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: #666666;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.vote-pin-toggle-btn:hover {
+    color: #000000;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.vote-pin-toggle-btn i {
+    font-size: 15px;
+}
+
+/* ข้อความช่วยเหลือ, นับเวลา, และลิงก์ด้านล่าง */
+.vote-otp-pin-helper {
+    text-align: center;
+    width: 100%;
+    margin: 8px 0 20px;
+}
+
+.vote-otp-timer {
+    font-size: 14px;
+    color: #666666;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.vote-otp-timer .countdown-num {
+    font-weight: 600;
+    color: #000000;
+}
+
+.vote-otp-pin-sublinks {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.vote-otp-subtext-line {
+    display: inline-block;
+}
+
+.vote-link-btn {
+    background: transparent;
+    border: none;
+    color: #000000;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+    cursor: pointer;
+    padding: 0;
+    display: inline;
+    vertical-align: baseline;
+    transition: opacity 0.15s ease;
+}
+
+.vote-link-btn:hover {
+    opacity: 0.75;
+}
+
+.vote-link-btn:disabled {
+    color: #999999;
+    cursor: not-allowed;
+    text-decoration: none;
+    opacity: 0.6;
+}
+
+.vote-pin-warning {
+    font-size: 14px;
+    color: #666666;
+    margin: 0 0 6px;
+    font-weight: 400;
+}
+
+.vote-pin-switch {
+    font-size: 14px;
+    color: #666666;
+    margin: 0;
+}
+
+.vote-link-sep {
+    margin: 0 6px;
+    color: #888888;
+}
+
+/* --------------------------------------------------------------------------
+   Mock SMS Toast Notification (การ์ดจำลองข้อความ SMS สไตล์การ์ดระบบ vote-todo / vote-check)
+   -------------------------------------------------------------------------- */
+.mock-sms-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-140%);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    background: #ffffff;
+    color: #000000;
+    border-radius: 9.6px;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    border: none;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    z-index: 9999;
+    box-sizing: border-box;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mock-sms-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mock-sms-icon {
+    flex: 0 0 38px;
+    height: 38px;
+    background: #000000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.mock-sms-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.mock-sms-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.mock-sms-sender {
+    font-size: 13px;
+    color: #666666;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.mock-sms-close {
+    background: transparent;
+    border: none;
+    color: #888888;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s ease;
+}
+
+.mock-sms-close:hover {
+    color: #000000;
+}
+
+.mock-sms-body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #000000;
+    margin-bottom: 10px;
+}
+
+.mock-sms-code {
+    color: #000000;
+    background: #f5f5f7;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    display: inline-block;
+    margin: 0 2px;
+}
+
+.mock-sms-ref {
+    color: #666666;
+    font-size: 13px;
+    margin-left: 2px;
+}
+
+.mock-sms-autofill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 9.6px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.mock-sms-autofill-btn:hover {
+    background: #2b2b2b;
+    transform: translateY(-1px);
+}
+
+.mock-sms-autofill-btn i {
+    font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (min-width: 768px and < 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+    .vote-otp-pin-main {
+        padding: 18px 80px 30px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .vote-otp-pin-heading {
+        margin: 12px 0 16px;
+    }
+
+    .vote-otp-pin-title {
+        font-size: 24px;
+    }
+
+    .vote-otp-pin-desc-wrap {
+        margin: 16px 0 24px;
+    }
+
+    .vote-otp-pin-desc {
+        font-size: 18px;
+        line-height: 1.5;
+    }
+
+    .vote-digit-group {
+        gap: 12px;
+        max-width: 440px;
+        margin: 0 auto 20px;
+    }
+
+    .vote-digit-input {
+        max-width: none;
+        flex: 0 0 auto;
+        width: 62px;
+        height: 78px;
+        font-size: 32px;
+        border-radius: 14px;
+    }
+
+    .vote-pin-toggle-btn {
+        font-size: 15px;
+    }
+
+    .vote-pin-toggle-btn i {
+        font-size: 17px;
+    }
+
+    .vote-otp-pin-helper {
+        margin: 12px 0 24px;
+    }
+
+    .vote-otp-timer {
+        font-size: 16px;
+    }
+
+    .vote-otp-pin-sublinks {
+        flex-direction: row;
+        justify-content: center;
+        font-size: 15px;
+    }
+
+    /* Toast Tablet สไตล์การ์ดเดียวกับ vote-todo */
+    .mock-sms-toast {
+        top: 24px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(-140%);
+        width: 480px;
+        max-width: 480px;
+        border-radius: 17px;
+        padding: 20px 24px;
+        gap: 16px;
+    }
+
+    .mock-sms-toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .mock-sms-icon {
+        flex: 0 0 44px;
+        height: 44px;
+        font-size: 18px;
+        border-radius: 10px;
+    }
+
+    .mock-sms-sender {
+        font-size: 14px;
+    }
+
+    .mock-sms-body {
+        font-size: 16px;
+    }
+
+    .mock-sms-code {
+        font-size: 18px;
+        padding: 3px 10px;
+    }
+
+    .mock-sms-autofill-btn {
+        font-size: 13px;
+        padding: 7px 16px;
+        border-radius: 12px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-otp-pin-main {
+        padding: 20px 80px 37px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .vote-otp-pin-heading {
+        margin: 16px 0 24px;
+    }
+
+    .vote-otp-pin-title {
+        font-size: 32px;
+    }
+
+    .vote-otp-pin-desc-wrap {
+        margin: 20px 0 32px;
+    }
+
+    .vote-otp-pin-desc {
+        font-size: 24px;
+        line-height: 1.5;
+    }
+
+    .vote-digit-group {
+        gap: 16px;
+        max-width: 1500px;
+        margin: 0 auto 24px;
+    }
+
+    .vote-digit-input {
+        max-width: none;
+        flex: 0 0 auto;
+        width: 78px;
+        height: 120px;
+        font-size: 50px;
+        border-radius: 14px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .vote-pin-toggle-wrap {
+        margin: 6px 0 20px;
+    }
+
+    .vote-pin-toggle-btn {
+        font-size: 18px;
+        gap: 8px;
+        padding: 8px 16px;
+    }
+
+    .vote-pin-toggle-btn i {
+        font-size: 20px;
+    }
+
+    .vote-otp-pin-helper {
+        margin: 16px 0 32px;
+    }
+
+    .vote-otp-timer {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .vote-otp-pin-sublinks {
+        flex-direction: row;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .vote-pin-warning,
+    .vote-pin-switch {
+        font-size: 18px;
+    }
+
+    /* Toast Desktop สไตล์การ์ดเดียวกับ vote-todo */
+    .mock-sms-toast {
+        top: 30px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(-140%);
+        width: 520px;
+        max-width: 520px;
+        border-radius: 17px;
+        padding: 22px 28px;
+        gap: 18px;
+    }
+
+    .mock-sms-toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .mock-sms-icon {
+        flex: 0 0 48px;
+        height: 48px;
+        font-size: 20px;
+        border-radius: 12px;
+    }
+
+    .mock-sms-sender {
+        font-size: 15px;
+    }
+
+    .mock-sms-body {
+        font-size: 18px;
+    }
+
+    .mock-sms-code {
+        font-size: 20px;
+        padding: 3px 12px;
+    }
+
+    .mock-sms-autofill-btn {
+        font-size: 14px;
+        padding: 8px 18px;
+        border-radius: 12px;
+    }
+}

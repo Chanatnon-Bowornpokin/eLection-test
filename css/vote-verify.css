@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Vote-Verify Page Styles (Desktop / Tablet / Mobile)
+   Reuses base styles from style.css and vote-check.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base / Mobile Styles (Default: < 768px)
+   -------------------------------------------------------------------------- */
+.vote-verify-main.page-container {
+    padding: 14px 20px 24px;
+    background: #f5f5f7;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vote-verify-heading {
+    margin: 10px 0 16px;
+}
+
+.vote-verify-title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+    color: #000;
+}
+
+.vote-verify-subtitle {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    margin-left: 8px;
+}
+
+/* ควบคุมการแสดงผลตามอุปกรณ์ */
+.vote-verify-content--desktop {
+    display: none;
+}
+.vote-verify-content--tablet {
+    display: none;
+}
+.vote-verify-content--mobile {
+    display: block;
+}
+
+/* รายการการ์ดวิธียืนยันตัวตน */
+.vote-verify-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.vote-verify-card {
+    background: #ffffff;
+    border-radius: 9.6px;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    padding: 16px 14px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    outline: none;
+}
+
+.vote-verify-card:hover {
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.vote-verify-card:focus-visible {
+    outline: 2px solid #000;
+}
+
+/* Radio Circle Indicator */
+.vote-verify-radio-wrap {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-verify-radio-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0px 1px 7px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.vote-verify-radio-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.vote-verify-card.is-selected .vote-verify-radio-dot {
+    background: #101010;
+}
+
+.vote-verify-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.vote-verify-card-title {
+    font-size: 16px;
+    margin: 0 0 4px 0;
+    color: #000;
+}
+
+.vote-verify-card-desc {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
+    color: #000;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tablet Styles (768px - 991.98px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .vote-verify-main.page-container {
+        padding: 14px 80px 38px;
+    }
+
+    .vote-verify-heading {
+        margin: 12px 0 20px;
+    }
+
+    .vote-verify-title {
+        font-size: 28px;
+    }
+
+    .vote-verify-subtitle {
+        font-size: 18px;
+        margin-left: 14px;
+    }
+
+    /* ควบคุมการแสดงผล */
+    .vote-verify-content--desktop {
+        display: none;
+    }
+    .vote-verify-content--tablet {
+        display: block;
+    }
+    .vote-verify-content--mobile {
+        display: none;
+    }
+
+    .vote-verify-list {
+        gap: 16px;
+    }
+
+    .vote-verify-card {
+        border-radius: 9.6px;
+        padding: 16px 20px;
+        gap: 18px;
+    }
+
+    .vote-verify-radio-circle {
+        width: 32px;
+        height: 32px;
+    }
+
+    .vote-verify-radio-dot {
+        width: 16px;
+        height: 16px;
+    }
+
+    .vote-verify-card-title {
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+
+    .vote-verify-card-desc {
+        font-size: 15px;
+        line-height: 1.45;
+    }
+
+}
+
+/* --------------------------------------------------------------------------
+   3. Desktop Styles (min-width: 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-verify-main.page-container {
+        padding: 20px 80px 37px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .vote-verify-heading {
+        margin: 20px 0 26px;
+    }
+
+    .vote-verify-title {
+        font-size: 32px;
+        line-height: 1.3;
+    }
+
+    .vote-verify-subtitle {
+        font-size: 20px;
+        margin-left: 18px;
+    }
+
+    /* ควบคุมการแสดงผล */
+    .vote-verify-content--desktop {
+        display: block;
+    }
+    .vote-verify-content--tablet {
+        display: none;
+    }
+    .vote-verify-content--mobile {
+        display: none;
+    }
+
+    .vote-verify-list {
+        gap: 24px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .vote-verify-card {
+        border-radius: 17px;
+        padding: 24px 30px;
+        gap: 24px;
+    }
+
+    .vote-verify-radio-circle {
+        width: 39px;
+        height: 39px;
+    }
+
+    .vote-verify-radio-dot {
+        width: 20px;
+        height: 20px;
+    }
+
+    .vote-verify-card-title {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .vote-verify-card-desc {
+        font-size: 22px;
+        line-height: 1.5;
+    }
+
+}
+
