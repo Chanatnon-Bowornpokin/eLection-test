@@ -138,6 +138,33 @@ body {
     word-break: break-word;
 }
 
+.user-profile-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 6px 14px;
+    border: 1px solid #000000;
+    border-radius: 20px;
+    background: #f4f4f5;
+    color: #000000;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.1s;
+    font-family: inherit;
+}
+
+.user-profile-reset-btn:hover {
+    background: #000000;
+    color: #ffffff;
+}
+
+.user-profile-reset-btn:active {
+    transform: scale(0.97);
+}
+
 .page-container {
     padding-inline: 20px;
 }

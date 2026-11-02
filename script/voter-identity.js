@@ -194,6 +194,69 @@
     }
 
     /**
+     * รีเซ็ตตัวตนประจำเครื่องนี้ และปลดล็อกสิทธิ์ใน Supabase คืนให้ระบบ
+     */
+    async function resetVoter() {
+        const current = getVoter();
+        if (current && current.id) {
+            try {
+                if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+                    await window.supabaseClient
+                        .from('mock_citizens')
+                        .update({ is_claimed: false, claimed_at: null })
+                        .eq('id', current.id);
+                } else {
+                    await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?id=eq.${current.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ is_claimed: false, claimed_at: null })
+                    });
+                }
+            } catch (e) {
+                console.warn('[VoterIdentity] Failed to unclaim current voter in Supabase:', e);
+            }
+        }
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(SESSION_KEY);
+        console.log('✅ ปลดล็อกสิทธิ์และล้างข้อมูล Local เรียบร้อย กำลังรีโหลดเพื่อรับตัวตนใหม่...');
+        window.location.reload();
+    }
+
+    /**
+     * รีเซ็ตฐานข้อมูล mock_citizens ใน Supabase ทั้งหมดให้กลับมาเป็นสถานะว่าง (is_claimed = false)
+     */
+    async function resetAllVoters() {
+        try {
+            if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+                await window.supabaseClient
+                    .from('mock_citizens')
+                    .update({ is_claimed: false, claimed_at: null })
+                    .eq('is_claimed', true);
+            } else {
+                await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?is_claimed=eq.true`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_claimed: false, claimed_at: null })
+                });
+            }
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(SESSION_KEY);
+            console.log('✅ รีเซ็ตตาราง mock_citizens ใน Supabase ทั้งหมด และล้างข้อมูลเครื่องเรียบร้อย');
+            window.location.reload();
+        } catch (e) {
+            console.error('[VoterIdentity] Failed to reset all voters in Supabase:', e);
+        }
+    }
+
+    /**
      * สร้างและควบคุม Navbar Profile Dropdown Card
      */
     function initProfileDropdown() {
@@ -220,8 +283,22 @@
                 </div>
                 <div class="user-profile-name" id="userProfileName">กำลังดึงข้อมูล...</div>
                 <div class="user-profile-district" id="userProfileDistrict"></div>
+                <button type="button" class="user-profile-reset-btn" id="userProfileResetBtn" title="สุ่มหรือเปลี่ยนตัวตนผู้มีสิทธิเลือกตั้งสำหรับทดสอบ">
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+                    <span>เปลี่ยนตัวตนทดสอบ</span>
+                </button>
             `;
             userIcon.appendChild(dropdown);
+
+            const resetBtn = dropdown.querySelector('#userProfileResetBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    resetBtn.disabled = true;
+                    resetBtn.innerHTML = '<span>กำลังสลับตัวตน...</span>';
+                    resetVoter();
+                });
+            }
         }
 
         function updateProfileView(voter) {
@@ -299,11 +376,15 @@
         getVoter,
         getOrClaimVoter,
         isEligibleFor,
+        resetVoter,
+        resetAllVoters,
         initProfileDropdown
     };
     window.getVoter = getVoter;
     window.getOrClaimVoter = getOrClaimVoter;
     window.isEligibleFor = isEligibleFor;
+    window.resetVoter = resetVoter;
+    window.resetAllVoters = resetAllVoters;
 
     // Boot อัตโนมัติเมื่อเอกสารพร้อม
     if (document.readyState === 'loading') {
