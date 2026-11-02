@@ -5,6 +5,7 @@
 const EVENTS = [
     {
         id: 'referendum-2569-03',
+        type: 'referendum',
         date: '2026-02-08',
         level: 'ระดับประเทศ',
         banner: '../img/Banner/Referendum_Banner.png',
@@ -16,6 +17,7 @@ const EVENTS = [
     },
     {
         id: 'house-election-2569',
+        type: 'general-election',
         date: '2026-02-08',
         level: 'ระดับประเทศ',
         banner: '../img/Banner/House_Election.png',

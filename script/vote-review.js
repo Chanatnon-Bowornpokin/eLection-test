@@ -325,7 +325,9 @@ function setupReviewActions(currentEventId) {
                     districtInfo: districtInfo,
                     trackingHash: trackingHash,
                     voteTime: votedAtText,
-                    eventId: currentEventId
+                    eventId: currentEventId,
+                    eventType: isReferendum ? 'referendum' : 'general-election',
+                    isReferendum: isReferendum
                 }));
 
                 // ========================================================

@@ -11,12 +11,25 @@
 
 function getCurrentEventId() {
     const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('id');
+    let eventId = urlParams.get('id');
+
+    // ถ้าไม่มี id ใน URL ลองดูจาก latest_vote_receipt ใน sessionStorage
+    if (!eventId) {
+        try {
+            const rawReceipt = sessionStorage.getItem('latest_vote_receipt');
+            if (rawReceipt) {
+                const parsed = JSON.parse(rawReceipt);
+                if (parsed.eventId) eventId = parsed.eventId;
+            }
+        } catch {}
+    }
 
     if (eventId && typeof EVENTS !== 'undefined' && Array.isArray(EVENTS)) {
         const found = EVENTS.find(ev => ev.id === eventId);
         if (found) return found.id;
     }
+
+    if (eventId) return eventId;
 
     if (typeof EVENTS !== 'undefined' && Array.isArray(EVENTS) && EVENTS.length > 0) {
         return EVENTS[0].id;
@@ -123,12 +136,22 @@ function ensureStagingEnvelope(currentEventId) {
 }
 
 function getReceiptLinesForEvent(currentEventId) {
-    if (currentEventId === 'referendum-2569-03') {
+    const event = (typeof EVENTS !== 'undefined' && Array.isArray(EVENTS))
+        ? EVENTS.find(ev => ev.id === currentEventId)
+        : null;
+
+    const isReferendum = (event?.type === 'referendum') ||
+                         currentEventId.toLowerCase().includes('referendum') ||
+                         currentEventId.toLowerCase().includes('ref');
+
+    if (isReferendum) {
         return {
             titleHtml: '<span class="phrase">การออกเสียงประชามติ</span> <span class="phrase">ครั้งที่ 3 ปี 2569</span>',
             titleLine1: 'การออกเสียงประชามติ',
             titleLine2: 'ครั้งที่ 3 ปี 2569',
-            dateText: '8 กุมภาพันธ์ 2569'
+            dateText: '8 กุมภาพันธ์ 2569',
+            isReferendum: true,
+            eventType: 'referendum'
         };
     }
 
@@ -136,19 +159,22 @@ function getReceiptLinesForEvent(currentEventId) {
         titleHtml: '<span class="phrase">การเลือกตั้งสมาชิกสภาผู้แทนราษฎร</span> <span class="phrase">(ส.ส.)</span> <span class="phrase">ครั้งที่ 28</span>',
         titleLine1: 'การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.)',
         titleLine2: 'ครั้งที่ 28',
-        dateText: '8 กุมภาพันธ์ 2569'
+        dateText: '8 กุมภาพันธ์ 2569',
+        isReferendum: false,
+        eventType: 'general-election'
     };
 }
 
 function initHeroAndReceipt(currentEventId) {
+    const currentEvent = (typeof EVENTS !== 'undefined' && Array.isArray(EVENTS))
+        ? EVENTS.find(ev => ev.id === currentEventId)
+        : null;
+
     // 1. อัปเดต Hero Banner
     const heroImg = document.getElementById('voteSuccessHeroImg');
-    if (heroImg && typeof EVENTS !== 'undefined' && Array.isArray(EVENTS)) {
-        const currentEvent = EVENTS.find(ev => ev.id === currentEventId);
-        if (currentEvent && currentEvent.banner) {
-            heroImg.src = currentEvent.banner;
-            heroImg.alt = currentEvent.title || 'รายละเอียดการเลือกตั้ง';
-        }
+    if (heroImg && currentEvent && currentEvent.banner) {
+        heroImg.src = currentEvent.banner;
+        heroImg.alt = currentEvent.title || 'รายละเอียดการเลือกตั้ง';
     }
 
     // 2. ดึงข้อมูลใบเสร็จจาก sessionStorage (หรือ fallback ไปที่ localStorage)
@@ -172,9 +198,15 @@ function initHeroAndReceipt(currentEventId) {
     const envelopeRecord = ensureStagingEnvelope(currentEventId);
     const electionCopy = getReceiptLinesForEvent(currentEventId);
 
+    const isReferendum = (sessionReceipt?.eventType === 'referendum') ||
+                         (sessionReceipt?.isReferendum === true) ||
+                         (currentEvent?.type === 'referendum') ||
+                         electionCopy.isReferendum;
+
     const titleEl = document.getElementById('receiptElectionTitle');
     const dateEl = document.getElementById('receiptElectionDate');
     const voterNameEl = document.getElementById('receiptVoterName');
+    const districtRowEl = document.getElementById('receiptDistrictRow');
     const districtInfoEl = document.getElementById('receiptDistrictInfo');
     const voteTimeEl = document.getElementById('receiptVoteTime');
     const hashEl = document.getElementById('receiptTrackingHash');
@@ -194,9 +226,31 @@ function initHeroAndReceipt(currentEventId) {
     if (voterNameEl) {
         voterNameEl.textContent = `ชื่อผู้ใช้สิทธิ์ : ${voterName}`;
     }
-    if (districtInfoEl) {
-        districtInfoEl.textContent = `เขตเลือกตั้ง : ${districtInfo}`;
+
+    // จัดการแถวเขตเลือกตั้ง: หากเป็นประชามติ ให้ซ่อนแถวเขตเลือกตั้งทันที
+    if (isReferendum) {
+        if (districtRowEl) {
+            districtRowEl.style.display = 'none';
+        } else if (districtInfoEl) {
+            districtInfoEl.style.display = 'none';
+            if (districtInfoEl.nextElementSibling && districtInfoEl.nextElementSibling.tagName === 'BR') {
+                districtInfoEl.nextElementSibling.style.display = 'none';
+            }
+        }
+    } else {
+        if (districtRowEl) {
+            districtRowEl.style.display = '';
+        } else if (districtInfoEl) {
+            districtInfoEl.style.display = '';
+            if (districtInfoEl.nextElementSibling && districtInfoEl.nextElementSibling.tagName === 'BR') {
+                districtInfoEl.nextElementSibling.style.display = '';
+            }
+        }
+        if (districtInfoEl) {
+            districtInfoEl.textContent = `เขตเลือกตั้ง : ${districtInfo}`;
+        }
     }
+
     if (voteTimeEl) {
         voteTimeEl.textContent = `เวลาที่ลงคะแนน : ${voteTime}`;
     }
@@ -211,7 +265,8 @@ function initHeroAndReceipt(currentEventId) {
         voterName,
         districtInfo,
         votedAt: voteTime,
-        trackingHash
+        trackingHash,
+        isReferendum
     };
 }
 
@@ -295,17 +350,29 @@ async function saveReceiptAsImage(receiptData) {
     const lineVoter = `ชื่อผู้ใช้สิทธิ์ : ${receiptData.voterName}`;
     const lineDistrict = `เขตเลือกตั้ง : ${receiptData.districtInfo || '-'}`;
     const lineTime = `เวลาที่ลงคะแนน : ${receiptData.votedAt}`;
-    const maxMetaWidth = Math.max(
-        ctx.measureText(lineVoter).width,
-        ctx.measureText(lineDistrict).width,
-        ctx.measureText(lineTime).width
-    );
-    const metaStartX = (width - maxMetaWidth) / 2;
 
     ctx.textAlign = 'left';
-    ctx.fillText(lineVoter, metaStartX, 436);
-    ctx.fillText(lineDistrict, metaStartX, 474);
-    ctx.fillText(lineTime, metaStartX, 512);
+    if (receiptData.isReferendum) {
+        // ประชามติไม่มีการแบ่งเขต -> วาดเฉพาะชื่อผู้ใช้สิทธิและเวลาที่ลงคะแนน
+        const maxMetaWidth = Math.max(
+            ctx.measureText(lineVoter).width,
+            ctx.measureText(lineTime).width
+        );
+        const metaStartX = (width - maxMetaWidth) / 2;
+        ctx.fillText(lineVoter, metaStartX, 452);
+        ctx.fillText(lineTime, metaStartX, 496);
+    } else {
+        // การเลือกตั้ง ส.ส. -> แสดงครบทั้งชื่อผู้ใช้สิทธิ์ เขตเลือกตั้ง และเวลา
+        const maxMetaWidth = Math.max(
+            ctx.measureText(lineVoter).width,
+            ctx.measureText(lineDistrict).width,
+            ctx.measureText(lineTime).width
+        );
+        const metaStartX = (width - maxMetaWidth) / 2;
+        ctx.fillText(lineVoter, metaStartX, 436);
+        ctx.fillText(lineDistrict, metaStartX, 474);
+        ctx.fillText(lineTime, metaStartX, 512);
+    }
 
     // 4. รหัสตรวจสอบสถานะบัตร
     ctx.textAlign = 'center';
