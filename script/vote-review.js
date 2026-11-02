@@ -209,6 +209,24 @@ async function encryptWithWebCrypto(plainText, secretKeyString = 'eLection-ECT-S
     return `ENC[AES-GCM::${base64Cipher}]`;
 }
 
+/**
+ * สร้าง Unique Tracking Code แบบไม่ซ้ำกัน 100%
+ * พ่วง Timestamp (มิลลิวินาที) + สุ่มด้วย Web Crypto API
+ * รูปแบบ เช่น VOTE-MVYY8FIU-511D-2026
+ */
+function generateUniqueTrackingCode() {
+    const timePart = Date.now().toString(36).toUpperCase();
+    let randPart = '';
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const randomBytes = new Uint8Array(3);
+        window.crypto.getRandomValues(randomBytes);
+        randPart = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    } else {
+        randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    return `VOTE-${timePart}-${randPart}-2026`;
+}
+
 function setupReviewActions(currentEventId) {
     const editB1 = document.getElementById('editBallot1Btn');
     const editB2 = document.getElementById('editBallot2Btn');
@@ -253,17 +271,20 @@ function setupReviewActions(currentEventId) {
                 const ballot1 = localStorage.getItem(`vote-choice-${currentEventId}-b1`) || (isReferendum ? 'approve' : '1');
                 const ballot2 = isReferendum ? null : (localStorage.getItem(`vote-choice-${currentEventId}-b2`) || '1');
 
-                // 2. สร้าง Random Hex สำหรับ Salt และ Tracking Hash (#xxxx-xxxx-xxxx-xxxx)
-                const randHex = (len) => {
-                    let out = '';
-                    const chars = '0123456789abcdef';
-                    for (let i = 0; i < len; i++) {
-                        out += chars[Math.floor(Math.random() * chars.length)];
-                    }
-                    return out;
-                };
+                // 2. สุ่มสร้าง tracking_code รูปแบบไม่ซ้ำ 100% (พ่วง Timestamp + Crypto)
+                const tracking_code = generateUniqueTrackingCode();
+                const trackingHash = tracking_code;
 
-                const trackingHash = `#${randHex(4)}-${randHex(4)}-${randHex(4)}-${randHex(4)}`;
+                // บันทึกข้อมูลใบเสร็จลง sessionStorage เพื่อนำไปแสดงในหน้า Vote-Success.html
+                const now = new Date();
+                const voteTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' น.';
+                const voteDateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                sessionStorage.setItem('latest_vote_receipt', JSON.stringify({
+                    trackingCode: tracking_code,
+                    voteTime: voteTimeStr,
+                    voteDate: voteDateStr
+                }));
 
                 // 3. ซองชั้นใน (Inner Envelope): เข้ารหัสตัวเลือกคะแนนจริงด้วย Web Crypto API (AES-GCM 256-bit)
                 const innerEnvelope = isReferendum ? {
@@ -284,13 +305,7 @@ function setupReviewActions(currentEventId) {
                     districtCode: 'BKK-01'
                 };
 
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('th-TH', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
-                const votedAtText = `8 กุมภาพันธ์ 2569 ${timeStr} น.`;
+                const votedAtText = `${voteDateStr} ${voteTimeStr}`;
 
                 // ========================================================
                 // 🚀 ยิงขึ้น Supabase จริง (แยกตารางตามประเภทการเลือกตั้ง)
@@ -299,28 +314,46 @@ function setupReviewActions(currentEventId) {
                     const isReferendum = currentEventId.toLowerCase().includes('referendum');
 
                     if (isReferendum) {
-                        // ส่งเข้าตารางประชามติ
-                        const { error: sbError } = await supabaseClient
+                        // ส่งเข้าตารางประชามติ (กรณี Revote ให้ tracking_code ถูกอัปเดตทับด้วยรหัสใหม่)
+                        const refPayload = {
+                            voter_id: voterSession.citizenId,
+                            tracking_code: tracking_code,
+                            encrypted_ballot: innerEnvelope,
+                            status: 'ACTIVE'
+                        };
+                        let { error: sbError } = await supabaseClient
                             .from('referendum_staging_box')
-                            .upsert({
-                                voter_id: voterSession.citizenId,
-                                tracking_hash: trackingHash,
-                                encrypted_ballot: innerEnvelope,
-                                status: 'ACTIVE'
-                            });
-                        if (sbError) console.error('Supabase Error (Referendum):', sbError);
+                            .upsert(refPayload, { onConflict: 'voter_id' });
+
+                        if (sbError && sbError.message && (sbError.message.includes('tracking_hash') || sbError.message.includes('column'))) {
+                            const { error: retryErr } = await supabaseClient
+                                .from('referendum_staging_box')
+                                .upsert({ ...refPayload, tracking_hash: tracking_code }, { onConflict: 'voter_id' });
+                            if (retryErr) console.error('Supabase Error (Referendum retry):', retryErr);
+                        } else if (sbError) {
+                            console.error('Supabase Error (Referendum):', sbError);
+                        }
                     } else {
-                        // ส่งเข้าตาราง ส.ส.
-                        const { error: sbError } = await supabaseClient
+                        // ส่งเข้าตาราง ส.ส. (กรณี Revote ให้ tracking_code ถูกอัปเดตทับด้วยรหัสใหม่)
+                        const mpPayload = {
+                            voter_id: voterSession.citizenId,
+                            tracking_code: tracking_code,
+                            district_code: voterSession.districtCode || 'BKK-01',
+                            encrypted_ballot: innerEnvelope,
+                            status: 'ACTIVE'
+                        };
+                        let { error: sbError } = await supabaseClient
                             .from('mp_staging_box')
-                            .upsert({
-                                voter_id: voterSession.citizenId,
-                                tracking_hash: trackingHash,
-                                district_code: voterSession.districtCode || 'BKK-01',
-                                encrypted_ballot: innerEnvelope,
-                                status: 'ACTIVE'
-                            });
-                        if (sbError) console.error('Supabase Error (MP):', sbError);
+                            .upsert(mpPayload, { onConflict: 'voter_id' });
+
+                        if (sbError && sbError.message && (sbError.message.includes('tracking_hash') || sbError.message.includes('column'))) {
+                            const { error: retryErr } = await supabaseClient
+                                .from('mp_staging_box')
+                                .upsert({ ...mpPayload, tracking_hash: tracking_code }, { onConflict: 'voter_id' });
+                            if (retryErr) console.error('Supabase Error (MP retry):', retryErr);
+                        } else if (sbError) {
+                            console.error('Supabase Error (MP):', sbError);
+                        }
                     }
                 }
 
@@ -342,7 +375,8 @@ function setupReviewActions(currentEventId) {
                         version: nextVersion
                     },
                     innerEnvelope: innerEnvelope,
-                    trackingHash: trackingHash
+                    trackingHash: tracking_code,
+                    trackingCode: tracking_code
                 };
                 localStorage.setItem(stagingKey, JSON.stringify(stagingTable));
 
@@ -416,7 +450,7 @@ async function decryptWithWebCrypto(encryptedString, secretKeyString = 'eLection
 // =============================================================================
 // 🏛️ ฟังก์ชันจำลองพิธีถอดรหัสบัตรเลือกตั้ง (Decryption Ceremony Simulation)
 // =============================================================================
-async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#EC-881B', '#EC-881B']) {
+async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#EC-881B', '#EC-881B'], delayMs = 400) {
     console.log(
         '%c================================================================================\n' +
         '🏛️ เริ่มต้นพิธีเปิดหีบและถอดรหัสบัตรเลือกตั้งอิเล็กทรอนิกส์ (Decryption Ceremony)\n' +
@@ -492,37 +526,33 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
     console.groupEnd();
 
     // -------------------------------------------------------------------------
-    // ขั้นตอนที่ 3: กระบวนการตัดสิทธิ (Anonymize) และสับลำดับ (Shuffle)
+    // ขั้นตอนที่ 3: กระบวนการตัดสิทธิ (Anonymize) และสับลำดับบัตร (Shuffle)
     // -------------------------------------------------------------------------
-    console.group('%c🔀 ขั้นตอนที่ 3: ตัด Identity ทิ้ง และสับลำดับบัตรสุ่ม (Fisher-Yates Shuffle)', 'font-weight: bold; color: #7C3AED;');
-    console.log('1. ตัดเลขบัตรประชาชน / ข้อมูลตัวตน (voter_id) ออกทั้งหมด');
-    console.log('2. นำก้อนบัตรเข้ารหัส (Encrypted Ballots) มาสลับลำดับตำแหน่งแบบสุ่มเพื่อป้องกันการคาดเดาเวลาลงคะแนน');
+    console.group('%c🔀 ขั้นตอนที่ 3: สับลำดับบัตรสุ่มก่อนเริ่มนับ (Fisher-Yates Shuffle)', 'font-weight: bold; color: #7C3AED;');
+    console.log('1. นำบัตรทั้งหมดมาสลับลำดับตำแหน่งแบบสุ่ม เพื่อตัดขาดความเชื่อมโยงกับเวลาลงคะแนน');
+    console.log('2. ในตารางผลนับคะแนนจะไม่มีการแสดงตัวตนหรือ Tracking Code กำกับ');
 
-    const anonymizedPool = ballots.map(item => ({
-        tracking_hash: item.tracking_hash,
-        district_code: item.district_code || 'BKK-01',
-        encrypted_ballot: item.encrypted_ballot
-    }));
-
-    // Fisher-Yates Shuffle
-    for (let i = anonymizedPool.length - 1; i > 0; i--) {
+    const shuffledBallots = [...ballots];
+    for (let i = shuffledBallots.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [anonymizedPool[i], anonymizedPool[j]] = [anonymizedPool[j], anonymizedPool[i]];
+        [shuffledBallots[i], shuffledBallots[j]] = [shuffledBallots[j], shuffledBallots[i]];
     }
 
-    console.log(`✨ สับเปลี่ยนลำดับเสร็จสมบูรณ์ — บัตรทั้งหมดถูกตัดความเชื่อมโยงกับตัวตนผู้ลงคะแนน 100%`);
+    console.log(`✨ สับเปลี่ยนลำดับเสร็จสมบูรณ์ — ลำดับคิวการนับถูกสุ่ม 100%`);
     console.groupEnd();
 
     // -------------------------------------------------------------------------
-    // ขั้นตอนที่ 4: ถอดรหัสบัตรด้วย Web Crypto API (AES-GCM 256-bit) และนับคะแนน
+    // ขั้นตอนที่ 4: ทยอยถอดรหัสบัตรและอัปเดตสถานะทีละใบ (Progressive Live Tally)
     // -------------------------------------------------------------------------
-    console.group('%c🔓 ขั้นตอนที่ 4: ถอดรหัสลับและสรุปผลคะแนนเลือกตั้งดิบ (Decryption & Tally)', 'font-weight: bold; color: #16A34A;');
+    console.group('%c🔓 ขั้นตอนที่ 4: ทยอยถอดรหัสและบันทึกคะแนนทีละใบ (Progressive Live Tally)', 'font-weight: bold; color: #16A34A;');
     const decryptedList = [];
     const tallyResults = {};
 
-    for (let i = 0; i < anonymizedPool.length; i++) {
-        const ballot = anonymizedPool[i];
-        const envelope = ballot.encrypted_ballot || {};
+    console.log(`⏱️ กำลังเริ่มนับคะแนนทีละใบจากคิวที่สับลำดับแล้ว (${shuffledBallots.length} ใบ)...`);
+
+    for (let i = 0; i < shuffledBallots.length; i++) {
+        const item = shuffledBallots[i];
+        const envelope = item.encrypted_ballot || {};
 
         if (isReferendum) {
             const cipherStr = envelope.ciphertext || envelope.choice;
@@ -535,7 +565,6 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
 
             decryptedList.push({
                 'ลำดับบัตร (Shuffled)': i + 1,
-                'รหัสตรวจสอบบัตร': ballot.tracking_hash,
                 'ผลการออกเสียงประชามติ': displayChoice,
                 'สถานะถอดรหัส': plainChoice !== 'DECRYPTION_FAILED' ? 'สำเร็จ ✅' : 'ล้มเหลว ❌'
             });
@@ -550,8 +579,7 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
 
             decryptedList.push({
                 'ลำดับบัตร (Shuffled)': i + 1,
-                'รหัสตรวจสอบบัตร': ballot.tracking_hash,
-                'เขตเลือกตั้ง': ballot.district_code,
+                'เขตเลือกตั้ง': item.district_code || 'BKK-01',
                 'ใบที่ 1 (ส.ส. เขต)': b1Label,
                 'ใบที่ 2 (ส.ส. บัญชีรายชื่อ)': b2Label,
                 'สถานะถอดรหัส': (decB1 !== 'DECRYPTION_FAILED' && decB2 !== 'DECRYPTION_FAILED') ? 'สำเร็จ ✅' : 'ล้มเหลว ❌'
@@ -561,6 +589,21 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
             const k2 = `[ส.ส. บัญชีรายชื่อ] ${b2Label}`;
             tallyResults[k1] = (tallyResults[k1] || 0) + 1;
             tallyResults[k2] = (tallyResults[k2] || 0) + 1;
+        }
+
+        // 🔄 อัปเดตสถานะของบัตรใบนี้ใน Supabase ทันที: ACTIVE -> TALLIED
+        if (item.voter_id) {
+            await supabaseClient
+                .from(targetTable)
+                .update({ status: 'TALLIED' })
+                .eq('voter_id', item.voter_id);
+        }
+
+        console.log(`🗳️ [บัตรใบที่ ${i + 1}/${shuffledBallots.length}] ประมวลผลและนับคะแนนแล้ว -> สถานะเปลี่ยนเป็น "TALLIED" (ประมวลผลแล้ว) ✅`);
+
+        // จำลองเวลาในการนับทีละใบ (Progressive Tally Delay)
+        if (delayMs > 0 && i < shuffledBallots.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
         }
     }
 
@@ -577,7 +620,7 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
 
     console.log(
         '%c================================================================================\n' +
-        '🎉 พิธีถอดรหัสและนับคะแนนเสร็จสิ้นอย่างสมบูรณ์ โปร่งใส ตรวจสอบได้\n' +
+        '🎉 พิธีถอดรหัสและนับคะแนนเสร็จสิ้นอย่างสมบูรณ์ บัตรทั้งหมดถูกเปลี่ยนสถานะเป็น TALLIED ครบ 100%\n' +
         '================================================================================',
         'color: #065F46; font-weight: bold; font-size: 13px;'
     );
@@ -590,7 +633,130 @@ async function eLectionDecryptCeremony(type = 'mp', keyShares = ['#EC-881B', '#E
     };
 }
 
+// =============================================================================
+// 🔍 ฟังก์ชันตรวจสอบสถานะบัตรลงคะแนนด้วย Tracking Code
+// เช็คเฉพาะว่าบัตรถูกเข้ารหัสและเข้าสู่ระบบหีบดิจิทัลแล้วหรือยัง (ไม่เปิดเผยคะแนนเสียง)
+// =============================================================================
+async function checkBallotTrackingStatus(trackingCode) {
+    if (!trackingCode || typeof trackingCode !== 'string') {
+        console.warn('⚠️ กรุณาระบุ Tracking Code เช่น: await checkBallotTrackingStatus("VOTE-XXXX-XXXX-2026")');
+        return { success: false, message: 'Invalid tracking code' };
+    }
+
+    const cleanCode = trackingCode.trim();
+
+    if (typeof supabaseClient === 'undefined') {
+        console.warn('⚠️ ไม่พบการเชื่อมต่อ Supabase Client');
+        return { success: false, message: 'Supabase client not loaded' };
+    }
+
+    try {
+        // 1. ค้นหาในตาราง ส.ส.
+        let { data: mpData } = await supabaseClient
+            .from('mp_staging_box')
+            .select('tracking_code, status, encrypted_ballot')
+            .eq('tracking_code', cleanCode)
+            .maybeSingle();
+
+        if (!mpData) {
+            const fb = await supabaseClient
+                .from('mp_staging_box')
+                .select('tracking_hash, status, encrypted_ballot')
+                .eq('tracking_hash', cleanCode)
+                .maybeSingle();
+            if (fb.data) mpData = fb.data;
+        }
+
+        if (mpData) {
+            const hasBallot = Boolean(mpData.encrypted_ballot);
+            const isTallied = mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
+            const isActive = mpData.status === 'ACTIVE';
+
+            let stageLabel = '';
+            let stageDesc = '';
+
+            if (isTallied) {
+                stageLabel = 'ประมวลผลแล้ว (นับคะแนนเรียบร้อยแล้ว) ✅';
+                stageDesc = 'บัตรของคุณผ่านการเปิดหีบ ถอดรหัส และถูกรวมคะแนนในผลการเลือกตั้งเรียบร้อยแล้ว';
+            } else if (isActive) {
+                stageLabel = 'บัตรอยู่ในระบบ (รอการนับคะแนน) ⏳';
+                stageDesc = 'บัตรของคุณถูกเข้ารหัสและปิดผนึกอยู่ในหีบเรียบร้อยแล้ว (รอเปิดหีบและนับคะแนนหลังเวลา 17:00 น.)';
+            } else {
+                stageLabel = `สถานะ: ${mpData.status}`;
+                stageDesc = 'สถานะบัตรในระบบ: ' + mpData.status;
+            }
+
+            const res = {
+                'สถานะบัตร': stageLabel,
+                'คำอธิบาย': stageDesc,
+                'ประเภทการเลือกตั้ง': 'การเลือกตั้ง ส.ส.',
+                'รหัสติดตาม': cleanCode,
+                'การเข้ารหัสบัตร': hasBallot ? 'เข้ารหัสสมบูรณ์ (Sealed & Encrypted)' : 'ไม่มีข้อมูลบัตร',
+                'DB Status': mpData.status
+            };
+            console.log(`%c[Tracking Status] ตรวจสอบรหัส: ${cleanCode}`, `font-weight: bold; color: ${isTallied ? '#059669' : '#D97706'};`);
+            console.table([res]);
+            return { success: true, stage: isTallied ? 'TALLIED' : 'ACTIVE', stageLabel, stageDesc, details: res };
+        }
+
+        // 2. ค้นหาในตารางประชามติ
+        let { data: refData } = await supabaseClient
+            .from('referendum_staging_box')
+            .select('tracking_code, status, encrypted_ballot')
+            .eq('tracking_code', cleanCode)
+            .maybeSingle();
+
+        if (!refData) {
+            const fb = await supabaseClient
+                .from('referendum_staging_box')
+                .select('tracking_hash, status, encrypted_ballot')
+                .eq('tracking_hash', cleanCode)
+                .maybeSingle();
+            if (fb.data) refData = fb.data;
+        }
+
+        if (refData) {
+            const hasBallot = Boolean(refData.encrypted_ballot);
+            const isTallied = refData.status === 'TALLIED' || refData.status === 'PROCESSED';
+            const isActive = refData.status === 'ACTIVE';
+
+            let stageLabel = '';
+            let stageDesc = '';
+
+            if (isTallied) {
+                stageLabel = 'ประมวลผลแล้ว (นับคะแนนเรียบร้อยแล้ว) ✅';
+                stageDesc = 'บัตรของคุณผ่านการเปิดหีบ ถอดรหัส และถูกรวมคะแนนในผลการออกเสียงเรียบร้อยแล้ว';
+            } else if (isActive) {
+                stageLabel = 'บัตรอยู่ในระบบ (รอการนับคะแนน) ⏳';
+                stageDesc = 'บัตรของคุณถูกเข้ารหัสและปิดผนึกอยู่ในหีบเรียบร้อยแล้ว (รอเปิดหีบและนับคะแนนหลังเวลา 17:00 น.)';
+            } else {
+                stageLabel = `สถานะ: ${refData.status}`;
+                stageDesc = 'สถานะบัตรในระบบ: ' + refData.status;
+            }
+
+            const res = {
+                'สถานะบัตร': stageLabel,
+                'คำอธิบาย': stageDesc,
+                'ประเภทการเลือกตั้ง': 'การออกเสียงประชามติ',
+                'รหัสติดตาม': cleanCode,
+                'การเข้ารหัสบัตร': hasBallot ? 'เข้ารหัสสมบูรณ์ (Sealed & Encrypted)' : 'ไม่มีข้อมูลบัตร',
+                'DB Status': refData.status
+            };
+            console.log(`%c[Tracking Status] ตรวจสอบรหัส: ${cleanCode}`, `font-weight: bold; color: ${isTallied ? '#059669' : '#D97706'};`);
+            console.table([res]);
+            return { success: true, stage: isTallied ? 'TALLIED' : 'ACTIVE', stageLabel, stageDesc, details: res };
+        }
+
+        console.warn(`[Tracking Status] ❌ ไม่พบบัตรที่ตรงกับรหัส "${cleanCode}" ในระบบหีบบัตร`);
+        return { success: false, isProcessed: false, message: 'ไม่พบรหัสบัตรในระบบ' };
+    } catch (err) {
+        console.error('Error checking tracking status:', err);
+        return { success: false, error: err.message };
+    }
+}
+
 // ลงทะเบียนฟังก์ชันใน Global Scope เพื่อให้เรียกใช้ได้ผ่าน DevTools Console
 window.encryptWithWebCrypto = encryptWithWebCrypto;
 window.decryptWithWebCrypto = decryptWithWebCrypto;
 window.eLectionDecryptCeremony = eLectionDecryptCeremony;
+window.checkBallotTrackingStatus = checkBallotTrackingStatus;

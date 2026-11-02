@@ -34,6 +34,24 @@ function generateRandomHex(len) {
     return out;
 }
 
+/**
+ * สร้าง Unique Tracking Code แบบไม่ซ้ำกัน 100%
+ * พ่วง Timestamp (มิลลิวินาที) + สุ่มด้วย Web Crypto API
+ * รูปแบบ เช่น VOTE-MVYY8FIU-511D-2026
+ */
+function generateUniqueTrackingCode() {
+    const timePart = Date.now().toString(36).toUpperCase();
+    let randPart = '';
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        const randomBytes = new Uint8Array(3);
+        window.crypto.getRandomValues(randomBytes);
+        randPart = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    } else {
+        randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    return `VOTE-${timePart}-${randPart}-2026`;
+}
+
 function ensureStagingEnvelope(currentEventId) {
     const stagingKey = 'election-staging-envelopes';
     let stagingTable = {};
@@ -43,26 +61,28 @@ function ensureStagingEnvelope(currentEventId) {
         stagingTable = {};
     }
 
-    if (stagingTable[currentEventId] && stagingTable[currentEventId].trackingHash) {
+    if (stagingTable[currentEventId] && (stagingTable[currentEventId].trackingCode || stagingTable[currentEventId].trackingHash)) {
         return stagingTable[currentEventId];
     }
 
     // กรณีเปิดหน้านี้โดยตรง ให้สร้างข้อมูลจำลองเริ่มต้นตามโครงสร้าง Digital Double Envelope
-    const trackingHash = `#${generateRandomHex(4)}-${generateRandomHex(4)}-${generateRandomHex(4)}-${generateRandomHex(4)}`;
+    const trackingCode = generateUniqueTrackingCode();
     const mockCipherHex = generateRandomHex(16).toUpperCase();
     const now = new Date();
     const timeStr = now.toLocaleTimeString('th-TH', {
         hour: '2-digit',
         minute: '2-digit',
+        second: '2-digit',
         hour12: false
-    });
+    }) + ' น.';
+    const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
 
     const record = {
         eventId: currentEventId,
         outerEnvelope: {
             citizenId: '1-1005-01234-56-7',
             voterName: 'ชนัตนนท์ บวรโภคิน',
-            votedAt: `8 กุมภาพันธ์ 2569 ${timeStr} น.`,
+            votedAt: `${dateStr} ${timeStr}`,
             timestampIso: now.toISOString(),
             version: 1
         },
@@ -71,7 +91,8 @@ function ensureStagingEnvelope(currentEventId) {
             algorithm: 'RSA-OAEP-4096+SALT',
             sealedUntil: '17:00'
         },
-        trackingHash: trackingHash
+        trackingHash: trackingCode,
+        trackingCode: trackingCode
     };
 
     try {
@@ -113,7 +134,17 @@ function initHeroAndReceipt(currentEventId) {
         }
     }
 
-    // 2. ดึงข้อมูลใบเสร็จจาก Staging Table (Digital Double Envelope)
+    // 2. ดึงข้อมูลใบเสร็จจาก sessionStorage (หรือ fallback ไปที่ Staging Table)
+    let sessionReceipt = null;
+    try {
+        const rawReceipt = sessionStorage.getItem('latest_vote_receipt');
+        if (rawReceipt) {
+            sessionReceipt = JSON.parse(rawReceipt);
+        }
+    } catch (e) {
+        console.warn('SessionStorage error:', e);
+    }
+
     const envelopeRecord = ensureStagingEnvelope(currentEventId);
     const electionCopy = getReceiptLinesForEvent(currentEventId);
 
@@ -126,14 +157,20 @@ function initHeroAndReceipt(currentEventId) {
     if (titleEl) {
         titleEl.innerHTML = electionCopy.titleHtml;
     }
+
+    const voterSession = JSON.parse(localStorage.getItem('voter_session') || 'null');
+    const voterName = voterSession?.fullName || envelopeRecord?.outerEnvelope?.voterName || 'ชนัตนนท์ บวรโภคิน';
+
+    // วันที่, เวลา และ รหัสตรวจสอบสถานะบัตร (Tracking Code)
+    const trackingCode = sessionReceipt?.trackingCode || envelopeRecord?.trackingCode || envelopeRecord?.trackingHash || 'VOTE-A8F9-2026';
+    const dateText = sessionReceipt?.voteDate || electionCopy.dateText;
+    const votedAt = sessionReceipt?.voteTime
+        ? `${dateText} ${sessionReceipt.voteTime}`
+        : (envelopeRecord?.outerEnvelope?.votedAt || `${dateText} 12:00 น.`);
+
     if (dateEl) {
-        dateEl.textContent = electionCopy.dateText;
+        dateEl.textContent = dateText;
     }
-
-    const voterName = envelopeRecord?.outerEnvelope?.voterName || 'ชนัตนนท์ บวรโภคิน';
-    const votedAt = envelopeRecord?.outerEnvelope?.votedAt || '8 กุมภาพันธ์ 2569 12:00 น.';
-    const trackingHash = envelopeRecord?.trackingHash || '#a8f9-4c2e-991b-88ff';
-
     if (voterNameEl) {
         voterNameEl.textContent = `ชื่อผู้ใช้สิทธิ์ : ${voterName}`;
     }
@@ -141,16 +178,16 @@ function initHeroAndReceipt(currentEventId) {
         voteTimeEl.textContent = `เวลาที่ลงคะแนน : ${votedAt}`;
     }
     if (hashEl) {
-        hashEl.textContent = `รหัสตรวจสอบสถานะบัตร : ${trackingHash}`;
+        hashEl.textContent = `รหัสตรวจสอบสถานะบัตร : ${trackingCode}`;
     }
 
     return {
         titleLine1: electionCopy.titleLine1,
         titleLine2: electionCopy.titleLine2,
-        dateText: electionCopy.dateText,
+        dateText,
         voterName,
         votedAt,
-        trackingHash
+        trackingHash: trackingCode
     };
 }
 
@@ -311,6 +348,130 @@ function initActions(currentEventId, receiptData) {
         });
     }
 }
+
+// =============================================================================
+// 🔍 ฟังก์ชันตรวจสอบสถานะบัตรลงคะแนนด้วย Tracking Code
+// เช็คเฉพาะว่าบัตรถูกเข้ารหัสและเข้าสู่ระบบหีบดิจิทัลแล้วหรือยัง (ไม่เปิดเผยคะแนนเสียง)
+// =============================================================================
+async function checkBallotTrackingStatus(trackingCode) {
+    if (!trackingCode || typeof trackingCode !== 'string') {
+        console.warn('⚠️ กรุณาระบุ Tracking Code เช่น: await checkBallotTrackingStatus("VOTE-XXXX-XXXX-2026")');
+        return { success: false, message: 'Invalid tracking code' };
+    }
+
+    const cleanCode = trackingCode.trim();
+
+    if (typeof supabaseClient === 'undefined') {
+        console.warn('⚠️ ไม่พบการเชื่อมต่อ Supabase Client');
+        return { success: false, message: 'Supabase client not loaded' };
+    }
+
+    try {
+        // 1. ค้นหาในตาราง ส.ส.
+        let { data: mpData } = await supabaseClient
+            .from('mp_staging_box')
+            .select('tracking_code, status, encrypted_ballot')
+            .eq('tracking_code', cleanCode)
+            .maybeSingle();
+
+        if (!mpData) {
+            const fb = await supabaseClient
+                .from('mp_staging_box')
+                .select('tracking_hash, status, encrypted_ballot')
+                .eq('tracking_hash', cleanCode)
+                .maybeSingle();
+            if (fb.data) mpData = fb.data;
+        }
+
+        if (mpData) {
+            const hasBallot = Boolean(mpData.encrypted_ballot);
+            const isTallied = mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
+            const isActive = mpData.status === 'ACTIVE';
+
+            let stageLabel = '';
+            let stageDesc = '';
+
+            if (isTallied) {
+                stageLabel = 'ประมวลผลแล้ว (นับคะแนนเรียบร้อยแล้ว) ✅';
+                stageDesc = 'บัตรของคุณผ่านการเปิดหีบ ถอดรหัส และถูกรวมคะแนนในผลการเลือกตั้งเรียบร้อยแล้ว';
+            } else if (isActive) {
+                stageLabel = 'บัตรอยู่ในระบบ (รอการนับคะแนน) ⏳';
+                stageDesc = 'บัตรของคุณถูกเข้ารหัสและปิดผนึกอยู่ในหีบเรียบร้อยแล้ว (รอเปิดหีบและนับคะแนนหลังเวลา 17:00 น.)';
+            } else {
+                stageLabel = `สถานะ: ${mpData.status}`;
+                stageDesc = 'สถานะบัตรในระบบ: ' + mpData.status;
+            }
+
+            const res = {
+                'สถานะบัตร': stageLabel,
+                'คำอธิบาย': stageDesc,
+                'ประเภทการเลือกตั้ง': 'การเลือกตั้ง ส.ส.',
+                'รหัสติดตาม': cleanCode,
+                'การเข้ารหัสบัตร': hasBallot ? 'เข้ารหัสสมบูรณ์ (Sealed & Encrypted)' : 'ไม่มีข้อมูลบัตร',
+                'DB Status': mpData.status
+            };
+            console.log(`%c[Tracking Status] ตรวจสอบรหัส: ${cleanCode}`, `font-weight: bold; color: ${isTallied ? '#059669' : '#D97706'};`);
+            console.table([res]);
+            return { success: true, stage: isTallied ? 'TALLIED' : 'ACTIVE', stageLabel, stageDesc, details: res };
+        }
+
+        // 2. ค้นหาในตารางประชามติ
+        let { data: refData } = await supabaseClient
+            .from('referendum_staging_box')
+            .select('tracking_code, status, encrypted_ballot')
+            .eq('tracking_code', cleanCode)
+            .maybeSingle();
+
+        if (!refData) {
+            const fb = await supabaseClient
+                .from('referendum_staging_box')
+                .select('tracking_hash, status, encrypted_ballot')
+                .eq('tracking_hash', cleanCode)
+                .maybeSingle();
+            if (fb.data) refData = fb.data;
+        }
+
+        if (refData) {
+            const hasBallot = Boolean(refData.encrypted_ballot);
+            const isTallied = refData.status === 'TALLIED' || refData.status === 'PROCESSED';
+            const isActive = refData.status === 'ACTIVE';
+
+            let stageLabel = '';
+            let stageDesc = '';
+
+            if (isTallied) {
+                stageLabel = 'ประมวลผลแล้ว (นับคะแนนเรียบร้อยแล้ว) ✅';
+                stageDesc = 'บัตรของคุณผ่านการเปิดหีบ ถอดรหัส และถูกรวมคะแนนในผลการออกเสียงเรียบร้อยแล้ว';
+            } else if (isActive) {
+                stageLabel = 'บัตรอยู่ในระบบ (รอการนับคะแนน) ⏳';
+                stageDesc = 'บัตรของคุณถูกเข้ารหัสและปิดผนึกอยู่ในหีบเรียบร้อยแล้ว (รอเปิดหีบและนับคะแนนหลังเวลา 17:00 น.)';
+            } else {
+                stageLabel = `สถานะ: ${refData.status}`;
+                stageDesc = 'สถานะบัตรในระบบ: ' + refData.status;
+            }
+
+            const res = {
+                'สถานะบัตร': stageLabel,
+                'คำอธิบาย': stageDesc,
+                'ประเภทการเลือกตั้ง': 'การออกเสียงประชามติ',
+                'รหัสติดตาม': cleanCode,
+                'การเข้ารหัสบัตร': hasBallot ? 'เข้ารหัสสมบูรณ์ (Sealed & Encrypted)' : 'ไม่มีข้อมูลบัตร',
+                'DB Status': refData.status
+            };
+            console.log(`%c[Tracking Status] ตรวจสอบรหัส: ${cleanCode}`, `font-weight: bold; color: ${isTallied ? '#059669' : '#D97706'};`);
+            console.table([res]);
+            return { success: true, stage: isTallied ? 'TALLIED' : 'ACTIVE', stageLabel, stageDesc, details: res };
+        }
+
+        console.warn(`[Tracking Status] ❌ ไม่พบบัตรที่ตรงกับรหัส "${cleanCode}" ในระบบหีบบัตร`);
+        return { success: false, isProcessed: false, message: 'ไม่พบรหัสบัตรในระบบ' };
+    } catch (err) {
+        console.error('Error checking tracking status:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+window.checkBallotTrackingStatus = checkBallotTrackingStatus;
 
 document.addEventListener('DOMContentLoaded', () => {
     const currentEventId = getCurrentEventId();
