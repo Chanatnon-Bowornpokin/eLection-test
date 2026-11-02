@@ -478,12 +478,26 @@
     const resultStatus = document.getElementById('ballotResultStatus');
     const resultIcon = document.getElementById('ballotResultIcon');
 
-    const STATUS_WAITING = 'รอนับคะแนนหลังปิดหีบ';
-    const STATUS_PROCESSED = 'ประมวลผลแล้ว';
-    const stateStatusText = state === 'waiting' ? STATUS_WAITING : STATUS_PROCESSED;
+    // ข้อความสถานะ 3 แบบตามข้อกำหนดอย่างเคร่งครัด
+    const STATUS_BEFORE_17 = 'รอนับคะแนนหลังปิดหีบ'; // กรณีที่ 1 (ก่อน 17:00 น. พบใน staging_box)
+    const STATUS_PENDING   = 'รอการประมวลผล';       // กรณีที่ 2 (หลัง 17:00 น. ยังไม่ประมวลผล)
+    const STATUS_PROCESSED = 'ประมวลผลแล้ว';         // กรณีที่ 3 (หลัง 17:00 น. นับคะแนนแล้ว พบใน final_box)
+    const MSG_NOT_FOUND    = 'ไม่พบบัตรลงคะแนนรหัสนี้ในระบบ';
+
+    // ตรวจสอบว่าขณะนี้หลัง 17:00 น. หรือไม่ (อ้างอิงจาก state ของหน้า หรือเวลาจริง)
+    function isAfter17() {
+        if (main && main.dataset.state === 'counting') return true;
+        if (main && main.dataset.state === 'waiting') return false;
+        const now = new Date();
+        return now.getHours() >= 17;
+    }
 
     // รหัสตัวอย่างตามดีไซน์ Figma
-    const SAMPLE = { code: '#a8f9-4c2e-991b-88ff', time: '14 ม.ค. 2569 | 14:37 น.' };
+    const SAMPLE = {
+        code: '#a8f9-4c2e-991b-88ff',
+        time: '14 ม.ค. 2569 | 14:37 น.',
+        status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
+    };
 
     function formatRecordedTime(value) {
         const date = value ? new Date(value) : null;
@@ -500,101 +514,275 @@
             resultIcon.classList.toggle('fa-check', ok);
             resultIcon.classList.toggle('fa-xmark', !ok);
         }
-        if (resultTitle) resultTitle.textContent = ok ? 'บัตรอยู่ในระบบเรียบร้อย' : (result.title || 'ไม่พบบัตรในระบบ');
-        if (resultCode) resultCode.textContent = `รหัสตรวจสอบสถานะบัตร : ${result.code}`;
-        if (resultTime) resultTime.textContent = ok ? `เวลาที่บันทึก : ${result.time}` : (result.hint || '');
-        if (resultTime) resultTime.hidden = !resultTime.textContent;
+        if (resultTitle) {
+            resultTitle.textContent = ok ? 'บัตรอยู่ในระบบเรียบร้อย' : (result.title || MSG_NOT_FOUND);
+        }
+        if (resultCode) {
+            resultCode.textContent = `รหัสตรวจสอบสถานะบัตร : ${result.code}`;
+        }
+        if (resultTime) {
+            if (ok && result.time) {
+                resultTime.textContent = `เวลาที่บันทึก : ${result.time}`;
+                resultTime.hidden = false;
+                resultTime.style.display = '';
+            } else {
+                resultTime.textContent = '';
+                resultTime.hidden = true;
+                resultTime.style.display = 'none';
+            }
+        }
         if (resultStatus) {
-            resultStatus.textContent = ok ? `สถานะ : ${result.status}` : '';
-            resultStatus.hidden = !ok;
+            if (ok && result.status) {
+                resultStatus.textContent = `สถานะ : ${result.status}`;
+                resultStatus.hidden = false;
+                resultStatus.style.display = '';
+            } else {
+                resultStatus.textContent = '';
+                resultStatus.hidden = true;
+                resultStatus.style.display = 'none';
+            }
         }
     }
 
-    function lookupLocal(target) {
+    function lookupLocal(code) {
+        const cleanWithHash = code.startsWith('#') ? code : `#${code}`;
+        const target = cleanWithHash.toLowerCase();
+
+        // ตรวจสอบใน sessionStorage (ใบเสร็จล่าสุดของการโหวตในเซสชันนี้)
         try {
-            const table = JSON.parse(localStorage.getItem('election-staging-envelopes') || '{}');
-            for (const record of Object.values(table)) {
-                const code = record && (record.trackingCode || record.trackingHash);
-                if (code && code.toLowerCase() === target) {
-                    const iso = record.outerEnvelope && record.outerEnvelope.timestampIso;
+            const rawReceipt = sessionStorage.getItem('latest_vote_receipt');
+            if (rawReceipt) {
+                const receipt = JSON.parse(rawReceipt);
+                const rCode = (receipt.trackingHash || receipt.trackingCode || '').toLowerCase();
+                if (rCode === target || `#${rCode}` === target || rCode === target.replace(/^#/, '')) {
+                    const determinedStatus = !isAfter17() ? STATUS_BEFORE_17 : STATUS_PENDING;
                     return {
                         ok: true,
-                        code,
-                        time: iso ? formatRecordedTime(iso) : (record.outerEnvelope && record.outerEnvelope.votedAt) || '-',
-                        status: stateStatusText,
+                        code: cleanWithHash,
+                        time: receipt.voteTime ? formatRecordedTime(new Date()) : '-',
+                        status: determinedStatus
                     };
                 }
             }
-        } catch (error) {
-            // ใช้ผลลัพธ์จากแหล่งอื่นต่อ
-        }
+        } catch (e) {}
+
+        // ตรวจสอบใน localStorage (election-staging-envelopes)
+        try {
+            const table = JSON.parse(localStorage.getItem('election-staging-envelopes') || '{}');
+            for (const record of Object.values(table)) {
+                const c = record && (record.trackingCode || record.trackingHash || '');
+                if (c && (c.toLowerCase() === target || `#${c.toLowerCase()}` === target)) {
+                    const iso = record.outerEnvelope && record.outerEnvelope.timestampIso;
+                    const determinedStatus = !isAfter17() ? STATUS_BEFORE_17 : STATUS_PENDING;
+                    return {
+                        ok: true,
+                        code: cleanWithHash,
+                        time: iso ? formatRecordedTime(iso) : ((record.outerEnvelope && record.outerEnvelope.votedAt) || '-'),
+                        status: determinedStatus
+                    };
+                }
+            }
+        } catch (e) {}
+
         return null;
     }
 
     async function lookupSupabase(code) {
-        if (typeof supabaseClient === 'undefined') return null;
+        const cleanWithHash = code.startsWith('#') ? code : `#${code}`;
+        const cleanWithoutHash = code.replace(/^#/, '');
+        const codeVariants = [cleanWithHash, cleanWithoutHash];
 
-        const tables = ['mp_staging_box', 'referendum_staging_box'];
-        const columns = ['tracking_code', 'tracking_hash'];
+        const SUPABASE_CONFIG = {
+            url: (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://nzobdkybbpufntionuze.supabase.co/',
+            key: (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_xBBzY0PXxUVWx4fINXBk3w_UwSEywAq'
+        };
 
-        for (const table of tables) {
-            for (const column of columns) {
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : null;
+
+        // 1. ค้นหาใน final_box: mp_final_box และ referendum_final_box (กรณีที่ 3)
+        // โครงสร้างตาราง final_box ใช้คอลัมน์ ballot_id ในการระบุรหัสบัตร
+        const finalTables = [
+            { name: 'mp_final_box', col: 'ballot_id' },
+            { name: 'referendum_final_box', col: 'ballot_id' }
+        ];
+
+        for (const target of finalTables) {
+            for (const val of codeVariants) {
                 try {
-                    const { data } = await supabaseClient.from(table).select('*').eq(column, code).maybeSingle();
-                    if (data) {
-                        const processed = data.status === 'TALLIED' || data.status === 'PROCESSED';
+                    let record = null;
+                    if (client) {
+                        const { data, error } = await client
+                            .from(target.name)
+                            .select('*')
+                            .eq(target.col, val)
+                            .maybeSingle();
+                        if (!error && data) record = data;
+                    }
+                    if (!record) {
+                        const res = await fetch(`${SUPABASE_CONFIG.url}rest/v1/${target.name}?${target.col}=eq.${encodeURIComponent(val)}&select=*`, {
+                            headers: {
+                                'apikey': SUPABASE_CONFIG.key,
+                                'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                            }
+                        });
+                        if (res.ok) {
+                            const rows = await res.json();
+                            if (Array.isArray(rows) && rows.length > 0) record = rows[0];
+                        }
+                    }
+
+                    if (record) {
                         return {
                             ok: true,
-                            code,
-                            time: formatRecordedTime(data.created_at || data.voted_at),
-                            status: processed ? STATUS_PROCESSED : (data.status === 'ACTIVE' ? STATUS_WAITING : String(data.status || stateStatusText)),
+                            code: cleanWithHash,
+                            time: formatRecordedTime(record.counted_at || record.created_at),
+                            status: STATUS_PROCESSED // กรณีที่ 3: นับคะแนนแล้ว -> ประมวลผลแล้ว
                         };
                     }
-                } catch (error) {
-                    // ตารางหรือคอลัมน์นี้ไม่มี ลองรายการถัดไป
+                } catch (err) {
+                    console.warn(`Query ${target.name} error:`, err);
                 }
             }
         }
+
+        // 2. ค้นหาใน staging_box: mp_staging_box และ referendum_staging_box
+        // โครงสร้างตาราง staging_box ใช้คอลัมน์ tracking_hash ในการระบุรหัสบัตร
+        const stagingTables = [
+            { name: 'mp_staging_box', col: 'tracking_hash' },
+            { name: 'referendum_staging_box', col: 'tracking_hash' }
+        ];
+
+        for (const target of stagingTables) {
+            for (const val of codeVariants) {
+                try {
+                    let record = null;
+                    if (client) {
+                        const { data, error } = await client
+                            .from(target.name)
+                            .select('*')
+                            .eq(target.col, val)
+                            .maybeSingle();
+                        if (!error && data) record = data;
+                    }
+                    if (!record) {
+                        const res = await fetch(`${SUPABASE_CONFIG.url}rest/v1/${target.name}?${target.col}=eq.${encodeURIComponent(val)}&select=*`, {
+                            headers: {
+                                'apikey': SUPABASE_CONFIG.key,
+                                'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                            }
+                        });
+                        if (res.ok) {
+                            const rows = await res.json();
+                            if (Array.isArray(rows) && rows.length > 0) record = rows[0];
+                        }
+                    }
+
+                    if (record) {
+                        // หากพบใน staging_box:
+                        // ตรวจสอบสถานะของแถวข้อมูล หรือเวลา
+                        const isProcessed = record.status === 'TALLIED' || record.status === 'PROCESSED';
+                        let determinedStatus;
+                        if (isProcessed) {
+                            determinedStatus = STATUS_PROCESSED; // ประมวลผลแล้ว
+                        } else if (!isAfter17()) {
+                            determinedStatus = STATUS_BEFORE_17; // กรณีที่ 1: ก่อน 17:00 น. -> รอนับคะแนนหลังปิดหีบ
+                        } else {
+                            determinedStatus = STATUS_PENDING;   // กรณีที่ 2: หลัง 17:00 น. ยังไม่ประมวลผล -> รอการประมวลผล
+                        }
+
+                        return {
+                            ok: true,
+                            code: cleanWithHash,
+                            time: formatRecordedTime(record.submitted_at || record.created_at),
+                            status: determinedStatus
+                        };
+                    }
+                } catch (err) {
+                    console.warn(`Query ${target.name} error:`, err);
+                }
+            }
+        }
+
         return null;
     }
 
     async function lookupBallot(rawCode) {
-        const code = rawCode.trim();
-        const target = code.toLowerCase();
-
-        const local = lookupLocal(target);
-        if (local) return local;
-
-        if (target === SAMPLE.code.toLowerCase() || `#${target}` === SAMPLE.code.toLowerCase()) {
-            return { ok: true, code: SAMPLE.code, time: SAMPLE.time, status: stateStatusText };
+        const code = (rawCode || '').trim();
+        if (!code) {
+            return {
+                ok: false,
+                code: '',
+                title: MSG_NOT_FOUND
+            };
         }
 
+        const cleanWithHash = code.startsWith('#') ? code : `#${code}`;
+        const target = cleanWithHash.toLowerCase();
+
+        // 1. ค้นหาใน Supabase จริง (ทั้ง 4 ตาราง: mp_final_box, referendum_final_box, mp_staging_box, referendum_staging_box)
         const remote = await lookupSupabase(code);
         if (remote) return remote;
 
+        // 2. ค้นหาใน Local Storage / Session Storage
+        const local = lookupLocal(code);
+        if (local) return local;
+
+        // 3. กรณีทดสอบรหัสตัวอย่าง Figma (#a8f9-4c2e-991b-88ff)
+        if (target === SAMPLE.code.toLowerCase()) {
+            return {
+                ok: true,
+                code: SAMPLE.code,
+                time: SAMPLE.time,
+                status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
+            };
+        }
+
+        // 4. กรณีค้นหาไม่พบรหัส
         return {
             ok: false,
-            code,
-            title: 'ไม่พบบัตรในระบบ',
-            hint: 'กรุณาตรวจสอบรหัสแล้วลองใหม่อีกครั้ง',
+            code: cleanWithHash,
+            title: MSG_NOT_FOUND
         };
     }
 
     function initCheckForm() {
         // แสดงตัวอย่างตามดีไซน์ก่อนที่ผู้ใช้จะค้นหา
-        showResult({ ok: true, code: SAMPLE.code, time: SAMPLE.time, status: stateStatusText });
+        showResult({
+            ok: true,
+            code: SAMPLE.code,
+            time: SAMPLE.time,
+            status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
+        });
+
+        // ตรวจสอบว่ามีพารามิเตอร์รหัสส่งมาใน URL หรือไม่ (เช่น ?code=... หรือ ?hash=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoCode = urlParams.get('code') || urlParams.get('hash') || urlParams.get('tracking');
+        if (autoCode && input) {
+            input.value = autoCode;
+            setTimeout(() => {
+                if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
+            }, 100);
+        }
 
         if (!form || !input) return;
         form.addEventListener('submit', async event => {
             event.preventDefault();
-            if (!input.value.trim()) {
+            const val = input.value.trim();
+            if (!val) {
                 input.focus();
                 return;
             }
             const button = form.querySelector('button[type="submit"]');
-            if (button) button.disabled = true;
-            showResult(await lookupBallot(input.value));
-            if (button) button.disabled = false;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'กำลังตรวจ...';
+            }
+            const result = await lookupBallot(val);
+            showResult(result);
+            if (button) {
+                button.disabled = false;
+                button.textContent = 'ตรวจสอบ';
+            }
         });
     }
 
