@@ -1,0 +1,900 @@
+/* ==========================================================================
+   Vote Status Page Styles (Mobile First: < 576px)
+   ========================================================================== */
+
+.vote-status-header {
+    background: #fff;
+}
+
+.vote-status-header .navbar {
+    display: flex;
+    height: 65px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 10;
+}
+
+.vote-status-header .toplogo {
+    margin: 0;
+}
+
+.vote-status-header .topLogo {
+    display: block;
+    width: 105px;
+    height: 27px;
+    margin: 0;
+}
+
+.vote-status-header .userIcon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    border: 1.43px solid #000;
+    border-radius: 50px;
+}
+
+.vote-status-header .personIcon {
+    font-size: 27px;
+}
+
+/* --------------------------------------------------------------------------
+   Hero Section Placeholder (Grey Box pending final image export)
+   -------------------------------------------------------------------------- */
+.vote-status-hero-placeholder {
+    position: relative;
+    width: 100%;
+    min-height: 140px;
+    background: linear-gradient(135deg, #e4e7eb 0%, #d5dae0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.hero-placeholder-inner {
+    text-align: center;
+    max-width: 800px;
+}
+
+.hero-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #666;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.hero-placeholder-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    margin: 0 0 4px;
+    line-height: 1.3;
+}
+
+.hero-placeholder-subtitle {
+    font-size: 13px;
+    color: #555;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Main Container & Heading
+   -------------------------------------------------------------------------- */
+.vote-status-main.page-container {
+    padding: 16px 16px 40px;
+    background: #f5f5f7;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vote-status-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.vote-status-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #000;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.vote-status-back:hover {
+    opacity: 0.75;
+    color: #000;
+}
+
+.vote-status-back .fa-arrow-left {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.vote-status-back .topic {
+    margin: 0;
+    color: #000;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* Quick State Switcher Toggle */
+.state-preview-toggle {
+    display: inline-flex;
+    align-self: flex-start;
+    background: #e5e5ea;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.btn-state-tab {
+    border: none;
+    background: transparent;
+    font-family: "Prompt", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    padding: 6px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-state-tab.active {
+    background: #000000;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   1. KPI Dashboard Cards (4 Cards Grid)
+   -------------------------------------------------------------------------- */
+.status-kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.status-kpi-card {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-value-row {
+    font-size: 14px;
+    color: #222;
+    margin: 0;
+    line-height: 1.45;
+}
+
+.kpi-bold-text {
+    font-weight: 600;
+    color: #000;
+}
+
+.kpi-percent-pill {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: 6px;
+    background: #eaf5ee;
+    color: #198754;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 8px;
+}
+
+.kpi-status-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 48px;
+}
+
+.kpi-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+.kpi-status-indicator.status-live {
+    color: #198754;
+}
+
+.kpi-status-indicator.status-waiting {
+    color: #666;
+}
+
+/* --------------------------------------------------------------------------
+   2. Regional Turnout Card (Waiting State)
+   -------------------------------------------------------------------------- */
+.regional-turnout-card {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 16px;
+}
+
+.regional-turnout-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.regional-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.regional-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.regional-name {
+    color: #111;
+    font-size: 15px;
+}
+
+.regional-percent {
+    color: #111;
+    font-size: 14px;
+}
+
+.regional-count {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 4px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 12px;
+    background: #eef0f3;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #000000;
+    border-radius: 10px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   3. Counting Tabs & Realtime Score List (Counting State)
+   -------------------------------------------------------------------------- */
+.counting-tabs-wrap {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    padding-bottom: 4px;
+}
+
+.counting-tab {
+    border: none;
+    background: transparent;
+    font-family: "Prompt", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #777;
+    padding: 8px 16px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.counting-tab:hover {
+    color: #000;
+}
+
+.counting-tab.active {
+    color: #000000;
+}
+
+.counting-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #000000;
+    border-radius: 3px;
+}
+
+/* Area filter row */
+.area-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.area-select-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 200px;
+}
+
+.area-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.area-select {
+    width: 100%;
+    padding: 7px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    background-color: #fcfcfd;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.area-select:focus {
+    border-color: #000;
+}
+
+/* Live Score Cards */
+.live-score-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.score-card-item {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.score-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.score-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.score-party-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.candidate-number {
+    background: #333;
+}
+
+.score-name {
+    font-size: 15px;
+    color: #111;
+}
+
+.score-numbers {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #444;
+}
+
+.score-vote-count {
+    color: #000;
+    font-size: 14px;
+}
+
+.score-percentage {
+    font-weight: 500;
+    color: #666;
+}
+
+/* Progress bar fill colors */
+.score-bar-color-1 {
+    background: #000000;
+}
+
+.score-bar-color-2 {
+    background: #333333;
+}
+
+.score-bar-color-3 {
+    background: #555555;
+}
+
+.score-bar-color-4 {
+    background: #777777;
+}
+
+.score-bar-neutral {
+    background: #999999;
+}
+
+/* --------------------------------------------------------------------------
+   4. ตรวจสอบสถานะบัตรของคุณ (EXACT Match to User Uploaded Image)
+   -------------------------------------------------------------------------- */
+.card-verify-section {
+    margin-bottom: 24px;
+}
+
+.card-verify-container {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.card-verify-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 6px;
+}
+
+.card-verify-subtitle {
+    font-size: 13px;
+    color: #333;
+    margin: 0 0 16px;
+}
+
+/* Input Row */
+.card-verify-input-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.card-verify-search-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #777;
+    border-radius: 12px;
+    padding: 8px 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-verify-search-wrap:focus-within {
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.card-verify-search-wrap .search-icon {
+    font-size: 16px;
+    color: #aaa;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.card-verify-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    color: #000;
+    background: transparent;
+}
+
+.card-verify-input::placeholder {
+    color: #bbb;
+}
+
+.card-verify-btn {
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.card-verify-btn:hover {
+    background: #2a2a2a;
+    transform: translateY(-1px);
+}
+
+/* Result Box */
+.card-verify-result-box {
+    background: #ffffff;
+    border: 1px solid #777;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.card-verify-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-verify-result-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 4px;
+}
+
+.card-verify-result-row {
+    font-size: 13px;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Right-side large green checkmark */
+.card-verify-result-icon {
+    font-size: 42px;
+    color: #198754; /* Green color matching design */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.card-verify-result-icon i {
+    font-size: 42px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Timeline Section
+   -------------------------------------------------------------------------- */
+.status-timeline-card {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+}
+
+.timeline-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin: -8px 0 16px;
+}
+
+.timeline-steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.timeline-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.45;
+}
+
+.step-num {
+    font-size: 15px;
+    color: #000;
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   6. Ceremony CTA Banner
+   -------------------------------------------------------------------------- */
+.ceremony-cta-card {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.ceremony-cta-title {
+    font-size: 16px;
+    color: #111;
+    margin: 0 0 4px;
+}
+
+.ceremony-cta-desc {
+    font-size: 13px;
+    color: #555;
+    margin: 0;
+}
+
+.btn-ceremony-watch {
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s ease;
+}
+
+.btn-ceremony-watch:hover {
+    background: #2a2a2a;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: Tablet (576px - 991px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 576px) {
+    .vote-status-main.page-container {
+        padding: 20px 24px 50px;
+    }
+
+    .vote-status-heading {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .vote-status-heading .topic {
+        font-size: 24px;
+    }
+
+    .status-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .score-card-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-verify-btn {
+        padding: 10px 32px;
+        font-size: 15px;
+    }
+
+    .card-verify-result-title {
+        font-size: 17px;
+    }
+
+    .card-verify-result-row {
+        font-size: 14px;
+    }
+
+    .card-verify-result-icon {
+        font-size: 48px;
+    }
+
+    .ceremony-cta-card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 28px;
+    }
+
+    .btn-ceremony-watch {
+        width: auto;
+        min-width: 130px;
+        padding: 10px 28px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: Desktop (>= 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-status-hero-placeholder {
+        min-height: 180px;
+        padding: 36px 30px;
+    }
+
+    .hero-placeholder-title {
+        font-size: 26px;
+    }
+
+    .hero-placeholder-subtitle {
+        font-size: 15px;
+    }
+
+    .vote-status-main.page-container {
+        padding: 28px 40px 60px;
+    }
+
+    .vote-status-heading .topic {
+        font-size: 28px;
+    }
+
+    /* 4 Columns for KPI Cards on Desktop */
+    .status-kpi-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .status-kpi-card {
+        padding: 20px 22px;
+        min-height: 130px;
+    }
+
+    .kpi-label {
+        font-size: 15px;
+    }
+
+    .kpi-value-row {
+        font-size: 14px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .regional-turnout-card {
+        padding: 28px 32px;
+    }
+
+    .score-card-item {
+        padding: 20px 26px;
+    }
+
+    .score-name {
+        font-size: 16px;
+    }
+
+    .score-vote-count {
+        font-size: 15px;
+    }
+
+    .card-verify-container {
+        padding: 28px 32px;
+    }
+
+    .card-verify-title {
+        font-size: 20px;
+    }
+
+    .card-verify-subtitle {
+        font-size: 14px;
+    }
+
+    .card-verify-result-box {
+        padding: 20px 28px;
+    }
+
+    .card-verify-result-title {
+        font-size: 18px;
+    }
+
+    .card-verify-result-row {
+        font-size: 15px;
+    }
+
+    .card-verify-result-icon {
+        font-size: 52px;
+    }
+
+    .status-timeline-card {
+        padding: 28px 32px;
+    }
+
+    .ceremony-cta-card {
+        padding: 26px 34px;
+    }
+
+    .ceremony-cta-title {
+        font-size: 18px;
+    }
+
+    .ceremony-cta-desc {
+        font-size: 14px;
+    }
+
+    .btn-ceremony-watch {
+        padding: 12px 34px;
+        font-size: 15px;
+    }
+}
+

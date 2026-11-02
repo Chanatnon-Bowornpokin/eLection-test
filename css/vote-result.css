@@ -1,0 +1,424 @@
+/* ==========================================================================
+   Vote Result Page Styles (Mobile First: < 576px)
+   ========================================================================== */
+
+.vote-result-header {
+    background: #fff;
+}
+
+.vote-result-header .navbar {
+    display: flex;
+    height: 65px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 10;
+}
+
+.vote-result-header .toplogo {
+    margin: 0;
+}
+
+.vote-result-header .topLogo {
+    display: block;
+    width: 105px;
+    height: 27px;
+    margin: 0;
+}
+
+.vote-result-header .userIcon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    border: 1.43px solid #000;
+    border-radius: 50px;
+}
+
+.vote-result-header .personIcon {
+    font-size: 27px;
+}
+
+.vote-result-hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+.vote-result-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 420px;
+}
+
+.vote-result-main.page-container {
+    padding: 18px 20px 40px;
+    background: #f5f5f7;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vote-result-heading {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    margin: 0 0 16px;
+}
+
+.vote-result-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #000;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.vote-result-back:hover {
+    opacity: 0.75;
+    color: #000;
+}
+
+.vote-result-back .fa-arrow-left {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.vote-result-back .topic {
+    margin: 0;
+    color: #000;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Search Box
+   -------------------------------------------------------------------------- */
+.searchbox-wrapper {
+    margin-bottom: 16px;
+}
+
+.searchbox {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 12px 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchbox:focus-within {
+    border-color: #000;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+.searchbox .search-icon {
+    font-size: 18px;
+    color: #888;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.searchbox input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: "Prompt", sans-serif;
+    font-size: 16px;
+    color: #000;
+    background: transparent;
+}
+
+.searchbox input::placeholder {
+    color: #999;
+}
+
+/* --------------------------------------------------------------------------
+   Filter Chips (Horizontal Scroll on Mobile)
+   -------------------------------------------------------------------------- */
+.filter-chips-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.filter-chips-container::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-chip {
+    flex-shrink: 0;
+    padding: 7px 18px;
+    border-radius: 52px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    background: #f0f0f2;
+}
+
+.filter-chip.active {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* Separator */
+.secbreak {
+    border: none;
+    height: 1.5px;
+    background: rgba(0, 0, 0, 0.08);
+    margin: 18px 0 24px;
+}
+
+/* --------------------------------------------------------------------------
+   Election Result Cards
+   -------------------------------------------------------------------------- */
+.vote-result-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.result-election-card {
+    background: #ffffff;
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.result-election-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+}
+
+.result-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.result-card-tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    background: #f0f0f2;
+    padding: 3px 12px;
+    border-radius: 8px;
+}
+
+.result-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 4px 0 2px;
+    line-height: 1.35;
+}
+
+.result-card-date {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.result-card-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-waiting {
+    color: #666;
+}
+
+.badge-waiting .status-dot {
+    background-color: #999;
+}
+
+.badge-counting {
+    color: #0b823b;
+    font-weight: 600;
+}
+
+.badge-counting .status-dot {
+    background-color: #198754;
+}
+
+.status-dot.pulsing {
+    box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.6);
+    animation: pulse-green 1.8s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(25, 135, 84, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+}
+
+.result-card-action {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-track-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+    background: #000000;
+    color: #ffffff;
+    font-family: "Prompt", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: background 0.2s ease, transform 0.15s ease;
+    width: 100%;
+}
+
+.btn-track-status:hover {
+    background: #333333;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: Tablet (576px - 991px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 576px) {
+    .vote-result-heading .topic {
+        font-size: 26px;
+    }
+
+    .result-election-card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 28px;
+    }
+
+    .result-card-title {
+        font-size: 20px;
+    }
+
+    .result-card-action {
+        flex-shrink: 0;
+        margin-left: 20px;
+    }
+
+    .btn-track-status {
+        width: auto;
+        min-width: 140px;
+        padding: 11px 28px;
+        font-size: 15px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: Desktop (>= 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    .vote-result-main.page-container {
+        padding: 24px 40px 60px;
+    }
+
+    .vote-result-heading .topic {
+        font-size: 30px;
+    }
+
+    .searchbox {
+        padding: 14px 24px;
+        border-radius: 17px;
+    }
+
+    .searchbox input {
+        font-size: 17px;
+    }
+
+    .filter-chips-container {
+        justify-content: flex-start;
+        gap: 14px;
+    }
+
+    .filter-chip {
+        padding: 8px 24px;
+        font-size: 15px;
+    }
+
+    .result-election-card {
+        padding: 28px 36px;
+        border-radius: 17px;
+    }
+
+    .result-card-title {
+        font-size: 24px;
+    }
+
+    .result-card-date {
+        font-size: 15px;
+    }
+
+    .result-card-status-badge {
+        font-size: 15px;
+    }
+
+    .btn-track-status {
+        padding: 13px 36px;
+        font-size: 16px;
+        border-radius: 15px;
+    }
+}
+

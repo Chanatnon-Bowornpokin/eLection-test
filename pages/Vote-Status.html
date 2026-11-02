@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ติดตามสถานะการเลือกตั้ง</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+
+    <link href="../fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="../fontawesome/css/fontawesome.css" rel="stylesheet">
+    <link href="../fontawesome/css/brands.css" rel="stylesheet">
+    <link href="../fontawesome/css/solid.css" rel="stylesheet">
+    <link href="../css/style.css?v=20261102_v1" rel="stylesheet">
+    <link href="../css/vote-check.css?v=20261102_v1" rel="stylesheet">
+    <link href="../css/vote-status.css?v=20261102_v1" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="vote-status-header">
+        <div class="navbar">
+            <div class="toplogo">
+                <a href="../index.html" aria-label="กลับสู่หน้าหลัก">
+                    <img src="../img/Logo/Logo.png" class="topLogo" alt="eLection">
+                </a>
+            </div>
+            <div class="userIcon" aria-label="บัญชีผู้ใช้">
+                <span class="material-symbols-outlined personIcon" aria-hidden="true">person</span>
+            </div>
+        </div>
+
+        <!-- Hero Section Banner: พื้นที่สีเทาสำหรับรอใส่ Banner จริงจาก User -->
+        <div class="vote-status-hero-placeholder">
+            <div class="hero-placeholder-inner">
+                <span class="hero-tag">Hero Section</span>
+                <h2 class="hero-placeholder-title bold" id="heroElectionTitle">การเลือกตั้งสมาชิกสภาผู้แทนราษฎร (ส.ส.) ครั้งที่ 28</h2>
+                <p class="hero-placeholder-subtitle">ติดตามสถานะการเลือกตั้งและรายงานผลคะแนน</p>
+            </div>
+            <div class="carousel-inner-shadow"></div>
+        </div>
+    </header>
+
+    <main class="container-fluid page-container vote-status-main">
+        <!-- Heading & Back Button -->
+        <div class="vote-status-heading">
+            <a class="vote-status-back" href="Vote-Result.html" aria-label="ย้อนกลับไปหน้ารวมผลการเลือกตั้ง">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                <h1 class="bold topic" id="pageElectionHeading">ติดตามสถานะ</h1>
+            </a>
+
+            <!-- Quick State Switcher for User/Dev Preview (รอนับคะแนน vs ระหว่างนับคะแนน) -->
+            <div class="state-preview-toggle" role="tablist" aria-label="จำลองสถานะการเลือกตั้ง">
+                <button type="button" class="btn-state-tab" id="tabStateWaiting" data-state="waiting">
+                    รอนับคะแนน
+                </button>
+                <button type="button" class="btn-state-tab active" id="tabStateCounting" data-state="counting">
+                    กำลังนับคะแนน
+                </button>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             1. KPI Dashboard Cards (4 Cards)
+             =================================================================== -->
+        <section class="status-kpi-grid" aria-label="สถิติภาพรวมการเลือกตั้ง">
+            <!-- KPI 1 -->
+            <div class="status-kpi-card">
+                <span class="kpi-label" id="kpiLabel1">ผู้มาใช้สิทธิสุทธิ</span>
+                <div class="kpi-content">
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">ผู้มีสิทธิ :</span> 51,354,679 คน
+                    </p>
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">มาใช้สิทธิ :</span> 34,120,450 คน
+                    </p>
+                    <span class="kpi-percent-pill">คิดเป็น 66.4%</span>
+                </div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="status-kpi-card">
+                <span class="kpi-label" id="kpiLabel2">นับคะแนนแล้ว</span>
+                <div class="kpi-content">
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">ส.ส. เขต :</span> <span id="kpiCountedDistrict">30,000,000 ใบ</span>
+                    </p>
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">บัญชีรายชื่อ :</span> <span id="kpiCountedParty">30,000,000 ใบ</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="status-kpi-card">
+                <span class="kpi-label" id="kpiLabel3">บัตรในระบบสุทธิ</span>
+                <div class="kpi-content" id="kpiContent3">
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">ส.ส. เขต :</span> 34,120,450 ใบ
+                    </p>
+                    <p class="kpi-value-row">
+                        <span class="kpi-bold-text">บัญชีรายชื่อ :</span> 34,120,450 ใบ
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="status-kpi-card">
+                <span class="kpi-label">สถานะการเลือกตั้ง</span>
+                <div class="kpi-content kpi-status-box" id="kpiStatusBox">
+                    <div class="kpi-status-indicator status-live" id="kpiStatusIndicator">
+                        <span class="status-dot pulsing"></span>
+                        <span class="status-text bold" id="kpiStatusText">กำลังนับคะแนน</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             2. VIEW A: รอนับคะแนนหลังปิดหีบ (Waiting State View)
+             =================================================================== -->
+        <section class="status-view-section" id="viewWaitingState" style="display: none;" aria-label="สถานะก่อนนับคะแนน">
+            <!-- สถิติการออกมาใช้สิทธิแยกตามภูมิภาค -->
+            <div class="regional-turnout-card">
+                <h3 class="section-title bold">สถิติการออกมาใช้สิทธิแยกตามภูมิภาค</h3>
+                
+                <div class="regional-turnout-list">
+                    <!-- ภาคกลาง -->
+                    <div class="regional-item">
+                        <div class="regional-header">
+                            <span class="regional-name bold">ภาคกลาง</span>
+                            <span class="regional-percent bold">คิดเป็น 69.6%</span>
+                        </div>
+                        <p class="regional-count">ใช้สิทธิแล้ว 11,270,000 / 16,190,000 คน</p>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill" style="width: 69.6%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ภาคเหนือ -->
+                    <div class="regional-item">
+                        <div class="regional-header">
+                            <span class="regional-name bold">ภาคเหนือ</span>
+                            <span class="regional-percent bold">คิดเป็น 65.0%</span>
+                        </div>
+                        <p class="regional-count">ใช้สิทธิแล้ว 5,460,000 / 8,400,000 คน</p>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill" style="width: 65.0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ภาคตะวันออกเฉียงเหนือ -->
+                    <div class="regional-item">
+                        <div class="regional-header">
+                            <span class="regional-name bold">ภาคตะวันออกเฉียงเหนือ</span>
+                            <span class="regional-percent bold">คิดเป็น 63.8%</span>
+                        </div>
+                        <p class="regional-count">ใช้สิทธิแล้ว 10,850,000 / 17,010,000 คน</p>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill" style="width: 63.8%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ภาคใต้ -->
+                    <div class="regional-item">
+                        <div class="regional-header">
+                            <span class="regional-name bold">ภาคใต้</span>
+                            <span class="regional-percent bold">คิดเป็น 61.2%</span>
+                        </div>
+                        <p class="regional-count">ใช้สิทธิแล้ว 6,000,000 / 9,800,000 คน</p>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill" style="width: 61.2%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             3. VIEW B: ระหว่างนับคะแนนเรียลไทม์ (Counting State View)
+             =================================================================== -->
+        <section class="status-view-section" id="viewCountingState" aria-label="สถานะระหว่างนับคะแนนเรียลไทม์">
+            <!-- แท็บสลับ: บัญชีรายชื่อ vs แบ่งเขต -->
+            <div class="counting-tabs-wrap" role="tablist">
+                <button type="button" class="counting-tab active" id="tabPartylist" data-tab="partylist">
+                    แบบบัญชีรายชื่อ
+                </button>
+                <button type="button" class="counting-tab" id="tabConstituency" data-tab="constituency">
+                    แบบแบ่งเขต
+                </button>
+            </div>
+
+            <!-- Tab Content 1: แบบบัญชีรายชื่อ -->
+            <div class="counting-tab-content" id="contentPartylist">
+                <h3 class="section-title bold">ผลคะแนนการเลือกตั้งแบบเรียลไทม์ แบบบัญชีรายชื่อ</h3>
+
+                <div class="live-score-list">
+                    <!-- พรรค ก. -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge">ก</span>
+                                <span class="score-name bold">พรรค ก. (เบอร์ 1)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">10,000,000 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 29.3%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-1" style="width: 29.3%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- พรรค ข. -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge">ข</span>
+                                <span class="score-name bold">พรรค ข. (เบอร์ 2)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">8,400,000 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 24.6%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-2" style="width: 24.6%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- พรรค ค. -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge">ค</span>
+                                <span class="score-name bold">พรรค ค. (เบอร์ 3)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">7,900,000 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 23.1%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-3" style="width: 23.1%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- พรรค ง. -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge">ง</span>
+                                <span class="score-name bold">พรรค ง. (เบอร์ 4)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">7,820,450 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 23.0%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-4" style="width: 23.0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: แบบแบ่งเขต -->
+            <div class="counting-tab-content" id="contentConstituency" style="display: none;">
+                <!-- Area Selectors -->
+                <div class="area-filter-row">
+                    <div class="area-select-item">
+                        <label for="selectProvince" class="area-label">จังหวัด :</label>
+                        <select id="selectProvince" class="area-select">
+                            <option value="bkk" selected>กรุงเทพมหานคร</option>
+                            <option value="cmi">เชียงใหม่</option>
+                            <option value="nma">นครราชสีมา</option>
+                            <option value="pkt">ภูเก็ต</option>
+                        </select>
+                    </div>
+                    <div class="area-select-item">
+                        <label for="selectDistrict" class="area-label">เขตเลือกตั้ง :</label>
+                        <select id="selectDistrict" class="area-select">
+                            <option value="1" selected>เขตที่ 1 (พระนคร, ป้อมปราบฯ)</option>
+                            <option value="2">เขตที่ 2 (ปทุมวัน, สาทร)</option>
+                            <option value="3">เขตที่ 3 (บางรัก, คลองเตย)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 class="section-title bold">ผลคะแนนการเลือกตั้งแบบเรียลไทม์ แบบแบ่งเขต</h3>
+
+                <div class="live-score-list">
+                    <!-- เบอร์ 1 นายสมชาย มุ่งมั่น -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge candidate-number">1</span>
+                                <span class="score-name bold">เบอร์ 1 นายสมชาย มุ่งมั่น (พรรค ก.)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">45,210 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 43.1%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-1" style="width: 43.1%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- เบอร์ 4 น.ส.วิภา สดใส -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge candidate-number">4</span>
+                                <span class="score-name bold">เบอร์ 4 น.ส.วิภา สดใส (พรรค ข.)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">38,150 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 36.4%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-2" style="width: 36.4%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- เบอร์ 2 ดร.เอกชัย รักถิ่น -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge candidate-number">2</span>
+                                <span class="score-name bold">เบอร์ 2 ดร.เอกชัย รักถิ่น (พรรค ค.)</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">15,420 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 14.7%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-color-3" style="width: 14.7%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ไม่ประสงค์ลงคะแนน -->
+                    <div class="score-card-item">
+                        <div class="score-card-header">
+                            <div class="score-identity">
+                                <span class="score-party-badge candidate-number">-</span>
+                                <span class="score-name bold">ไม่ประสงค์ลงคะแนน</span>
+                            </div>
+                            <div class="score-numbers">
+                                <span class="score-vote-count bold">6,050 คะแนน</span>
+                                <span class="score-percentage">คิดเป็น 5.8%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar-fill score-bar-neutral" style="width: 5.8%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             4. ตรวจสอบสถานะบัตรของคุณ (Exact matching user design)
+             =================================================================== -->
+        <section class="card-verify-section" aria-label="ตรวจสอบสถานะบัตรของคุณ">
+            <div class="card-verify-container">
+                <h3 class="card-verify-title bold">ตรวจสอบสถานะบัตรของคุณ</h3>
+                <p class="card-verify-subtitle">กรอกรหัสตรวจสอบสถานะบัตร เพื่อตรวจสอบว่าบัตรอยู่ในระบบแล้ว</p>
+
+                <!-- Input Row -->
+                <div class="card-verify-input-row">
+                    <div class="card-verify-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                        <input type="text" class="card-verify-input" id="ballotCodeInput" 
+                               placeholder="กรอกรหัสบัตร....." value="#a8f9-4c2e-991b-88ff" aria-label="กรอกรหัสบัตร">
+                    </div>
+                    <button type="button" class="card-verify-btn" id="btnVerifyBallot">
+                        ตรวจสอบ
+                    </button>
+                </div>
+
+                <!-- Result Card -->
+                <div class="card-verify-result-box" id="verifyResultBox">
+                    <div class="card-verify-result-info">
+                        <h4 class="card-verify-result-title bold">บัตรอยู่ในระบบเรียบร้อย</h4>
+                        <p class="card-verify-result-row">
+                            รหัสตรวจสอบสถานะบัตร : <span class="bold" id="resBallotHash">#a8f9-4c2e-991b-88ff</span>
+                        </p>
+                        <p class="card-verify-result-row">
+                            เวลาที่บันทึก : <span id="resRecordedTime">14 ม.ค. 2569 | 14:37 น.</span>
+                        </p>
+                        <p class="card-verify-result-row">
+                            สถานะ : <span class="bold" id="resBallotStatus">รอนับคะแนนหลังปิดหีบ</span>
+                        </p>
+                    </div>
+                    <div class="card-verify-result-icon" aria-hidden="true">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             5. กำหนดการและขั้นตอนหลังปิดการลงคะแนน (Timeline)
+             =================================================================== -->
+        <section class="status-timeline-section" aria-label="กำหนดการและขั้นตอนหลังปิดการลงคะแนน">
+            <div class="status-timeline-card">
+                <h3 class="section-title bold">กำหนดการและขั้นตอนหลังปิดการลงคะแนน</h3>
+                <p class="timeline-subtitle">กระบวนการภายหลังการปิดการออกเสียงลงคะแนนตั้งแต่เวลา 17.00 น. เป็นต้นไป</p>
+
+                <ol class="timeline-steps-list">
+                    <li class="timeline-step-item">
+                        <span class="step-num bold">1.</span>
+                        <div class="step-content">
+                            <span class="bold">นับคะแนนและรายงานผลสด</span> คาดว่าจะประมวลผลคะแนนครบ 100% ภายในเวลา 20:00 น. ของวันนี้
+                        </div>
+                    </li>
+                    <li class="timeline-step-item">
+                        <span class="step-num bold">2.</span>
+                        <div class="step-content">
+                            <span class="bold">ตรวจสอบความถูกต้อง</span> เปิดให้ประชาชนและตัวแทนพรรคยื่นคำร้อง และ พิจารณาเรื่องร้องเรียน
+                        </div>
+                    </li>
+                    <li class="timeline-step-item">
+                        <span class="step-num bold">3.</span>
+                        <div class="step-content">
+                            <span class="bold">ประกาศรับรองผลการเลือกตั้งอย่างเป็นทางการ</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             6. แบนเนอร์ ผู้แทนส่งรหัสเพื่อเปิดหีบดิจิตอล
+             =================================================================== -->
+        <section class="ceremony-cta-section" aria-label="ผู้แทนส่งรหัสเพื่อเปิดหีบดิจิตอล">
+            <div class="ceremony-cta-card">
+                <div class="ceremony-cta-content">
+                    <h3 class="ceremony-cta-title bold">ผู้แทนส่งรหัสเพื่อเปิดหีบดิจิตอล</h3>
+                    <p class="ceremony-cta-desc">ระบบเปิดให้รวมรหัสเพื่อเปิดหีบบัตรดิจิทัลหลังการปิดหีบ 17:00 น.</p>
+                </div>
+                <div class="ceremony-cta-action">
+                    <button type="button" class="btn-ceremony-watch" id="btnWatchCeremony">
+                        เข้าชม
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <hr class="secbreak">
+    </main>
+
+    <footer class="site-footer">
+        <div class="report-banner">
+            <img src="../img/Banner/Report_Banner.png" alt="แจ้งเหตุผิดปกติเกี่ยวกับการเลือกตั้ง">
+        </div>
+
+        <div class="site-footer-main">
+            <div class="site-footer-content">
+                <div class="footer-brand">
+                    <img class="footer-logo" src="../img/Logo/Wh-Logo.png" alt="eLection">
+                    <div class="footer-social" aria-label="ช่องทางโซเชียลมีเดีย">
+                        <span class="footer-social-icon" role="img" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                        </span>
+                        <span class="footer-social-icon" role="img" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <nav class="footer-links" aria-label="Links">
+                    <h2>Links</h2>
+                    <ul class="footer-link-list">
+                        <li><a href="../index.html#vote">ลงคะแนน</a></li>
+                        <li><a href="../index.html#candidate-policy">นโยบายผู้สมัคร</a></li>
+                        <li><a href="../index.html#eligibility">ตรวจสอบสิทธิ</a></li>
+                        <li><a href="Vote-Result.html">ผลการเลือกตั้ง</a></li>
+                        <li><a href="../index.html#service-locations">จุดบริการ</a></li>
+                        <li><a href="../index.html#calendar">ปฏิทิน</a></li>
+                        <li><a href="../index.html#news">ประชาสัมพันธ์</a></li>
+                        <li><a href="../index.html#laws">ข้อกฎหมาย</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-learn" aria-label="Learn More">
+                    <h2>Learn More</h2>
+                    <ul class="footer-simple-list">
+                        <li>About Us</li>
+                        <li>FAQ</li>
+                        <li>Support</li>
+                    </ul>
+                </nav>
+
+                <div class="footer-contact">
+                    <h2>Contact Us</h2>
+                    <address class="footer-contact-info">
+                        <p>120 หมู่ที่ 3 อาคารรัฐประศาสนภักดี (อาคารบี) ศูนย์ราชการเฉลิมพระเกียรติฯ ถ.แจ้งวัฒนะ แขวงทุ่งสองห้อง เขตหลักสี่ กรุงเทพฯ 10210</p>
+                        <p>เบอร์ติดต่อ: 0-2141-8888</p>
+                        <p>อีเมล: <a href="mailto:contact@ect.go.th">contact@ect.go.th</a></p>
+                    </address>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script/vote-status.js?v=20261102_v1"></script>
+</body>
+
+</html>
