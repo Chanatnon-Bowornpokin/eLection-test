@@ -292,56 +292,105 @@
 
 .vs-score-dropdown-wrap {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    display: inline-block;
     max-width: 100%;
 }
 
-.vs-score-title {
-    margin: 0;
+.vs-score-title-btn {
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #000;
+    font-family: inherit;
     font-size: var(--card-title);
     font-weight: 700;
-    color: #000;
-    line-height: 1.3;
+    line-height: 1.27;
+    text-align: left;
+    cursor: pointer;
 }
 
-.vs-score-dropdown-btn {
+.vs-score-title-btn:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.vs-score-type-current {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
     white-space: nowrap;
 }
 
-.vs-score-dropdown-btn .vs-caret {
-    font-size: 0.75em;
+.vs-score-type-current .vs-caret {
+    font-size: 0.7em;
     color: #000;
     transition: transform 0.2s ease;
 }
 
-.vs-score-dropdown-wrap:hover .vs-caret {
-    transform: translateY(2px);
+.vs-score-title-btn[aria-expanded="true"] .vs-caret {
+    transform: rotate(180deg);
 }
 
-.vs-native-dropdown {
+.vs-score-dropdown-menu {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    font-size: 16px;
-    z-index: 2;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 100;
+    display: none;
+    min-width: 220px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid #000;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
-.vs-native-dropdown:focus-visible + .vs-score-title .vs-score-dropdown-btn {
-    outline: 2px solid #000;
-    outline-offset: 4px;
-    border-radius: 4px;
+.vs-score-dropdown-menu.is-open {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vs-score-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #000;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.vs-score-opt:hover {
+    background: #f0f0f2;
+}
+
+.vs-score-opt.is-selected {
+    font-weight: 700;
+    background: #f4f4f6;
+}
+
+.vs-score-opt .vs-opt-check {
+    width: 14px;
+    font-size: 13px;
+    color: #000;
+    visibility: hidden;
+}
+
+.vs-score-opt.is-selected .vs-opt-check {
+    visibility: visible;
 }
 
 /* --------------------------------------------------------------------------
@@ -531,42 +580,44 @@
 .vs-timeline {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 10px 8px;
+    gap: 4px;
+    padding: 10px 14px;
 }
 
 .vs-timeline-title {
-    margin: 0;
-    padding: 10px;
+    margin: 0 0 4px;
+    padding: 0;
     color: #000;
-    font-size: 16px;
+    font-size: var(--card-title);
     font-weight: 700;
     line-height: 1.27;
 }
 
 .vs-timeline-sub {
-    margin: 0;
-    padding: 0 10px;
+    margin: 0 0 4px;
+    padding: 0;
     color: #000;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: var(--card-text);
+    font-weight: 500;
     line-height: 1.3;
 }
 
 .vs-timeline-steps {
     display: flex;
     margin: 0;
-    padding: 7.3px 4.6px;
+    padding: 0;
     flex-direction: column;
-    gap: 4.6px;
+    gap: 4px;
     list-style: none;
 }
 
 .vs-timeline-steps li {
+    margin: 0;
+    padding: 0;
     color: #000;
-    font-size: 12px;
+    font-size: var(--card-text);
     font-weight: 400;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 /* --------------------------------------------------------------------------
@@ -577,7 +628,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 10px;
+    padding: 10px 14px;
 }
 
 .vs-ceremony-copy {
@@ -586,18 +637,19 @@
 }
 
 .vs-ceremony-title {
-    margin: 0 0 2px;
+    margin: 0 0 4px;
+    padding: 0;
     color: #000;
-    font-size: 14px;
+    font-size: var(--card-title);
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.27;
 }
 
 .vs-ceremony-desc {
     margin: 0;
-    padding-left: 6px;
+    padding: 0;
     color: #000;
-    font-size: 11px;
+    font-size: var(--card-text);
     font-weight: 400;
     line-height: 1.35;
 }
@@ -688,13 +740,50 @@
         margin-bottom: 12px;
     }
 
+    .vs-score-dropdown-menu {
+        min-width: 240px;
+        padding: 8px;
+    }
+
+    .vs-score-opt {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .vs-timeline {
+        padding: 12px 14px;
+        gap: 5px;
+    }
+
+    .vs-timeline-title {
+        margin: 0 0 4px;
+        padding: 0;
+        font-size: 16px;
+    }
+
+    .vs-timeline-steps {
+        padding: 0;
+        gap: 6px;
+    }
+
+    .vs-timeline-steps li {
+        font-size: 13.5px;
+    }
+
+    .vs-ceremony {
+        padding: 12px 14px;
+    }
+
     .vs-ceremony-title {
+        margin: 0 0 4px;
+        padding: 0;
         font-size: 16px;
     }
 
     .vs-ceremony-desc {
-        padding-left: 8px;
+        padding-left: 0;
         font-size: 13.5px;
+        font-weight: 400;
     }
 
     .vs-btn--watch {
@@ -788,9 +877,29 @@
         margin-bottom: 18px;
     }
 
-    .vs-score-title {
+    .vs-score-title-btn {
         font-size: 32px;
         gap: 12px;
+    }
+
+    .vs-score-dropdown-menu {
+        top: calc(100% + 10px);
+        min-width: 280px;
+        padding: 10px;
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .vs-score-opt {
+        gap: 12px;
+        padding: 10px 16px;
+        font-size: 20px;
+        border-radius: 10px;
+    }
+
+    .vs-score-opt .vs-opt-check {
+        width: 18px;
+        font-size: 18px;
     }
 
     .vs-scores .vs-bar-list {
@@ -893,40 +1002,47 @@
 
     .vs-timeline {
         gap: 6px;
-        padding: 10px 7px;
+        padding: 20px 24px;
         border-radius: 16.5px;
     }
 
     .vs-timeline-title {
-        font-size: 33px;
+        margin: 0 0 6px;
+        padding: 0;
+        font-size: 32px;
     }
 
     .vs-timeline-sub {
-        font-size: 24.7px;
+        margin: 0 0 6px;
+        padding: 0;
+        font-size: 24px;
         font-weight: 500;
     }
 
     .vs-timeline-steps {
-        gap: 9.6px;
-        padding: 15.4px 15px;
+        gap: 8px;
+        padding: 0;
     }
 
     .vs-timeline-steps li {
-        font-size: 27px;
+        font-size: 24px;
     }
 
     .vs-ceremony {
         gap: 32px;
-        padding: 24px 30px;
+        padding: 20px 24px;
     }
 
     .vs-ceremony-title {
-        font-size: 28px;
+        margin: 0 0 6px;
+        padding: 0;
+        font-size: 32px;
     }
 
     .vs-ceremony-desc {
-        padding-left: 14px;
-        font-size: 20px;
+        padding-left: 0;
+        font-size: 24px;
+        font-weight: 400;
         line-height: 1.35;
     }
 

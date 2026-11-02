@@ -346,17 +346,78 @@
         if (scoreTypeLabel) {
             scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
         }
+
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('type', type);
+            window.history.replaceState({}, '', url.toString());
+        } catch (error) {
+            // Ignore URL state error in restricted iframe or local file
+        }
+
+        const optParty = document.getElementById('optPartylist');
+        const optConst = document.getElementById('optConstituency');
+        if (optParty) optParty.classList.toggle('is-selected', type === 'partylist');
+        if (optConst) optConst.classList.toggle('is-selected', type === 'constituency');
+
         renderScores();
     }
 
     function initSwitch() {
+        const wrap = document.getElementById('scoreDropdownWrap');
+        const btn = document.getElementById('scoreTypeBtn');
+        const menu = document.getElementById('scoreDropdownMenu');
+
         if (scoreTypeSelect) {
             scoreTypeSelect.value = type;
-            if (scoreTypeLabel) {
-                scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
-            }
             scoreTypeSelect.addEventListener('change', () => {
                 setType(scoreTypeSelect.value);
+            });
+        }
+
+        if (scoreTypeLabel) {
+            scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
+        }
+
+        const optParty = document.getElementById('optPartylist');
+        const optConst = document.getElementById('optConstituency');
+        if (optParty) optParty.classList.toggle('is-selected', type === 'partylist');
+        if (optConst) optConst.classList.toggle('is-selected', type === 'constituency');
+
+        if (btn && menu) {
+            const toggleMenu = (open) => {
+                const shouldOpen = typeof open === 'boolean' ? open : !menu.classList.contains('is-open');
+                menu.classList.toggle('is-open', shouldOpen);
+                btn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+            };
+
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                toggleMenu();
+            });
+
+            menu.querySelectorAll('.vs-score-opt').forEach(opt => {
+                opt.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const val = opt.getAttribute('data-value');
+                    if (val) {
+                        setType(val);
+                        toggleMenu(false);
+                    }
+                });
+            });
+
+            document.addEventListener('click', (event) => {
+                if (wrap && !wrap.contains(event.target)) {
+                    toggleMenu(false);
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && menu.classList.contains('is-open')) {
+                    toggleMenu(false);
+                    btn.focus();
+                }
             });
         }
     }
