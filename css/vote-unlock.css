@@ -1,696 +1,862 @@
 /* ==========================================================================
-   eLection - Key Ceremony & Unlock (ปลดล็อค Private Key) Stylesheet
-   Figma Reference: Node 564:2183 (Desktop), 564:4913 (Tablet), 564:5029 (Mobile)
-   100% Pixel-perfect & Design Consistency
+   Vote Unlock Page (ปลดล็อค Private Key - รวมรหัสเปิดหีบ)
+   - Header / Hero / Footer / Divider ใช้โครงสร้างและคลาสเดิมจาก style.css + vote-check.css
+   - อ้างอิง Figma 100% Pixel-perfect:
+     * Mobile  (#564:5029): 412px (Container 372px)
+     * Tablet  (#564:4913): 834px (Container 674px)
+     * Desktop (#564:2183): 1512px (Container 1352px)
    ========================================================================== */
 
-/* Page Background */
-body {
-    background-color: #F5F5F7;
-    margin: 0;
-    padding: 0;
-    font-family: 'Prompt', sans-serif;
-    color: #000000;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ==========================================================================
-   1. HERO SECTION & BANNER PLACEHOLDER
-   Figma Desktop: #564:2185 (H: 457px), Tablet: #832:48743 (H: 214px), Mobile: #724:46668 (H: 179px)
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   1. Hero Placeholder (พื้นที่สีเทา รอ banner จริง — สัดส่วนเดียวกับหน้าอื่น)
+   -------------------------------------------------------------------------- */
 .vote-unlock-hero {
-    background-color: #A0A0A0;
-    box-shadow: inset 0px 4px 16px 0px rgba(0, 0, 0, 0.25);
-    position: relative;
-    width: 100%;
-    min-height: 179px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 20px;
     box-sizing: border-box;
-}
-
-.vu-hero-container {
-    width: 100%;
-    max-width: 1352px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-}
-
-.vu-hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 8px;
-    color: #000000;
-}
-
-/* Badge แท็กด้านบน */
-.vu-hero-badge {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: #000000;
-    color: #FFFFFF;
-    font-family: 'Prompt', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.2;
-    padding: 6px 16px;
-    border-radius: 20px;
-    width: fit-content;
-    letter-spacing: 0.02em;
+    aspect-ratio: 409.05 / 121;
+    background: #a0a0a0;
 }
 
-/* หัวข้อหลัก Hero Title */
-.vu-hero-title {
-    font-family: 'Prompt', sans-serif;
-    font-size: 32px;
+.vote-unlock-hero-text {
+    margin: 0;
+    color: #000;
+    font-size: 4.5vw;
     font-weight: 500;
     line-height: 1.27;
-    margin: 0;
-    color: #000000;
-    text-align: left;
+    text-align: center;
 }
 
-/* Placeholder Container รอไฟล์ภาพเวกเตอร์ (Figma Desktop 410px x 399px, aspect-ratio: 410 / 399) */
-.vu-hero-placeholder {
-    width: 140px;
-    height: 120px;
-    aspect-ratio: 410 / 399;
-    flex-shrink: 0;
-    border: 2px dashed rgba(0, 0, 0, 0.35);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.25);
+@media (min-width: 768px) {
+    .vote-unlock-hero {
+        aspect-ratio: 834 / 247;
+    }
+
+    .vote-unlock-hero-text {
+        font-size: 4.8vw;
+    }
+}
+
+@media (min-width: 992px) {
+    .vote-unlock-hero {
+        aspect-ratio: 1512 / 457;
+    }
+
+    .vote-unlock-hero-text {
+        font-size: min(6.35vw, 96px);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   2. Base Layout — Mobile (< 768px, Figma 412px, Content 372px)
+   -------------------------------------------------------------------------- */
+.vote-check-main.vote-unlock-main.page-container {
     display: flex;
     flex-direction: column;
+    padding: 15px 20px 8px;
+    background: #f5f5f7;
+    color: #000;
+    font-family: 'Prompt', sans-serif;
+}
+
+.vu-br-mobile {
+    display: inline;
+}
+
+/* ส่วนหัวกลไกความปลอดภัย + แถบความคืบหน้าด้านบน */
+.vu-top-section {
+    margin: 0 0 18px;
+}
+
+.vu-heading-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.vu-back-btn {
+    display: inline-flex;
+    flex: 0 0 10px;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
-    transition: all 0.3s ease;
+    padding: 3px 0;
+    color: #000;
+    font-size: 18px;
+    line-height: 1;
+    text-decoration: none;
 }
 
-/* ==========================================================================
-   2. MAIN CONTAINER & SECTION: กลไกความปลอดภัยร่วม
-   ========================================================================== */
-.vu-main-container {
-    width: 100%;
-    max-width: 372px; /* Mobile default */
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-    box-sizing: border-box;
+.vu-back-btn:hover {
+    color: #000;
+    opacity: 0.75;
 }
 
-/* Header ของกลไกความปลอดภัย */
-.vu-stakeholder-header {
+.vu-heading-col {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vu-title-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 16px;
+    gap: 2px;
 }
 
 .vu-sec-title {
-    font-family: 'Prompt', sans-serif;
+    margin: 0;
+    color: #000;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.35;
-    color: #000000;
-    margin: 0;
 }
 
 .vu-sec-subtitle {
-    font-family: 'Prompt', sans-serif;
+    margin: 0;
+    padding-left: 7.5px;
+    color: #000;
     font-size: 16px;
     font-weight: 400;
-    line-height: 1.4;
-    color: #000000;
-    margin: 0;
+    line-height: 1.35;
 }
 
-/* Tracker สถานะการส่งรหัส */
-.vu-tracker-wrap {
-    margin-bottom: 20px;
+.vu-tracker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 10px;
 }
 
 .vu-tracker-label {
-    font-family: 'Prompt', sans-serif;
+    margin: 0;
+    color: #000;
     font-size: 16px;
     font-weight: 400;
-    color: #000000;
-    margin: 0 0 8px;
+    line-height: 1.35;
 }
 
-/* รางแถบ Progress Bar หลักด้านบน */
 .vu-main-progress-track {
-    width: 100%;
-    height: 25px; /* Mobile / Tablet */
-    background-color: #FFFFFF;
-    border: 1px solid #000000;
-    border-radius: 8.54px;
     box-sizing: border-box;
+    width: 343px;
+    max-width: 100%;
+    height: 25px;
+    padding: 2.5px 4.5px;
+    border: 0.5px solid #000;
+    border-radius: 8.54px;
+    background: #fff;
     display: flex;
     align-items: center;
-    padding: 2px;
     overflow: hidden;
 }
 
 .vu-main-progress-fill {
-    height: 100%;
-    width: 0%;
-    background-color: #000000;
+    height: 20px;
     border-radius: 8.54px;
-    box-shadow: inset 0px 2.016px 6.3px -1.512px rgba(0, 0, 0, 0.25);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #000;
+    box-shadow: inset 0 2.02px 6.3px -1.51px rgba(0, 0, 0, 0.25);
+    transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* ==========================================================================
-   3. STAKEHOLDER CARDS (5 รายการ)
-   Figma Mobile: 371px x hug, radius 17px, shadow 0px 4px 7px rgba(0,0,0,0.25)
-   Figma Tablet: 674px x hug, radius 8.47px, shadow 0px 1.99px 3.49px rgba(0,0,0,0.25)
-   Figma Desktop: 1352px x hug, radius 17px, shadow 0px 4px 7px rgba(0,0,0,0.25)
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   3. รายการการ์ด 5 ฝ่าย (Key Share Stakeholder Cards)
+   -------------------------------------------------------------------------- */
 .vu-cards-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    margin-bottom: 24px;
+    margin: 0;
 }
 
-.vu-stakeholder-card {
-    background-color: #FFFFFF;
-    border-radius: 17px;
-    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.25);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.vu-card {
     box-sizing: border-box;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    gap: 12px;
-}
-
-.vu-card-content-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-}
-
-/* ไอคอนสถานะด้านซ้าย */
-.vu-status-icon-wrap {
-    width: 45.37px;
-    height: 42.21px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ไอคอนสีเขียว (ยืนยันแล้ว) */
-.vu-icon-confirmed svg,
-.vu-icon-confirmed img {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    padding: 10px;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
 }
 
-/* ไอคอนสีเหลือง (รอดำเนินการ) */
-.vu-icon-pending {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background-color: #FCD50F;
-    box-shadow: 0px 2px 10.6px 0px rgba(0, 0, 0, 0.25);
+.vu-card--pending {
+    padding: 5px;
+    gap: 6px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* ไอคอนด้านซ้ายของการ์ด */
+.vu-card-icon-wrap {
+    box-sizing: border-box;
+    width: 55.34px;
+    flex: 0 0 55.34px;
+    padding: 7.48px 4.99px 4.99px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 }
 
-.vu-icon-pending::after {
-    content: '';
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background-color: #FFFFFF;
-    opacity: 0.85;
+.vu-card-icon-wrap--pending {
+    width: 64.49px;
+    flex: 0 0 64.49px;
+    padding: 4.97px;
 }
 
-/* รายละเอียดชื่อฝ่ายและสถานะ */
-.vu-card-text-block {
+.vu-icon-check {
+    color: #22c55e;
+    font-size: 44px;
+    line-height: 1;
+}
+
+.vu-icon-circle {
+    color: #fcd50f;
+    font-size: 54.54px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 5.27px rgba(0, 0, 0, 0.25));
+}
+
+/* ข้อมูลด้านขวาของการ์ด */
+.vu-card-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3.5px;
+}
+
+.vu-card-body--pending {
+    gap: 2px;
+}
+
+.vu-card-text-group {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    min-width: 0;
+    gap: 0;
+}
+
+.vu-card-title-row {
+    padding: 0 5px;
+}
+
+.vu-card--pending .vu-card-title-row {
+    padding: 5px 5px 0;
 }
 
 .vu-party-name {
-    font-family: 'Prompt', sans-serif;
+    margin: 0;
+    padding-left: 6px;
+    color: #000;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.35;
-    color: #000000;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.vu-card--pending .vu-party-name {
+    padding-left: 0;
+}
+
+.vu-card-status-row {
+    padding: 0 5px 5px 24px;
+}
+
+.vu-card-status-row--pending {
+    padding: 0 5px 5px 21px;
 }
 
 .vu-party-status {
-    font-family: 'Prompt', sans-serif;
+    margin: 0;
+    color: #000;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.35;
-    color: #000000;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-/* ปุ่ม [ ส่งรหัส ] (BT-Confirm Component) */
-.vu-card-action-right {
-    flex-shrink: 0;
+.vu-status-main {
+    display: inline;
 }
 
-.vu-btn-confirm {
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid #000000;
-    border-radius: 8.5px;
-    padding: 8px 18px;
+/* บน Mobile รหัสอ้างอิงขึ้นบรรทัดใหม่ด้วยขนาด 12px ตาม Figma */
+.vu-status-ref {
+    display: block;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+/* แถวปุ่ม ส่งรหัส ในการ์ดที่ 5 */
+.vu-card-action-row {
+    padding: 0;
+}
+
+.vu-card-action-inner {
+    padding: 5px 0 5px 5px;
+    width: 284px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.vu-btn-submit {
+    box-sizing: border-box;
+    width: 100%;
+    height: 31px;
+    padding: 5.18px;
+    border: 0.5px solid #000;
+    border-radius: 8.81px;
+    background: #000;
+    color: #fff;
     font-family: 'Prompt', sans-serif;
-    font-size: 14.5px;
+    font-size: 14.52px;
     font-weight: 600;
     line-height: 1;
-    cursor: pointer;
-    box-sizing: border-box;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease, transform 0.1s ease;
-    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.vu-btn-confirm:hover {
-    background-color: #222222;
+.vu-btn-submit:hover {
+    background: #222;
 }
 
-.vu-btn-confirm:active {
-    transform: scale(0.98);
-}
-
-/* ==========================================================================
-   4. SECURITY NOTE BOX & DIVIDER
-   ========================================================================== */
-.vu-security-notice {
-    font-family: 'Prompt', sans-serif;
-    font-size: 10px;
+/* --------------------------------------------------------------------------
+   4. หมายเหตุด้านความปลอดภัย & เส้นคั่น
+   -------------------------------------------------------------------------- */
+.vu-security-notes {
+    margin: 14px 0 0;
+    padding-left: 16px;
+    color: #d9d9d9;
+    font-size: 9.84px;
     font-weight: 400;
-    line-height: 1.6;
-    color: #000000;
-    margin: 18px 0 20px;
-    white-space: pre-line;
+    line-height: 1.42;
+    list-style-type: disc;
 }
 
-.vu-section-divider {
-    border: none;
-    border-top: 1px solid #D9D9D9;
-    margin: 24px 0 28px;
+.vu-security-notes li {
+    margin: 0;
+}
+
+.vote-check-divider.vu-divider {
     width: 100%;
+    margin: 10px 0 10px;
+    border: 0;
+    border-top: 2px solid #d9d9d9;
 }
 
-/* ==========================================================================
-   5. SECTION: สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล
-   ========================================================================== */
-.vu-processing-section-title {
-    font-family: 'Prompt', sans-serif;
+/* --------------------------------------------------------------------------
+   5. สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล
+   -------------------------------------------------------------------------- */
+.vu-process-section {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.vu-process-section-title {
+    margin: 0;
+    color: #000;
     font-size: 16px;
     font-weight: 700;
-    line-height: 1.4;
-    color: #000000;
-    margin: 0 0 16px;
+    line-height: 1.35;
 }
 
 .vu-process-box {
-    background-color: #FFFFFF;
-    border-radius: 8.5px;
-    box-shadow: 0px 2px 3.5px 0px rgba(0, 0, 0, 0.25);
-    padding: 10px 14px 18px;
     box-sizing: border-box;
+    width: 100%;
+    padding: 10px 10px 18px;
+    border-radius: 8.5px;
+    background: #fff;
+    box-shadow: 0 2px 3.5px rgba(0, 0, 0, 0.25);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 3.5px;
 }
 
-.vu-process-box-header {
-    font-family: 'Prompt', sans-serif;
+.vu-process-header-wrap {
+    padding: 5px;
+}
+
+.vu-process-header {
+    margin: 0;
+    color: #000;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.35;
-    color: #000000;
-    text-align: center;
-    margin: 0;
-    padding: 4px 0;
+    text-align: left;
 }
 
-/* รายการขั้นตอน 3 สเต็ป */
-.vu-steps-container {
+.vu-process-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 0 4px;
+    gap: 8.5px;
+    padding-left: 12.5px;
 }
 
-.vu-step-item {
+.vu-steps-list {
+    display: flex;
+    width: 323px;
+    max-width: 100%;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.vu-step-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: 'Prompt', sans-serif;
+    color: #000;
     font-size: 14px;
     font-weight: 400;
-    color: #000000;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
-.vu-step-status-tag {
-    font-family: 'Prompt', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: #000000;
+.vu-step-value {
+    width: 34.5px;
+    text-align: center;
+    flex: 0 0 auto;
 }
 
-/* แถบ Progress Bar ล่าง */
 .vu-process-progress-track {
-    width: 100%;
-    height: 25px;
-    background-color: #FFFFFF;
-    border: 0.5px solid #000000;
-    border-radius: 8.57px;
     box-sizing: border-box;
+    width: 323px;
+    max-width: 100%;
+    height: 25px;
+    padding: 2.5px 4.5px;
+    border: 0.5px solid #000;
+    border-radius: 8.57px;
+    background: #fff;
     display: flex;
     align-items: center;
-    padding: 2.5px;
     overflow: hidden;
-    margin-top: 4px;
 }
 
 .vu-process-progress-fill {
-    height: 100%;
-    width: 0%;
-    background-color: #000000;
+    height: 20px;
     border-radius: 8.57px;
-    box-shadow: inset 0px 2.016px 6.3px -1.512px rgba(0, 0, 0, 0.25);
-    transition: width 0.35s ease-out;
+    background: #000;
+    box-shadow: inset 0 2.02px 6.3px -1.51px rgba(0, 0, 0, 0.25);
+    transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* Navigation Action (Revealed when finished) */
-.vu-finished-nav {
-    margin-top: 18px;
-    text-align: center;
-    display: none;
-}
-
-.vu-btn-view-results {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #000000;
-    color: #FFFFFF;
-    font-family: 'Prompt', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 12px 28px;
-    border-radius: 8.5px;
-    text-decoration: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease;
-}
-
-.vu-btn-view-results:hover {
-    background-color: #222222;
-    color: #FFFFFF;
+.vu-bottom-secbreak {
+    margin-top: 22px;
 }
 
 /* ==========================================================================
-   6. RESPONSIVE BREAKPOINTS (Tablet: 768px - 991px)
-   Figma Tablet #564:4913
+   Tablet (>= 768px and < 992px) — Figma #564:4913 (834px, Content 674px)
    ========================================================================== */
-@media (min-width: 576px) and (max-width: 991.98px) {
-    .vote-unlock-hero {
-        min-height: 214px;
-        padding: 30px 40px;
+@media (min-width: 768px) {
+    .vote-check-main.vote-unlock-main.page-container {
+        padding: 21px 80px 38px;
     }
 
-    .vu-hero-title {
-        font-size: 40px;
+    .vu-br-mobile {
+        display: none;
     }
 
-    .vu-hero-placeholder {
-        width: 218px;
-        height: 180px;
+    .vu-top-section {
+        margin: 0 0 16px;
     }
 
-    .vu-main-container {
-        max-width: 674px;
-        padding: 32px 0 80px;
+    .vu-heading-row {
+        gap: 7px;
     }
 
-    .vu-sec-title,
-    .vu-sec-subtitle,
+    .vu-back-btn {
+        flex: 0 0 10px;
+        padding: 3px 0;
+        font-size: 18px;
+    }
+
+    .vu-heading-col {
+        gap: 6px;
+    }
+
+    .vu-sec-title {
+        font-size: 15.95px;
+    }
+
+    .vu-sec-subtitle {
+        padding-left: 7.48px;
+        font-size: 15.95px;
+    }
+
+    .vu-tracker-group {
+        gap: 6px;
+        padding-left: 18.45px;
+    }
+
     .vu-tracker-label {
-        font-size: 16px;
+        font-size: 15.95px;
     }
 
     .vu-main-progress-track {
+        width: 535.41px;
         height: 24.93px;
+        margin-left: 46.36px;
         border-radius: 8.54px;
     }
 
-    .vu-stakeholder-card {
-        padding: 10px 14px;
+    .vu-cards-list {
+        gap: 17px;
+    }
+
+    .vu-card {
+        padding: 9.97px;
         border-radius: 8.47px;
-        box-shadow: 0px 1.99px 3.49px 0px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 1.99px 3.49px rgba(0, 0, 0, 0.25);
     }
 
-    .vu-party-name,
+    .vu-card--pending {
+        padding: 4.97px;
+        gap: 5.97px;
+        border-radius: 8.45px;
+        box-shadow: 0 1.99px 1.99px rgba(0, 0, 0, 0.25);
+    }
+
+    .vu-card-title-row {
+        padding: 4.99px 4.99px 0;
+    }
+
+    .vu-party-name {
+        font-size: 15.95px;
+    }
+
     .vu-party-status {
-        font-size: 16px;
+        font-size: 15.95px;
     }
 
-    .vu-btn-confirm {
-        font-size: 14.5px;
-        border-radius: 8.5px;
-        padding: 8px 20px;
+    /* บน Tablet และ Desktop รหัสอ้างอิงอยู่บรรทัดเดียวกัน */
+    .vu-status-ref {
+        display: inline;
+        font-size: inherit;
+        margin-left: 4px;
     }
 
-    .vu-security-notice {
-        font-size: 10px;
+    .vu-card-action-row {
+        padding-left: 17.41px;
     }
 
-    .vu-processing-section-title,
-    .vu-process-box-header {
+    .vu-card-action-inner {
+        padding: 4.97px;
+        width: 566px;
+        max-width: 100%;
+    }
+
+    .vu-btn-submit {
+        width: 556px;
+        max-width: 100%;
+        height: 31px;
+        border-radius: 8.81px;
+        font-size: 14.52px;
+    }
+
+    .vu-security-notes {
+        margin: 13px 0 0;
+        padding-left: 16px;
+        font-size: 9.84px;
+    }
+
+    .vote-check-divider.vu-divider {
+        margin: 11px 0 11px;
+        border-top: 2px solid #d9d9d9;
+    }
+
+    .vu-process-section {
+        gap: 7px;
+    }
+
+    .vu-process-section-title {
         font-size: 16px;
     }
 
     .vu-process-box {
+        padding: 10px 10px 18px;
         border-radius: 8.5px;
-        box-shadow: 0px 2px 3.5px 0px rgba(0, 0, 0, 0.25);
-        padding: 12px 18px 20px;
+        box-shadow: 0 2px 3.5px rgba(0, 0, 0, 0.25);
+        gap: 3.5px;
     }
 
-    .vu-step-item,
-    .vu-step-status-tag {
+    .vu-process-header-wrap {
+        padding: 5px;
+    }
+
+    .vu-process-header {
+        font-size: 16px;
+    }
+
+    .vu-process-content {
+        padding-left: 12.5px;
+        gap: 8.5px;
+    }
+
+    .vu-steps-list {
+        width: 593.5px;
+        gap: 3px;
+    }
+
+    .vu-step-row {
         font-size: 14px;
     }
 
+    .vu-step-value {
+        width: 34.5px;
+    }
+
     .vu-process-progress-track {
+        width: 593.5px;
         height: 25px;
         border-radius: 8.57px;
+    }
+
+    .vu-process-progress-fill {
+        height: 20.16px;
+        border-radius: 8.57px;
+    }
+
+    .vu-bottom-secbreak {
+        margin-top: 34px;
     }
 }
 
 /* ==========================================================================
-   7. RESPONSIVE BREAKPOINTS (Desktop: 992px+)
-   Figma Desktop #564:2183 (Width: 1512px, Container: 1352px)
+   Desktop (>= 992px) — Figma #564:2183 (1512px, Content 1352px)
    ========================================================================== */
 @media (min-width: 992px) {
-    .vote-unlock-hero {
-        min-height: 457px;
-        padding: 40px 80px;
+    .vote-check-main.vote-unlock-main.page-container {
+        padding: 22px 80px 37px;
     }
 
-    .vu-hero-badge {
-        font-size: 20px;
-        padding: 8px 24px;
-        border-radius: 28px;
+    .vu-top-section {
+        margin: 0 0 70px;
     }
 
-    .vu-hero-title {
-        font-size: 64px;
-        line-height: 1.25;
+    .vu-heading-row {
+        gap: 10px;
     }
 
-    .vu-hero-placeholder {
-        width: 410px;
-        height: 399px;
-        border-radius: 20px;
+    .vu-back-btn {
+        flex: 0 0 16px;
+        padding: 10px 0 0;
+        font-size: 28px;
     }
 
-    .vu-main-container {
-        max-width: 1352px;
-        padding: 48px 0 120px;
-    }
-
-    /* Desktop Typography */
-    .vu-stakeholder-header {
+    .vu-heading-col {
         gap: 8px;
-        margin-bottom: 24px;
+    }
+
+    .vu-title-group {
+        gap: 0;
     }
 
     .vu-sec-title {
         font-size: 32px;
+        line-height: 1.4;
     }
 
     .vu-sec-subtitle {
+        padding-left: 15px;
         font-size: 32px;
+        line-height: 1.4;
     }
 
-    .vu-tracker-wrap {
-        margin-bottom: 32px;
+    .vu-tracker-group {
+        gap: 4px;
+        padding-left: 15px;
     }
 
     .vu-tracker-label {
         font-size: 32px;
-        margin-bottom: 12px;
+        line-height: 1.4;
     }
 
     .vu-main-progress-track {
-        height: 34px;
-        border-radius: 17px;
-        padding: 3px;
+        width: 1124px;
+        height: 50px;
+        margin-left: 68px;
+        padding: 5px 9px;
+        border: 1px solid #000;
+        border-radius: 17.14px;
     }
 
     .vu-main-progress-fill {
-        border-radius: 17px;
-        box-shadow: inset 0px 4px 12.5px -3px rgba(0, 0, 0, 0.25);
+        height: 40.32px;
+        border-radius: 17.14px;
+        box-shadow: inset 0 4.03px 12.6px -3.02px rgba(0, 0, 0, 0.25);
     }
 
-    /* Desktop Stakeholder Cards */
+    /* การ์ด 5 ฝ่ายบน Desktop */
     .vu-cards-list {
-        gap: 24px;
-        margin-bottom: 36px;
+        gap: 34px;
     }
 
-    .vu-stakeholder-card {
+    .vu-card {
+        padding: 20px;
         border-radius: 17px;
-        padding: 20px 28px;
-        box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25);
     }
 
-    .vu-card-content-left {
-        gap: 24px;
+    .vu-card--pending {
+        padding: 10px;
+        gap: 12px;
+        border-radius: 17px;
+        box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     }
 
-    .vu-status-icon-wrap {
-        width: 91px;
-        height: 85px;
+    .vu-card-icon-wrap {
+        width: 111px;
+        flex: 0 0 111px;
+        padding: 15px 10px 10px;
     }
 
-    .vu-icon-pending {
-        width: 91px;
-        height: 85px;
+    .vu-card-icon-wrap--pending {
+        width: 129.67px;
+        flex: 0 0 129.67px;
+        padding: 10px;
     }
 
-    .vu-icon-pending::after {
-        width: 32px;
-        height: 32px;
+    .vu-icon-check {
+        font-size: 88px;
     }
 
-    .vu-card-text-block {
-        gap: 6px;
+    .vu-icon-circle {
+        font-size: 109.67px;
+        filter: drop-shadow(0 2px 10.6px rgba(0, 0, 0, 0.25));
+    }
+
+    .vu-card-body {
+        gap: 7px;
+    }
+
+    .vu-card-body--pending {
+        gap: 0;
+    }
+
+    .vu-card-title-row {
+        padding: 10px 10px 0;
+    }
+
+    .vu-card--pending .vu-card-title-row {
+        padding: 10px 10px 0;
     }
 
     .vu-party-name {
+        padding-left: 12px;
         font-size: 32px;
+        line-height: 1.35;
+    }
+
+    .vu-card--pending .vu-party-name {
+        padding-left: 0;
+    }
+
+    .vu-card-status-row {
+        padding: 0 10px 10px 48px;
+    }
+
+    .vu-card-status-row--pending {
+        padding: 0 10px 10px 42px;
     }
 
     .vu-party-status {
         font-size: 32px;
+        line-height: 1.35;
     }
 
-    .vu-btn-confirm {
-        border-radius: 17.7px;
-        font-size: 29.2px;
-        padding: 12px 36px;
+    .vu-card-action-row {
+        padding-left: 35px;
+    }
+
+    .vu-card-action-inner {
+        padding: 10px;
+        width: 1133px;
+        max-width: 100%;
+    }
+
+    .vu-btn-submit {
+        width: 100%;
         height: 63px;
+        padding: 10.43px;
+        border: 1px solid #000;
+        border-radius: 17.72px;
+        font-size: 29.19px;
     }
 
-    /* Desktop Security Notice */
-    .vu-security-notice {
+    /* หมายเหตุด้านความปลอดภัย & เส้นคั่น บน Desktop */
+    .vu-security-notes {
+        margin: 26px 0 0 122px;
+        padding-left: 24px;
         font-size: 20px;
-        line-height: 1.8;
-        margin: 32px 0 36px;
-        padding: 0 10px;
+        line-height: 1.4;
     }
 
-    .vu-section-divider {
-        margin: 36px 0 44px;
+    .vote-check-divider.vu-divider {
+        margin: 47px 0 29px;
+        border-top: 2px solid #d9d9d9;
     }
 
-    /* Desktop Processing Section */
-    .vu-processing-section-title {
+    /* สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล บน Desktop */
+    .vu-process-section {
+        gap: 23px;
+    }
+
+    .vu-process-section-title {
+        margin-left: 9px;
         font-size: 32px;
-        margin-bottom: 24px;
+        line-height: 1.4;
     }
 
     .vu-process-box {
+        padding: 20px 20px 36px;
         border-radius: 17px;
-        padding: 28px 48px 44px;
-        box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.25);
-        gap: 20px;
+        box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25);
+        gap: 7px;
     }
 
-    .vu-process-box-header {
+    .vu-process-header-wrap {
+        padding: 10px;
+    }
+
+    .vu-process-header {
         font-size: 32px;
-        padding: 8px 0;
+        line-height: 1.35;
     }
 
-    .vu-steps-container {
-        gap: 16px;
-        padding: 0 12px;
+    .vu-process-content {
+        padding-left: 25px;
+        gap: 17px;
     }
 
-    .vu-step-item {
+    .vu-steps-list {
+        width: 1191px;
+        gap: 6px;
+    }
+
+    .vu-step-row {
         font-size: 28px;
+        line-height: 1.35;
     }
 
-    .vu-step-status-tag {
-        font-size: 28px;
+    .vu-step-value {
+        width: 69px;
     }
 
     .vu-process-progress-track {
-        height: 49.5px;
-        border-radius: 17px;
-        border-width: 1px;
-        padding: 4px;
-        margin-top: 12px;
+        width: 1191px;
+        height: 50px;
+        padding: 5px 9px;
+        border: 1px solid #000;
+        border-radius: 17.14px;
     }
 
     .vu-process-progress-fill {
-        border-radius: 17px;
-        box-shadow: inset 0px 4px 12.5px -3px rgba(0, 0, 0, 0.25);
+        height: 40.32px;
+        border-radius: 17.14px;
+        box-shadow: inset 0 4.03px 12.6px -3.02px rgba(0, 0, 0, 0.25);
     }
 
-    .vu-btn-view-results {
-        font-size: 24px;
-        padding: 16px 44px;
-        border-radius: 14px;
+    .vu-bottom-secbreak {
+        margin-top: 66px;
     }
 }
