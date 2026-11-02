@@ -79,7 +79,34 @@ function renderElections() {
     if (!electionList || !Array.isArray(EVENTS)) return;
 
     const savedStatus = readVoteStatus();
-    electionList.innerHTML = EVENTS.map(election => {
+    const voter = (typeof window.getVoter === 'function')
+        ? window.getVoter()
+        : (function () {
+            try { return JSON.parse(localStorage.getItem('election_current_voter') || 'null'); } catch { return null; }
+        })();
+
+    // กรองการ์ดการเลือกตั้งตามสิทธิ์จริงของผู้มีสิทธิเลือกตั้ง (Eligibility UI Filtering)
+    const visibleEvents = EVENTS.filter(election => {
+        if (!voter) return true;
+        if (typeof window.isEligibleFor === 'function') {
+            return window.isEligibleFor(election.id, voter);
+        }
+        if (election.id === 'house-election-2569') return voter.eligible_mp !== false;
+        if (election.id === 'referendum-2569-03') return voter.eligible_referendum !== false;
+        return true;
+    });
+
+    if (visibleEvents.length === 0) {
+        electionList.innerHTML = `
+            <div class="vote-election-empty" style="text-align: center; padding: 48px 20px; color: #666;">
+                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #000;">ไม่พบรายการที่ท่านมีสิทธิลงคะแนน</p>
+                <p style="font-size: 14px; color: #666; margin: 0;">ตามข้อมูลทะเบียน ท่านไม่มีสิทธิลงคะแนนในการเลือกตั้งหรือการออกเสียงประชามติในขณะนี้</p>
+            </div>
+        `;
+        return;
+    }
+
+    electionList.innerHTML = visibleEvents.map(election => {
         const electionId = election.id || `${election.date}-${election.title}`;
         const date = new Intl.DateTimeFormat('th-TH', {
             day: 'numeric',
@@ -122,5 +149,10 @@ function renderElections() {
         window.location.href = `Vote-Todo.html?id=${encodeURIComponent(id)}`;
     });
 }
+
+// อัปเดตรายการเมื่อดึงข้อมูลผู้โหวตประจำเครื่องสำเร็จ
+window.addEventListener('voter-claimed', () => {
+    renderElections();
+});
 
 renderElections();

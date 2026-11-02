@@ -57,7 +57,56 @@ function initHeroBanner(currentEventId) {
 }
 
 // 2. Render รายการการ์ดข้อพึงปฏิบัติ ดึงข้อมูลจาก VOTE_TODO_DATA ใน script/vote-todo-data.js
+function checkEligibility(currentEventId) {
+    const voter = (typeof window.getVoter === 'function')
+        ? window.getVoter()
+        : (function () {
+            try { return JSON.parse(localStorage.getItem('election_current_voter') || 'null'); } catch { return null; }
+        })();
+
+    if (!voter) return true;
+
+    let isEligible = true;
+    if (typeof window.isEligibleFor === 'function') {
+        isEligible = window.isEligibleFor(currentEventId, voter);
+    } else {
+        if (currentEventId === 'house-election-2569') isEligible = voter.eligible_mp !== false;
+        if (currentEventId === 'referendum-2569-03') isEligible = voter.eligible_referendum !== false;
+    }
+
+    if (!isEligible) {
+        const list = document.getElementById('voteTodoList');
+        const agreement = document.querySelector('.vote-todo-agreement');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (agreement) agreement.style.display = 'none';
+        if (nextBtn) {
+            nextBtn.disabled = true;
+            nextBtn.classList.add('is-disabled');
+            nextBtn.style.display = 'none';
+        }
+        if (list) {
+            list.innerHTML = `
+                <div class="vote-todo-card" style="text-align: center; padding: 36px 20px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #dc2626; margin-bottom: 10px;">
+                        ท่านไม่มีสิทธิลงคะแนนในรายการนี้
+                    </div>
+                    <div style="font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 24px;">
+                        ระบบตรวจสอบข้อมูลผู้มีสิทธิเลือกตั้งประจำเครื่องแล้ว พบว่าท่านไม่มีสิทธิลงคะแนนในการเลือกตั้งรายการนี้
+                    </div>
+                    <a href="Vote-Check.html" class="vote-todo-btn vote-todo-btn-back" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; margin: 0 auto;">
+                        กลับสู่หน้ารายการสิทธิลงคะแนน
+                    </a>
+                </div>
+            `;
+        }
+        return false;
+    }
+    return true;
+}
+
 function renderVoteTodos(currentEventId) {
+    if (!checkEligibility(currentEventId)) return;
     const listContainer = document.getElementById('voteTodoList');
     if (!listContainer || typeof VOTE_TODO_DATA === 'undefined') return;
 
@@ -118,4 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroBanner(currentEventId);
     renderVoteTodos(currentEventId);
     initControls(currentEventId);
+});
+
+window.addEventListener('voter-claimed', () => {
+    const currentEventId = getCurrentEventId();
+    checkEligibility(currentEventId);
 });

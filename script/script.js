@@ -12,3 +12,10 @@ if (resultsButton) {
 		window.location.href = 'pages/Vote-Result.html';
 	});
 }
+
+const eligibilityButton = document.getElementById('eligibility');
+if (eligibilityButton) {
+	eligibilityButton.addEventListener('click', () => {
+		window.location.href = 'pages/Vote-Check.html';
+	});
+}

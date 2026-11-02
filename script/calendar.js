@@ -27,11 +27,31 @@ function escWithBreaks(s) {
 
 const now = FAKE_TODAY ? new Date(FAKE_TODAY + 'T00:00:00') : new Date();
 const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-const eventDates = new Set(EVENTS.map(e => e.date));
+
+function getEligibleEvents() {
+    const voter = (typeof window.getVoter === 'function')
+        ? window.getVoter()
+        : (function () {
+            try { return JSON.parse(localStorage.getItem('election_current_voter') || 'null'); } catch { return null; }
+        })();
+
+    if (!voter) return EVENTS;
+
+    return EVENTS.filter(e => {
+        if (typeof window.isEligibleFor === 'function') {
+            return window.isEligibleFor(e.id, voter);
+        }
+        if (e.id === 'house-election-2569') return voter.eligible_mp !== false;
+        if (e.id === 'referendum-2569-03') return voter.eligible_referendum !== false;
+        return true;
+    });
+}
 
 let view = new Date(now.getFullYear(), now.getMonth(), 1);
 
 function renderCalendar() {
+    const eligibleEvents = getEligibleEvents();
+    const eventDates = new Set(eligibleEvents.map(e => e.date));
     const y = view.getFullYear();
     const m = view.getMonth();
     const firstWeekday = new Date(y, m, 1).getDay();
@@ -56,13 +76,14 @@ function renderCalendar() {
 }
 
 function renderUpcoming() {
-    const upcoming = EVENTS
+    const eligibleEvents = getEligibleEvents();
+    const upcoming = eligibleEvents
         .filter(e => e.date >= todayKey)
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(0, 5);
 
     if (upcoming.length === 0) {
-        listEl.innerHTML = '<div class="event-empty">ไม่มีกำหนดการที่กำลังจะมาถึง</div>';
+        listEl.innerHTML = '<div class="event-empty" style="text-align: center; padding: 24px 16px; color: #888;">ไม่มีกำหนดการที่ท่านมีสิทธิลงคะแนนในขณะนี้</div>';
         return;
     }
 
@@ -85,6 +106,11 @@ function renderUpcoming() {
 
 document.getElementById('calPrev').onclick = () => { view.setMonth(view.getMonth() - 1); renderCalendar(); };
 document.getElementById('calNext').onclick = () => { view.setMonth(view.getMonth() + 1); renderCalendar(); };
+
+window.addEventListener('voter-claimed', () => {
+    renderCalendar();
+    renderUpcoming();
+});
 
 renderCalendar();
 renderUpcoming();
