@@ -65,11 +65,12 @@
     }
 
     function barRowHtml(nameHtml, subText, percentText, widthPct = 0) {
+        const cleanSub = String(subText).replace(/^[•\s-]+/, '').trim();
         return `
             <div class="vs-bar-row">
                 ${nameHtml}
                 <div class="vs-bar-meta">
-                    <span class="vs-bar-sub">${escapeHtml(subText)}</span>
+                    <span class="vs-bar-sub"><span class="vs-bullet" aria-hidden="true">•</span><span class="vs-bar-text">${escapeHtml(cleanSub)}</span></span>
                     <span class="vs-bar-pct">${escapeHtml(percentText)}</span>
                 </div>
                 <div class="vs-bar-track vs-bar"><div class="vs-bar-fill" style="width: ${widthPct}%;"></div></div>
@@ -134,6 +135,7 @@
 
         regionEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
+            text: row.querySelector('.vs-bar-text'),
             pct: row.querySelector('.vs-bar-pct'),
             fill: row.querySelector('.vs-bar-fill'),
         }));
@@ -144,7 +146,12 @@
             const els = regionEls[index];
             if (!els) return;
             const share = pct(region.used, region.total);
-            els.sub.textContent = `• ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
+            const label = `ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
+            if (els.text) {
+                els.text.textContent = label;
+            } else if (els.sub) {
+                els.sub.textContent = `• ${label}`;
+            }
             els.pct.textContent = `คิดเป็น ${share}%`;
             els.fill.style.width = `${share}%`;
         });
@@ -294,6 +301,7 @@
 
         scoreEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
+            text: row.querySelector('.vs-bar-text'),
             pct: row.querySelector('.vs-bar-pct'),
             fill: row.querySelector('.vs-bar-fill'),
         }));
@@ -307,9 +315,14 @@
             const els = scoreEls[index];
             if (!els) return;
             const share = pct(row.votes, total);
-            els.sub.textContent = row.hideVotes
-                ? `• ${row.label}`
-                : `• ${row.label} ${fmt(row.votes)} คะแนน`;
+            const label = row.hideVotes
+                ? row.label
+                : `${row.label} ${fmt(row.votes)} คะแนน`;
+            if (els.text) {
+                els.text.textContent = label;
+            } else if (els.sub) {
+                els.sub.textContent = `• ${label}`;
+            }
             els.pct.textContent = `คิดเป็น ${share}%`;
             els.fill.style.width = `${share}%`;
         });
