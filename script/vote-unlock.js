@@ -49,10 +49,10 @@
         ],
         referendum: [
             { id: 'ect', number: 1, name: 'ผู้แทนสำนักงาน กกต.', defaultRole: 'ect', refCode: '#EC-881B' },
-            { id: 'party1', number: 2, name: 'ผู้แทนฝ่ายเห็นชอบ', defaultRole: 'approve_rep', refCode: '#RF-YES1' },
-            { id: 'party2', number: 3, name: 'ผู้แทนฝ่ายไม่เห็นชอบ', defaultRole: 'disapprove_rep', refCode: '#RF-NO02' },
-            { id: 'party3', number: 4, name: 'ผู้แทนภาควิชาการและสื่อมวลชน', defaultRole: 'academic_rep', refCode: '#AC-551D' },
-            { id: 'citizen', number: 5, name: 'ผู้แทนภาคประชาชนและผู้สังเกตการณ์', defaultRole: 'citizen_rep', refCode: '#OB-904F' }
+            { id: 'parliament', number: 2, name: 'ผู้แทนรัฐสภา', defaultRole: 'parliament', refCode: '#PL-772A' },
+            { id: 'citizen1', number: 3, name: 'ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 1', defaultRole: 'citizen1', refCode: '#OB-01CA' },
+            { id: 'citizen2', number: 4, name: 'ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 2', defaultRole: 'citizen2', refCode: '#OB-02DB' },
+            { id: 'citizen3', number: 5, name: 'ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 3', defaultRole: 'citizen3', refCode: '#OB-03EC' }
         ]
     };
 
@@ -67,12 +67,18 @@
         if (!currentRole || currentRole === 'all' || currentRole === 'dev') return true;
         if (currentRole === stakeholder.id || currentRole === stakeholder.defaultRole) return true;
 
-        // Alias mapping
+        // MP Aliases
         if (stakeholder.id === 'ect' && (currentRole === 'admin' || currentRole === 'ect')) return true;
-        if (stakeholder.id === 'party1' && (currentRole === 'citizen1' || currentRole === 'party1' || currentRole === 'approve')) return true;
-        if (stakeholder.id === 'party2' && (currentRole === 'citizen2' || currentRole === 'party2' || currentRole === 'disapprove')) return true;
-        if (stakeholder.id === 'party3' && (currentRole === 'lecturer1' || currentRole === 'party3' || currentRole === 'academic')) return true;
-        if (stakeholder.id === 'citizen' && (currentRole === 'lecturer2' || currentRole === 'citizen' || currentRole === 'observer')) return true;
+        if (stakeholder.id === 'party1' && (currentRole === 'party1' || currentRole === 'citizen1')) return true;
+        if (stakeholder.id === 'party2' && (currentRole === 'party2' || currentRole === 'citizen2')) return true;
+        if (stakeholder.id === 'party3' && (currentRole === 'party3' || currentRole === 'lecturer1')) return true;
+        if (stakeholder.id === 'citizen' && (currentRole === 'citizen' || currentRole === 'lecturer2' || currentRole === 'observer')) return true;
+
+        // Referendum Aliases
+        if (stakeholder.id === 'parliament' && (currentRole === 'parliament' || currentRole === 'parliament_rep' || currentRole === 'party1' || currentRole === 'citizen1')) return true;
+        if (stakeholder.id === 'citizen1' && (currentRole === 'citizen1' || currentRole === 'observer1' || currentRole === 'party2' || currentRole === 'citizen2')) return true;
+        if (stakeholder.id === 'citizen2' && (currentRole === 'citizen2' || currentRole === 'observer2' || currentRole === 'party3' || currentRole === 'lecturer1')) return true;
+        if (stakeholder.id === 'citizen3' && (currentRole === 'citizen3' || currentRole === 'observer3' || currentRole === 'citizen' || currentRole === 'lecturer2')) return true;
 
         return false;
     }
@@ -433,12 +439,19 @@
         const bar = document.getElementById('roleSimulatorBar');
         if (!bar) return;
 
-        const roles = [
+        const roles = isReferendum ? [
             { key: 'all', label: 'ทั้งหมด (Dev)' },
             { key: 'ect', label: '1. กกต.' },
-            { key: 'party1', label: isReferendum ? '2. ฝ่ายเห็นชอบ' : '2. พรรค ก' },
-            { key: 'party2', label: isReferendum ? '3. ฝ่ายไม่เห็นชอบ' : '3. พรรค ข' },
-            { key: 'party3', label: isReferendum ? '4. วิชาการ/สื่อ' : '4. พรรค ค' },
+            { key: 'parliament', label: '2. รัฐสภา' },
+            { key: 'citizen1', label: '3. ประชาชน 1' },
+            { key: 'citizen2', label: '4. ประชาชน 2' },
+            { key: 'citizen3', label: '5. ประชาชน 3' }
+        ] : [
+            { key: 'all', label: 'ทั้งหมด (Dev)' },
+            { key: 'ect', label: '1. กกต.' },
+            { key: 'party1', label: '2. พรรค ก' },
+            { key: 'party2', label: '3. พรรค ข' },
+            { key: 'party3', label: '4. พรรค ค' },
             { key: 'citizen', label: '5. ประชาชน/สังเกตการณ์' }
         ];
 
