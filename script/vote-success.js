@@ -35,21 +35,36 @@ function generateRandomHex(len) {
 }
 
 /**
- * สร้าง Unique Tracking Code แบบไม่ซ้ำกัน 100%
- * พ่วง Timestamp (มิลลิวินาที) + สุ่มด้วย Web Crypto API
- * รูปแบบ เช่น VOTE-MVYY8FIU-511D-2026
+ * สร้าง Unique Tracking Hash สุ่มเลขฐาน 16 จำนวน 4 ชุด คั่นด้วยขีด เช่น #a8f9-4c2e-991b-88ff
  */
-function generateUniqueTrackingCode() {
-    const timePart = Date.now().toString(36).toUpperCase();
-    let randPart = '';
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-        const randomBytes = new Uint8Array(3);
-        window.crypto.getRandomValues(randomBytes);
-        randPart = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-    } else {
-        randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-    }
-    return `VOTE-${timePart}-${randPart}-2026`;
+function generateTrackingHash() {
+    const hex = (len) => {
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const bytes = new Uint8Array(len);
+            window.crypto.getRandomValues(bytes);
+            return Array.from(bytes, b => (b % 16).toString(16)).join('');
+        }
+        let out = '';
+        for (let i = 0; i < len; i++) {
+            out += Math.floor(Math.random() * 16).toString(16);
+        }
+        return out;
+    };
+    return `#${hex(4)}-${hex(4)}-${hex(4)}-${hex(4)}`;
+}
+
+function formatThaiDateTime(date = new Date()) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}:${seconds} น.`;
+
+    const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+
+    return `${timeStr} วันที่ ${day} ${month} ${year}`;
 }
 
 function ensureStagingEnvelope(currentEventId) {
@@ -61,28 +76,30 @@ function ensureStagingEnvelope(currentEventId) {
         stagingTable = {};
     }
 
-    if (stagingTable[currentEventId] && (stagingTable[currentEventId].trackingCode || stagingTable[currentEventId].trackingHash)) {
+    if (stagingTable[currentEventId] && (stagingTable[currentEventId].trackingHash || stagingTable[currentEventId].trackingCode)) {
         return stagingTable[currentEventId];
     }
 
-    // กรณีเปิดหน้านี้โดยตรง ให้สร้างข้อมูลจำลองเริ่มต้นตามโครงสร้าง Digital Double Envelope
-    const trackingCode = generateUniqueTrackingCode();
+    // กรณีเปิดหน้านี้โดยตรง ให้ดึงตัวตนจาก election_current_voter หรือ fallback
+    const voter = JSON.parse(localStorage.getItem('election_current_voter') || 'null') ||
+                  JSON.parse(localStorage.getItem('voter_session') || 'null') || {
+        citizen_id: '9-1001-50001-01-1',
+        full_name_th: 'นายกิตติศักดิ์ เพิ่มมงคล',
+        district_info: 'เขต 1 (พระนคร) กรุงเทพมหานคร'
+    };
+
+    const trackingHash = generateTrackingHash();
     const mockCipherHex = generateRandomHex(16).toUpperCase();
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('th-TH', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    }) + ' น.';
-    const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    const votedAtText = formatThaiDateTime(now);
 
     const record = {
         eventId: currentEventId,
         outerEnvelope: {
-            citizenId: '1-1005-01234-56-7',
-            voterName: 'ชนัตนนท์ บวรโภคิน',
-            votedAt: `${dateStr} ${timeStr}`,
+            citizenId: voter.citizen_id || voter.citizenId || '9-1001-50001-01-1',
+            voterName: voter.full_name_th || voter.fullName || 'นายกิตติศักดิ์ เพิ่มมงคล',
+            districtInfo: voter.district_info || voter.districtInfo || 'เขต 1 (พระนคร) กรุงเทพมหานคร',
+            votedAt: votedAtText,
             timestampIso: now.toISOString(),
             version: 1
         },
@@ -91,8 +108,8 @@ function ensureStagingEnvelope(currentEventId) {
             algorithm: 'RSA-OAEP-4096+SALT',
             sealedUntil: '17:00'
         },
-        trackingHash: trackingCode,
-        trackingCode: trackingCode
+        trackingHash: trackingHash,
+        trackingCode: trackingHash
     };
 
     try {
@@ -134,7 +151,7 @@ function initHeroAndReceipt(currentEventId) {
         }
     }
 
-    // 2. ดึงข้อมูลใบเสร็จจาก sessionStorage (หรือ fallback ไปที่ Staging Table)
+    // 2. ดึงข้อมูลใบเสร็จจาก sessionStorage (หรือ fallback ไปที่ localStorage)
     let sessionReceipt = null;
     try {
         const rawReceipt = sessionStorage.getItem('latest_vote_receipt');
@@ -145,49 +162,56 @@ function initHeroAndReceipt(currentEventId) {
         console.warn('SessionStorage error:', e);
     }
 
+    const currentVoter = JSON.parse(localStorage.getItem('election_current_voter') || 'null') ||
+                         JSON.parse(localStorage.getItem('voter_session') || 'null') || {
+        citizen_id: '9-1001-50001-01-1',
+        full_name_th: 'นายกิตติศักดิ์ เพิ่มมงคล',
+        district_info: 'เขต 1 (พระนคร) กรุงเทพมหานคร'
+    };
+
     const envelopeRecord = ensureStagingEnvelope(currentEventId);
     const electionCopy = getReceiptLinesForEvent(currentEventId);
 
     const titleEl = document.getElementById('receiptElectionTitle');
     const dateEl = document.getElementById('receiptElectionDate');
     const voterNameEl = document.getElementById('receiptVoterName');
+    const districtInfoEl = document.getElementById('receiptDistrictInfo');
     const voteTimeEl = document.getElementById('receiptVoteTime');
     const hashEl = document.getElementById('receiptTrackingHash');
 
     if (titleEl) {
         titleEl.innerHTML = electionCopy.titleHtml;
     }
-
-    const voterSession = JSON.parse(localStorage.getItem('voter_session') || 'null');
-    const voterName = voterSession?.fullName || envelopeRecord?.outerEnvelope?.voterName || 'ชนัตนนท์ บวรโภคิน';
-
-    // วันที่, เวลา และ รหัสตรวจสอบสถานะบัตร (Tracking Code)
-    const trackingCode = sessionReceipt?.trackingCode || envelopeRecord?.trackingCode || envelopeRecord?.trackingHash || 'VOTE-A8F9-2026';
-    const dateText = sessionReceipt?.voteDate || electionCopy.dateText;
-    const votedAt = sessionReceipt?.voteTime
-        ? `${dateText} ${sessionReceipt.voteTime}`
-        : (envelopeRecord?.outerEnvelope?.votedAt || `${dateText} 12:00 น.`);
-
     if (dateEl) {
-        dateEl.textContent = dateText;
+        dateEl.textContent = electionCopy.dateText;
     }
+
+    const voterName = sessionReceipt?.fullName || currentVoter?.full_name_th || currentVoter?.fullName || envelopeRecord?.outerEnvelope?.voterName || 'นายกิตติศักดิ์ เพิ่มมงคล';
+    const districtInfo = sessionReceipt?.districtInfo || currentVoter?.district_info || currentVoter?.districtInfo || envelopeRecord?.outerEnvelope?.districtInfo || 'เขต 1 (พระนคร) กรุงเทพมหานคร';
+    const trackingHash = sessionReceipt?.trackingHash || sessionReceipt?.trackingCode || envelopeRecord?.trackingHash || envelopeRecord?.trackingCode || generateTrackingHash();
+    const voteTime = sessionReceipt?.voteTime || envelopeRecord?.outerEnvelope?.votedAt || formatThaiDateTime(new Date());
+
     if (voterNameEl) {
         voterNameEl.textContent = `ชื่อผู้ใช้สิทธิ์ : ${voterName}`;
     }
+    if (districtInfoEl) {
+        districtInfoEl.textContent = `เขตเลือกตั้ง : ${districtInfo}`;
+    }
     if (voteTimeEl) {
-        voteTimeEl.textContent = `เวลาที่ลงคะแนน : ${votedAt}`;
+        voteTimeEl.textContent = `เวลาที่ลงคะแนน : ${voteTime}`;
     }
     if (hashEl) {
-        hashEl.textContent = `รหัสตรวจสอบสถานะบัตร : ${trackingCode}`;
+        hashEl.textContent = `รหัสตรวจสอบสถานะบัตร : ${trackingHash}`;
     }
 
     return {
         titleLine1: electionCopy.titleLine1,
         titleLine2: electionCopy.titleLine2,
-        dateText,
+        dateText: electionCopy.dateText,
         voterName,
-        votedAt,
-        trackingHash: trackingCode
+        districtInfo,
+        votedAt: voteTime,
+        trackingHash
     };
 }
 
@@ -266,21 +290,27 @@ async function saveReceiptAsImage(receiptData) {
     ctx.font = '400 24px "Prompt", sans-serif';
     ctx.fillText(receiptData.dateText, centerX, 382);
 
-    // 3. ข้อมูลผู้ใช้สิทธิและเวลาที่ลงคะแนน (จัดชิดซ้ายให้อยู่กึ่งกลางการ์ด)
+    // 3. ข้อมูลผู้ใช้สิทธิ เขตเลือกตั้ง และเวลาที่ลงคะแนน (จัดชิดซ้ายให้อยู่กึ่งกลางการ์ด)
     ctx.font = '400 24px "Prompt", sans-serif';
     const lineVoter = `ชื่อผู้ใช้สิทธิ์ : ${receiptData.voterName}`;
+    const lineDistrict = `เขตเลือกตั้ง : ${receiptData.districtInfo || '-'}`;
     const lineTime = `เวลาที่ลงคะแนน : ${receiptData.votedAt}`;
-    const maxMetaWidth = Math.max(ctx.measureText(lineVoter).width, ctx.measureText(lineTime).width);
+    const maxMetaWidth = Math.max(
+        ctx.measureText(lineVoter).width,
+        ctx.measureText(lineDistrict).width,
+        ctx.measureText(lineTime).width
+    );
     const metaStartX = (width - maxMetaWidth) / 2;
 
     ctx.textAlign = 'left';
-    ctx.fillText(lineVoter, metaStartX, 462);
-    ctx.fillText(lineTime, metaStartX, 500);
+    ctx.fillText(lineVoter, metaStartX, 436);
+    ctx.fillText(lineDistrict, metaStartX, 474);
+    ctx.fillText(lineTime, metaStartX, 512);
 
     // 4. รหัสตรวจสอบสถานะบัตร
     ctx.textAlign = 'center';
     ctx.font = '400 24px "Prompt", sans-serif';
-    ctx.fillText(`รหัสตรวจสอบสถานะบัตร : ${receiptData.trackingHash}`, centerX, 578);
+    ctx.fillText(`รหัสตรวจสอบสถานะบัตร : ${receiptData.trackingHash}`, centerX, 580);
 
     // สั่งดาวน์โหลดเป็นไฟล์ PNG
     const cleanHash = receiptData.trackingHash.replace(/[^a-zA-Z0-9_-]/g, '');

@@ -214,17 +214,34 @@ async function encryptWithWebCrypto(plainText, secretKeyString = 'eLection-ECT-S
  * พ่วง Timestamp (มิลลิวินาที) + สุ่มด้วย Web Crypto API
  * รูปแบบ เช่น VOTE-MVYY8FIU-511D-2026
  */
-function generateUniqueTrackingCode() {
-    const timePart = Date.now().toString(36).toUpperCase();
-    let randPart = '';
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-        const randomBytes = new Uint8Array(3);
-        window.crypto.getRandomValues(randomBytes);
-        randPart = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-    } else {
-        randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-    }
-    return `VOTE-${timePart}-${randPart}-2026`;
+function generateTrackingHash() {
+    const hex = (len) => {
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const bytes = new Uint8Array(len);
+            window.crypto.getRandomValues(bytes);
+            return Array.from(bytes, b => (b % 16).toString(16)).join('');
+        }
+        let out = '';
+        for (let i = 0; i < len; i++) {
+            out += Math.floor(Math.random() * 16).toString(16);
+        }
+        return out;
+    };
+    return `#${hex(4)}-${hex(4)}-${hex(4)}-${hex(4)}`;
+}
+
+function formatThaiDateTime(date = new Date()) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}:${seconds} น.`;
+
+    const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+
+    return `${timeStr} วันที่ ${day} ${month} ${year}`;
 }
 
 function setupReviewActions(currentEventId) {
@@ -271,20 +288,8 @@ function setupReviewActions(currentEventId) {
                 const ballot1 = localStorage.getItem(`vote-choice-${currentEventId}-b1`) || (isReferendum ? 'approve' : '1');
                 const ballot2 = isReferendum ? null : (localStorage.getItem(`vote-choice-${currentEventId}-b2`) || '1');
 
-                // 2. สุ่มสร้าง tracking_code รูปแบบไม่ซ้ำ 100% (พ่วง Timestamp + Crypto)
-                const tracking_code = generateUniqueTrackingCode();
-                const trackingHash = tracking_code;
-
-                // บันทึกข้อมูลใบเสร็จลง sessionStorage เพื่อนำไปแสดงในหน้า Vote-Success.html
-                const now = new Date();
-                const voteTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' น.';
-                const voteDateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
-
-                sessionStorage.setItem('latest_vote_receipt', JSON.stringify({
-                    trackingCode: tracking_code,
-                    voteTime: voteTimeStr,
-                    voteDate: voteDateStr
-                }));
+                // 2. สุ่มสร้าง tracking_hash รูปแบบใหม่ทุกครั้งที่กดยืนยัน เช่น #a8f9-4c2e-991b-88ff
+                const trackingHash = generateTrackingHash();
 
                 // 3. ซองชั้นใน (Inner Envelope): เข้ารหัสตัวเลือกคะแนนจริงด้วย Web Crypto API (AES-GCM 256-bit)
                 const innerEnvelope = isReferendum ? {
@@ -298,66 +303,113 @@ function setupReviewActions(currentEventId) {
                     sealedUntil: '17:00'
                 };
 
-                // 4. ซองชั้นนอก (Outer Envelope): ข้อมูลผู้มีสิทธิ
-                const voterSession = JSON.parse(localStorage.getItem('voter_session') || 'null') || {
-                    citizenId: '1-1005-01234-56-7',
-                    fullName: 'ชนัตนนท์ บวรโภคิน',
-                    districtCode: 'BKK-01'
+                // 4. ซองชั้นนอก (Outer Envelope): ดึงตัวตนจริงจาก election_current_voter
+                const currentVoter = JSON.parse(localStorage.getItem('election_current_voter') || 'null') ||
+                                     JSON.parse(localStorage.getItem('voter_session') || 'null') || {
+                    citizen_id: '9-1001-50001-01-1',
+                    full_name_th: 'นายกิตติศักดิ์ เพิ่มมงคล',
+                    district_code: 'BKK-01',
+                    district_info: 'เขต 1 (พระนคร) กรุงเทพมหานคร'
+                };
+                const voterId = currentVoter.citizen_id || currentVoter.citizenId || '9-1001-50001-01-1';
+                const fullName = currentVoter.full_name_th || currentVoter.fullName || 'ผู้มีสิทธิเลือกตั้ง';
+                const districtCode = currentVoter.district_code || currentVoter.districtCode || 'BKK-01';
+                const districtInfo = currentVoter.district_info || currentVoter.districtInfo || 'เขต 1 (พระนคร) กรุงเทพมหานคร';
+
+                const now = new Date();
+                const votedAtText = formatThaiDateTime(now);
+
+                // บันทึกข้อมูลใบเสร็จลง sessionStorage เพื่อนำไปแสดงในหน้า Vote-Success.html
+                sessionStorage.setItem('latest_vote_receipt', JSON.stringify({
+                    fullName: fullName,
+                    districtInfo: districtInfo,
+                    trackingHash: trackingHash,
+                    voteTime: votedAtText,
+                    eventId: currentEventId
+                }));
+
+                // ========================================================
+                // 🚀 ยิงขึ้น Supabase จริง (รองรับ Revote ด้วย upsert on Conflict: voter_id)
+                // ========================================================
+                const SUPABASE_CONFIG = {
+                    url: (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://nzobdkybbpufntionuze.supabase.co/',
+                    key: (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_xBBzY0PXxUVWx4fINXBk3w_UwSEywAq'
                 };
 
-                const votedAtText = `${voteDateStr} ${voteTimeStr}`;
-
-                // ========================================================
-                // 🚀 ยิงขึ้น Supabase จริง (แยกตารางตามประเภทการเลือกตั้ง)
-                // ========================================================
-                if (typeof supabaseClient !== 'undefined') {
-                    const isReferendum = currentEventId.toLowerCase().includes('referendum');
-
-                    if (isReferendum) {
-                        // ส่งเข้าตารางประชามติ (กรณี Revote ให้ tracking_code ถูกอัปเดตทับด้วยรหัสใหม่)
-                        const refPayload = {
-                            voter_id: voterSession.citizenId,
-                            tracking_code: tracking_code,
-                            encrypted_ballot: innerEnvelope,
-                            status: 'ACTIVE'
-                        };
-                        let { error: sbError } = await supabaseClient
-                            .from('referendum_staging_box')
-                            .upsert(refPayload, { onConflict: 'voter_id' });
-
-                        if (sbError && sbError.message && (sbError.message.includes('tracking_hash') || sbError.message.includes('column'))) {
-                            const { error: retryErr } = await supabaseClient
+                if (isReferendum) {
+                    const refPayload = {
+                        voter_id: voterId,
+                        tracking_hash: trackingHash,
+                        encrypted_ballot: innerEnvelope,
+                        status: 'ACTIVE'
+                    };
+                    let sbDone = false;
+                    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                        try {
+                            const { error: sbError } = await supabaseClient
                                 .from('referendum_staging_box')
-                                .upsert({ ...refPayload, tracking_hash: tracking_code }, { onConflict: 'voter_id' });
-                            if (retryErr) console.error('Supabase Error (Referendum retry):', retryErr);
-                        } else if (sbError) {
-                            console.error('Supabase Error (Referendum):', sbError);
+                                .upsert(refPayload, { onConflict: 'voter_id' });
+                            if (!sbError) sbDone = true;
+                            else console.warn('Supabase Client Upsert Warning (Ref):', sbError);
+                        } catch (e) {
+                            console.warn('Supabase Client exception (Ref):', e);
                         }
-                    } else {
-                        // ส่งเข้าตาราง ส.ส. (กรณี Revote ให้ tracking_code ถูกอัปเดตทับด้วยรหัสใหม่)
-                        const mpPayload = {
-                            voter_id: voterSession.citizenId,
-                            tracking_code: tracking_code,
-                            district_code: voterSession.districtCode || 'BKK-01',
-                            encrypted_ballot: innerEnvelope,
-                            status: 'ACTIVE'
-                        };
-                        let { error: sbError } = await supabaseClient
-                            .from('mp_staging_box')
-                            .upsert(mpPayload, { onConflict: 'voter_id' });
-
-                        if (sbError && sbError.message && (sbError.message.includes('tracking_hash') || sbError.message.includes('column'))) {
-                            const { error: retryErr } = await supabaseClient
+                    }
+                    if (!sbDone) {
+                        try {
+                            await fetch(`${SUPABASE_CONFIG.url}rest/v1/referendum_staging_box?on_conflict=voter_id`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': SUPABASE_CONFIG.key,
+                                    'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'resolution=merge-duplicates,return=representation'
+                                },
+                                body: JSON.stringify(refPayload)
+                            });
+                        } catch (fetchErr) {
+                            console.warn('Fetch fallback error (Ref):', fetchErr);
+                        }
+                    }
+                } else {
+                    const mpPayload = {
+                        voter_id: voterId,
+                        tracking_hash: trackingHash,
+                        district_code: districtCode,
+                        encrypted_ballot: innerEnvelope,
+                        status: 'ACTIVE'
+                    };
+                    let sbDone = false;
+                    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                        try {
+                            const { error: sbError } = await supabaseClient
                                 .from('mp_staging_box')
-                                .upsert({ ...mpPayload, tracking_hash: tracking_code }, { onConflict: 'voter_id' });
-                            if (retryErr) console.error('Supabase Error (MP retry):', retryErr);
-                        } else if (sbError) {
-                            console.error('Supabase Error (MP):', sbError);
+                                .upsert(mpPayload, { onConflict: 'voter_id' });
+                            if (!sbError) sbDone = true;
+                            else console.warn('Supabase Client Upsert Warning (MP):', sbError);
+                        } catch (e) {
+                            console.warn('Supabase Client exception (MP):', e);
+                        }
+                    }
+                    if (!sbDone) {
+                        try {
+                            await fetch(`${SUPABASE_CONFIG.url}rest/v1/mp_staging_box?on_conflict=voter_id`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': SUPABASE_CONFIG.key,
+                                    'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'resolution=merge-duplicates,return=representation'
+                                },
+                                body: JSON.stringify(mpPayload)
+                            });
+                        } catch (fetchErr) {
+                            console.warn('Fetch fallback error (MP):', fetchErr);
                         }
                     }
                 }
 
-                // บันทึก fallback ใน localStorage เดิมของคุณเพื่อความชัวร์
+                // บันทึก fallback ใน localStorage สำหรับการใช้งานภายในแอป
                 const stagingKey = 'election-staging-envelopes';
                 const stagingTable = JSON.parse(localStorage.getItem(stagingKey) || '{}');
                 const prevEnvelope = stagingTable[currentEventId];
@@ -368,17 +420,26 @@ function setupReviewActions(currentEventId) {
                 stagingTable[currentEventId] = {
                     eventId: currentEventId,
                     outerEnvelope: {
-                        citizenId: voterSession.citizenId,
-                        voterName: voterSession.fullName,
+                        citizenId: voterId,
+                        voterName: fullName,
+                        districtInfo: districtInfo,
                         votedAt: votedAtText,
                         timestampIso: now.toISOString(),
                         version: nextVersion
                     },
                     innerEnvelope: innerEnvelope,
-                    trackingHash: tracking_code,
-                    trackingCode: tracking_code
+                    trackingHash: trackingHash,
+                    trackingCode: trackingHash
                 };
                 localStorage.setItem(stagingKey, JSON.stringify(stagingTable));
+
+                // ซิงค์ voter_session
+                localStorage.setItem('voter_session', JSON.stringify({
+                    citizenId: voterId,
+                    fullName: fullName,
+                    districtCode: districtCode,
+                    districtInfo: districtInfo
+                }));
 
                 // 5. อัปเดตสถานะการใช้สิทธิ
                 const statusKey = 'election-vote-status-v2';

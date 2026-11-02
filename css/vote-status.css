@@ -73,9 +73,9 @@
     --bar-radius: 8.1px;
     --bar-pad-x: 2.7px;
     --bar-pad-y: 2.4px;
-    --bar-name-indent: 6px;
-    --bar-indent: 18px;
-    --bar-right: 10px;
+    --bar-name-indent: 14px;
+    --bar-indent: 28px;
+    --bar-right: 14px;
 
     display: flex;
     flex-direction: column;
@@ -140,15 +140,31 @@
     gap: var(--kpi-gap);
     margin: 0;
     padding: 2px 0;
+    text-align: center;
+}
+
+.vs-kpi-lines {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    margin: 0 auto;
+    text-align: left;
 }
 
 .vs-kpi-line {
-    align-self: stretch;
     margin: 0;
-    padding: 0 6px 0 var(--kpi-indent);
+    padding: 0;
     font-size: var(--kpi-text);
     font-weight: 400;
     line-height: 1.3;
+    white-space: nowrap;
+}
+
+.vs-kpi-body > .vs-kpi-line {
+    align-self: center;
+    text-align: center;
+    padding: 0 4px;
 }
 
 .vs-kpi-line b {
@@ -745,9 +761,9 @@
         --card-text: 13px;
         --bar-h: 30px;
         --bar-radius: 12px;
-        --bar-name-indent: 10px;
-        --bar-indent: 26px;
-        --bar-right: 16px;
+        --bar-name-indent: 20px;
+        --bar-indent: 40px;
+        --bar-right: 20px;
         --bar-pad-x: 4.5px;
     }
 
@@ -871,9 +887,9 @@
         --bar-radius: 17px;
         --bar-pad-x: 9.4px;
         --bar-pad-y: 5px;
-        --bar-name-indent: 14px;
-        --bar-indent: 38px;
-        --bar-right: 24px;
+        --bar-name-indent: 32px;
+        --bar-indent: 64px;
+        --bar-right: 32px;
 
         padding-bottom: 37px;
     }
@@ -882,8 +898,8 @@
         column-gap: 31px;
     }
 
-    .vs-kpi-line {
-        padding-right: 10px;
+    .vs-kpi-lines {
+        gap: 6px;
     }
 
     .vs-regions,

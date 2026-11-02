@@ -24,7 +24,7 @@
     <link href="../css/style.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-check.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-searchbox.css?v=20261102_v2" rel="stylesheet">
-    <link href="../css/vote-status.css?v=20261102_v7" rel="stylesheet">
+    <link href="../css/vote-status.css?v=20261102_v8" rel="stylesheet">
 
 </head>
 
@@ -64,16 +64,20 @@
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">จำนวนผู้มีสิทธิ<br>และ ผู้ใช้สิทธิแล้ว</h2>
                 <div class="vs-kpi-body">
-                    <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
-                    <p class="vs-kpi-line"><b>ใช้สิทธิแล้ว :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
+                        <p class="vs-kpi-line"><b>ใช้สิทธิแล้ว :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    </div>
                     <p class="vs-kpi-big">ใช้สิทธิแล้ว <span data-bind="usedPct">66.4</span>%</p>
                 </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">บัตรในระบบ<br>ขณะนี้</h2>
                 <div class="vs-kpi-body">
-                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
-                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
+                        <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                    </div>
                 </div>
             </article>
             <article class="vs-kpi">
@@ -98,23 +102,29 @@
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">ผู้มาใช้สิทธิ<br>สุทธิ</h2>
                 <div class="vs-kpi-body">
-                    <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
-                    <p class="vs-kpi-line"><b>มาใช้สิทธิ :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
+                        <p class="vs-kpi-line"><b>มาใช้สิทธิ :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    </div>
                     <p class="vs-kpi-big">คิดเป็น <span data-bind="usedPct">66.4</span>%</p>
                 </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">บัตรในระบบ<br>สุทธิ</h2>
                 <div class="vs-kpi-body">
-                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
-                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
+                        <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                    </div>
                 </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">นับคะแนน<br>แล้ว</h2>
                 <div class="vs-kpi-body">
-                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="countedDistrict">30,000,000</span> ใบ</p>
-                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="countedParty">30,000,000</span> ใบ</p>
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="countedDistrict">30,000,000</span> ใบ</p>
+                        <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="countedParty">30,000,000</span> ใบ</p>
+                    </div>
                     <p class="vs-kpi-big">คิดเป็น <span data-bind="countedPct">87.9</span>%</p>
                 </div>
             </article>
