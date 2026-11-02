@@ -194,66 +194,109 @@
     }
 
     /**
-     * รีเซ็ตตัวตนประจำเครื่องนี้ และปลดล็อกสิทธิ์ใน Supabase คืนให้ระบบ
+     * สลับไปยังตัวตนผู้มีสิทธิเลือกตั้งคนถัดไปในฐานข้อมูล
      */
-    async function resetVoter() {
+    async function nextVoter() {
         const current = getVoter();
-        if (current && current.id) {
+        const currentId = (current && current.id) ? Number(current.id) : 0;
+        let nextCitizen = null;
+
+        try {
+            // 1. ลองค้นหาคนถัดไปที่ยังไม่ถูกเคลม (id > currentId)
+            const res = await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?is_claimed=eq.false&id=gt.${currentId}&order=id.asc&limit=1`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Accept': 'application/json'
+                }
+            });
+            if (res.ok) {
+                const list = await res.json();
+                if (Array.isArray(list) && list.length > 0) {
+                    nextCitizen = list[0];
+                }
+            }
+        } catch (e) {
+            console.warn('[VoterIdentity] Error querying next citizen:', e);
+        }
+
+        // 2. ถ้าไม่มีคนว่างที่มี id มากกว่า ให้วนหาคนว่างแรกในระบบ
+        if (!nextCitizen) {
             try {
-                if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
-                    await window.supabaseClient
-                        .from('mock_citizens')
-                        .update({ is_claimed: false, claimed_at: null })
-                        .eq('id', current.id);
-                } else {
-                    await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?id=eq.${current.id}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ is_claimed: false, claimed_at: null })
-                    });
+                const res = await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?is_claimed=eq.false&order=id.asc&limit=1`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                if (res.ok) {
+                    const list = await res.json();
+                    if (Array.isArray(list) && list.length > 0) {
+                        nextCitizen = list[0];
+                    }
                 }
             } catch (e) {
-                console.warn('[VoterIdentity] Failed to unclaim current voter in Supabase:', e);
+                console.warn('[VoterIdentity] Error querying any unclaimed:', e);
             }
         }
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(SESSION_KEY);
-        console.log('✅ ปลดล็อกสิทธิ์และล้างข้อมูล Local เรียบร้อย กำลังรีโหลดเพื่อรับตัวตนใหม่...');
+
+        // 3. ถ้าไม่มีคนว่างเหลือเลยจริง ๆ ให้รีเซ็ตทั้งระบบแล้วเริ่มใหม่ที่คนแรก
+        if (!nextCitizen) {
+            await resetAllVoters();
+            return;
+        }
+
+        // อัปเดตสถานะของคนใหม่ใน Supabase เป็น is_claimed = true
+        try {
+            await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?id=eq.${nextCitizen.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify({
+                    is_claimed: true,
+                    claimed_at: new Date().toISOString()
+                })
+            });
+        } catch (e) {
+            console.warn('[VoterIdentity] Error updating claimed status in DB:', e);
+        }
+
+        nextCitizen.is_claimed = true;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCitizen));
+        syncVoterSession(nextCitizen);
+
+        console.log(`✅ สลับไปยังตัวตนใหม่สำเร็จ: ID ${nextCitizen.id} (${nextCitizen.full_name_th})`);
         window.location.reload();
     }
 
     /**
-     * รีเซ็ตฐานข้อมูล mock_citizens ใน Supabase ทั้งหมดให้กลับมาเป็นสถานะว่าง (is_claimed = false)
+     * รีเซ็ตฐานข้อมูล mock_citizens ใน Supabase ทั้งหมดให้กลับมาเป็นสถานะว่าง (is_claimed = false) และเริ่มใหม่ที่คนแรก
      */
     async function resetAllVoters() {
         try {
-            if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
-                await window.supabaseClient
-                    .from('mock_citizens')
-                    .update({ is_claimed: false, claimed_at: null })
-                    .eq('is_claimed', true);
-            } else {
-                await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?is_claimed=eq.true`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ is_claimed: false, claimed_at: null })
-                });
-            }
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(SESSION_KEY);
-            console.log('✅ รีเซ็ตตาราง mock_citizens ใน Supabase ทั้งหมด และล้างข้อมูลเครื่องเรียบร้อย');
-            window.location.reload();
+            await fetch(`${SUPABASE_URL}rest/v1/mock_citizens?is_claimed=eq.true`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ is_claimed: false, claimed_at: null })
+            });
         } catch (e) {
             console.error('[VoterIdentity] Failed to reset all voters in Supabase:', e);
         }
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(SESSION_KEY);
+        console.log('✅ รีเซ็ตตาราง mock_citizens ใน Supabase ทั้งหมดเรียบร้อย กำลังรีโหลดเพื่อเริ่มที่คนแรก...');
+        window.location.reload();
     }
 
     /**
@@ -283,20 +326,40 @@
                 </div>
                 <div class="user-profile-name" id="userProfileName">กำลังดึงข้อมูล...</div>
                 <div class="user-profile-district" id="userProfileDistrict"></div>
-                <button type="button" class="user-profile-reset-btn" id="userProfileResetBtn" title="สุ่มหรือเปลี่ยนตัวตนผู้มีสิทธิเลือกตั้งสำหรับทดสอบ">
-                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-                    <span>เปลี่ยนตัวตนทดสอบ</span>
-                </button>
+                <div class="user-profile-tags" id="userProfileTags">
+                    <span class="user-tag" id="userTagMp">ส.ส. : ตรวจสอบ...</span>
+                    <span class="user-tag" id="userTagRef">ประชามติ : ตรวจสอบ...</span>
+                </div>
+                <div class="user-profile-actions">
+                    <button type="button" class="user-profile-btn user-profile-btn--primary" id="userProfileNextBtn" title="สลับไปยังตัวตนถัดไปในฐานข้อมูล">
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        <span>สลับเป็นคนถัดไป</span>
+                    </button>
+                    <button type="button" class="user-profile-btn user-profile-btn--secondary" id="userProfileResetBtn" title="รีเซ็ตฐานข้อมูลทั้งหมดและเริ่มใหม่ที่คนแรก">
+                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                        <span>รีเซ็ตกลับคนแรก</span>
+                    </button>
+                </div>
             `;
             userIcon.appendChild(dropdown);
+
+            const nextBtn = dropdown.querySelector('#userProfileNextBtn');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = '<span>กำลังสลับคนถัดไป...</span>';
+                    nextVoter();
+                });
+            }
 
             const resetBtn = dropdown.querySelector('#userProfileResetBtn');
             if (resetBtn) {
                 resetBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     resetBtn.disabled = true;
-                    resetBtn.innerHTML = '<span>กำลังสลับตัวตน...</span>';
-                    resetVoter();
+                    resetBtn.innerHTML = '<span>กำลังรีเซ็ต...</span>';
+                    resetAllVoters();
                 });
             }
         }
@@ -304,9 +367,23 @@
         function updateProfileView(voter) {
             const nameEl = dropdown.querySelector('#userProfileName');
             const distEl = dropdown.querySelector('#userProfileDistrict');
+            const tagMp = dropdown.querySelector('#userTagMp');
+            const tagRef = dropdown.querySelector('#userTagRef');
+
             if (voter) {
                 if (nameEl) nameEl.textContent = voter.full_name_th || 'ผู้มีสิทธิเลือกตั้ง';
                 if (distEl) distEl.textContent = voter.district_info || '';
+
+                if (tagMp) {
+                    const ok = voter.eligible_mp !== false;
+                    tagMp.textContent = `ส.ส. : ${ok ? 'มีสิทธิ' : 'ไม่มีสิทธิ'}`;
+                    tagMp.className = `user-tag ${ok ? 'is-eligible' : 'is-ineligible'}`;
+                }
+                if (tagRef) {
+                    const ok = voter.eligible_referendum !== false;
+                    tagRef.textContent = `ประชามติ : ${ok ? 'มีสิทธิ' : 'ไม่มีสิทธิ'}`;
+                    tagRef.className = `user-tag ${ok ? 'is-eligible' : 'is-ineligible'}`;
+                }
             } else {
                 if (nameEl) nameEl.textContent = 'กำลังดึงข้อมูล...';
                 if (distEl) distEl.textContent = '';
@@ -376,14 +453,16 @@
         getVoter,
         getOrClaimVoter,
         isEligibleFor,
-        resetVoter,
+        nextVoter,
+        resetVoter: nextVoter,
         resetAllVoters,
         initProfileDropdown
     };
     window.getVoter = getVoter;
     window.getOrClaimVoter = getOrClaimVoter;
     window.isEligibleFor = isEligibleFor;
-    window.resetVoter = resetVoter;
+    window.nextVoter = nextVoter;
+    window.resetVoter = nextVoter;
     window.resetAllVoters = resetAllVoters;
 
     // Boot อัตโนมัติเมื่อเอกสารพร้อม
