@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Vote Searchbox (Figma component "Searchbox" 453:2074)
+   ใช้ร่วมกันหน้า Vote-Result และ Vote-Status
+   Base = Mobile / Tablet, >= 992px = Desktop
+   ========================================================================== */
+.vote-searchbox {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    align-items: center;
+    gap: 4.76px;
+    padding: 5.72px;
+    border-radius: 9.72px;
+    background: #fff;
+    box-shadow: 0 2.29px 4px rgba(0, 0, 0, 0.25);
+    cursor: text;
+}
+
+.vote-searchbox-icon {
+    flex: 0 0 auto;
+    color: #d9d9d9;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.vote-searchbox-divider {
+    flex: 0 0 1.43px;
+    width: 1.43px;
+    height: 20.46px;
+    border-radius: 3.33px;
+    background: #d9d9d9;
+}
+
+.vote-searchbox input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 0 0 3px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #000;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.vote-searchbox input::placeholder {
+    color: #d9d9d9;
+    opacity: 1;
+}
+
+.vote-searchbox:focus-within {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+/* รูปแบบมีเส้นขอบ (ช่องกรอกรหัสบัตรในหน้า Vote-Status) */
+.vote-searchbox--outline {
+    border: 0.48px solid #000;
+    border-radius: 8.09px;
+    box-shadow: none;
+}
+
+@media (min-width: 992px) {
+    .vote-searchbox {
+        gap: 10px;
+        padding: 10px;
+        border-radius: 17px;
+        box-shadow: 0 4px 7px rgba(0, 0, 0, 0.25);
+    }
+
+    .vote-searchbox-icon {
+        font-size: 34px;
+    }
+
+    .vote-searchbox-divider {
+        flex-basis: 3px;
+        width: 3px;
+        height: 43px;
+        border-radius: 7px;
+    }
+
+    .vote-searchbox input {
+        padding-left: 8px;
+        font-size: 20px;
+    }
+
+    .vote-searchbox--outline {
+        border-width: 1px;
+        border-radius: 17px;
+        box-shadow: none;
+    }
+}
+

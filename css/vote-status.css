@@ -1,900 +1,859 @@
 /* ==========================================================================
-   Vote Status Page Styles (Mobile First: < 576px)
+   Vote Status Page (ติดตามสถานะ / ผลคะแนนเรียลไทม์)
+   - Header / Hero / Footer / Divider ใช้ของเดิมจาก style.css + vote-check.css
+   - ไฟล์นี้เพิ่มเฉพาะส่วนเนื้อหาของหน้านี้ ตามดีไซน์ Figma
+   - Base = Mobile (412px) | >= 768px = Tablet (834px) | >= 992px = Desktop (1512px)
    ========================================================================== */
 
-.vote-status-header {
-    background: #fff;
-}
-
-.vote-status-header .navbar {
+/* --------------------------------------------------------------------------
+   Hero placeholder (พื้นที่สีเทา รอ banner จริง) — สัดส่วนเดียวกับ .vote-check-hero img
+   -------------------------------------------------------------------------- */
+.vote-status-hero {
     display: flex;
-    height: 65px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-    position: relative;
-    z-index: 10;
-}
-
-.vote-status-header .toplogo {
-    margin: 0;
-}
-
-.vote-status-header .topLogo {
-    display: block;
-    width: 105px;
-    height: 27px;
-    margin: 0;
-}
-
-.vote-status-header .userIcon {
-    display: flex;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
+    box-sizing: border-box;
     align-items: center;
     justify-content: center;
-    margin: 0;
-    border: 1.43px solid #000;
-    border-radius: 50px;
+    aspect-ratio: 409.05 / 121;
+    background: #a0a0a0;
 }
 
-.vote-status-header .personIcon {
-    font-size: 27px;
-}
-
-/* --------------------------------------------------------------------------
-   Hero Section Placeholder (Grey Box pending final image export)
-   -------------------------------------------------------------------------- */
-.vote-status-hero-placeholder {
-    position: relative;
-    width: 100%;
-    min-height: 140px;
-    background: linear-gradient(135deg, #e4e7eb 0%, #d5dae0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 20px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.hero-placeholder-inner {
-    text-align: center;
-    max-width: 800px;
-}
-
-.hero-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: #666;
-    background: rgba(0, 0, 0, 0.06);
-    padding: 2px 10px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-}
-
-.hero-placeholder-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #222;
-    margin: 0 0 4px;
-    line-height: 1.3;
-}
-
-.hero-placeholder-subtitle {
-    font-size: 13px;
-    color: #555;
-    margin: 0;
-}
-
-/* --------------------------------------------------------------------------
-   Main Container & Heading
-   -------------------------------------------------------------------------- */
-.vote-status-main.page-container {
-    padding: 16px 16px 40px;
-    background: #f5f5f7;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.vote-status-heading {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.vote-status-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    color: #000;
-    text-decoration: none;
-    transition: opacity 0.2s ease;
-}
-
-.vote-status-back:hover {
-    opacity: 0.75;
-    color: #000;
-}
-
-.vote-status-back .fa-arrow-left {
-    font-size: 20px;
-    line-height: 1;
-}
-
-.vote-status-back .topic {
+.vote-status-hero-text {
     margin: 0;
     color: #000;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-/* Quick State Switcher Toggle */
-.state-preview-toggle {
-    display: inline-flex;
-    align-self: flex-start;
-    background: #e5e5ea;
-    border-radius: 12px;
-    padding: 4px;
-    gap: 4px;
-}
-
-.btn-state-tab {
-    border: none;
-    background: transparent;
-    font-family: "Prompt", sans-serif;
-    font-size: 13px;
+    font-size: 4.5vw;
     font-weight: 500;
-    color: #555;
-    padding: 6px 14px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    line-height: 1.27;
+    text-align: center;
 }
 
-.btn-state-tab.active {
-    background: #000000;
-    color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+@media (min-width: 768px) {
+    .vote-status-hero {
+        aspect-ratio: 834 / 247;
+    }
+
+    .vote-status-hero-text {
+        font-size: 4.8vw;
+    }
+}
+
+@media (min-width: 992px) {
+    .vote-status-hero {
+        aspect-ratio: 1512 / 457;
+    }
+
+    .vote-status-hero-text {
+        font-size: min(6.35vw, 96px);
+    }
 }
 
 /* --------------------------------------------------------------------------
-   1. KPI Dashboard Cards (4 Cards Grid)
+   Layout + design tokens
    -------------------------------------------------------------------------- */
-.status-kpi-grid {
+.vote-check-main.vote-status-main.page-container {
+    --vs-gap: 15px;
+    --vs-radius: 8px;
+    --vs-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    --vs-shadow-card: 0 4px 7px rgba(0, 0, 0, 0.25);
+
+    --kpi-gap-x: 16px;
+    --kpi-min-h: 119px;
+    --kpi-pad-y: 6.7px;
+    --kpi-gap: 5px;
+    --kpi-indent: 9.5px;
+    --kpi-title: 13px;
+    --kpi-text: 10px;
+    --kpi-big: 15px;
+    --kpi-time: 17px;
+    --kpi-small: 11px;
+
+    --card-title: 15px;
+    --card-text: 10px;
+    --bar-h: 24px;
+    --bar-border: 0.48px;
+    --bar-radius: 8.1px;
+    --bar-pad-x: 2.7px;
+    --bar-pad-y: 2.4px;
+    --bar-left: 11%;
+    --bar-right: 4.4%;
+    --bar-sub-indent: 17px;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--vs-gap);
+    padding-top: var(--vs-gap);
+    padding-bottom: 8px;
+}
+
+.vote-status-main .vs-card {
+    box-sizing: border-box;
+    border-radius: var(--vs-radius);
+    background: #fff;
+    box-shadow: var(--vs-shadow-card);
+}
+
+/* สลับการแสดงผลตามสถานะ (JS กำหนด data-state / data-type บน <main>) */
+.vote-status-main[data-state="waiting"] .only-counting,
+.vote-status-main[data-state="counting"] .only-waiting,
+.vote-status-main:not([data-type="constituency"]) .only-constituency {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   การ์ดสรุป 4 ใบ
+   -------------------------------------------------------------------------- */
+.vs-kpis {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--vs-gap) var(--kpi-gap-x);
 }
 
-.status-kpi-card {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 16px 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+.vs-kpi {
     display: flex;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--kpi-min-h);
     flex-direction: column;
-    justify-content: space-between;
-}
-
-.kpi-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 10px;
-    display: block;
-}
-
-.kpi-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.kpi-value-row {
-    font-size: 14px;
-    color: #222;
-    margin: 0;
-    line-height: 1.45;
-}
-
-.kpi-bold-text {
-    font-weight: 600;
+    align-items: center;
+    gap: var(--kpi-gap);
+    padding: var(--kpi-pad-y) 0;
+    border-radius: var(--vs-radius);
+    background: #fff;
+    box-shadow: var(--vs-shadow);
     color: #000;
 }
 
-.kpi-percent-pill {
-    display: inline-block;
-    align-self: flex-start;
-    margin-top: 6px;
-    background: #eaf5ee;
-    color: #198754;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 8px;
-}
-
-.kpi-status-box {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 48px;
-}
-
-.kpi-status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 15px;
-}
-
-.kpi-status-indicator.status-live {
-    color: #198754;
-}
-
-.kpi-status-indicator.status-waiting {
-    color: #666;
-}
-
-/* --------------------------------------------------------------------------
-   2. Regional Turnout Card (Waiting State)
-   -------------------------------------------------------------------------- */
-.regional-turnout-card {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    margin-bottom: 24px;
-}
-
-.section-title {
-    font-size: 18px;
+.vs-kpi-title {
+    margin: 0;
+    font-size: var(--kpi-title);
     font-weight: 700;
-    color: #111;
-    margin: 0 0 16px;
+    line-height: 1.27;
+    text-align: center;
 }
 
-.regional-turnout-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.vs-kpi-line {
+    align-self: stretch;
+    margin: 0;
+    padding: 0 6px 0 var(--kpi-indent);
+    font-size: var(--kpi-text);
+    font-weight: 400;
+    line-height: 1.3;
 }
 
-.regional-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.vs-kpi-line b {
+    font-weight: 500;
 }
 
-.regional-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
+.vs-kpi-big {
+    margin: auto 0 0;
+    font-size: var(--kpi-big);
+    font-weight: 500;
+    line-height: 1.27;
+    text-align: center;
 }
 
-.regional-name {
-    color: #111;
-    font-size: 15px;
+.vs-kpi-status {
+    margin: auto 0;
+    font-size: var(--kpi-big);
+    font-weight: 400;
+    line-height: 1.27;
+    text-align: center;
 }
 
-.regional-percent {
-    color: #111;
-    font-size: 14px;
+.vs-kpi-time {
+    margin: 0;
+    font-size: var(--kpi-time);
+    font-weight: 500;
+    line-height: 1.27;
+    text-align: center;
 }
 
-.regional-count {
-    font-size: 13px;
-    color: #666;
-    margin: 0 0 4px;
-}
-
-.progress-track {
-    width: 100%;
-    height: 12px;
-    background: #eef0f3;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background: #000000;
-    border-radius: 10px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.vs-kpi-small {
+    margin: auto 0 0;
+    font-size: var(--kpi-small);
+    font-weight: 400;
+    line-height: 1.27;
+    text-align: center;
 }
 
 /* --------------------------------------------------------------------------
-   3. Counting Tabs & Realtime Score List (Counting State)
+   หัวข้อ / การ์ดหลัก
    -------------------------------------------------------------------------- */
-.counting-tabs-wrap {
-    display: flex;
-    gap: 10px;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
-    padding-bottom: 4px;
-}
-
-.counting-tab {
-    border: none;
-    background: transparent;
-    font-family: "Prompt", sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #777;
-    padding: 8px 16px;
-    cursor: pointer;
-    position: relative;
-    transition: color 0.2s ease;
-}
-
-.counting-tab:hover {
-    color: #000;
-}
-
-.counting-tab.active {
-    color: #000000;
-}
-
-.counting-tab.active::after {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: #000000;
-    border-radius: 3px;
-}
-
-/* Area filter row */
-.area-filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-    background: #ffffff;
-    padding: 14px 18px;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.area-select-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1 1 200px;
-}
-
-.area-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
+.vs-card-title,
+.vs-section-title {
     margin: 0;
+    color: #000;
+    font-size: var(--card-title);
+    font-weight: 700;
+    line-height: 1.27;
+}
+
+.vs-regions {
+    padding: 9.5px 0 9.5px 9.5px;
+}
+
+.vs-scores {
+    padding: 9.5px 0 9.5px 9.5px;
+}
+
+/* --------------------------------------------------------------------------
+   แถบ Progress (ภูมิภาค / คะแนน)
+   -------------------------------------------------------------------------- */
+.vs-bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9.5px;
+    padding: 2.4px 19.5px 2.4px 19.5px;
+}
+
+.vs-regions .vs-card-title {
+    margin-bottom: 3px;
+}
+
+.vs-bar-row {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.vs-bar-name {
+    margin: 0;
+    color: #000;
+    font-size: var(--card-title);
+    font-weight: 700;
+    line-height: 1.27;
+}
+
+.vs-bar-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    color: #000;
+    font-size: var(--card-text);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.vs-bar-sub {
+    min-width: 0;
+    padding-left: var(--bar-sub-indent);
+}
+
+.vs-bar-pct {
+    flex: 0 0 auto;
+    text-align: right;
     white-space: nowrap;
 }
 
-.area-select {
-    width: 100%;
-    padding: 7px 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-family: "Prompt", sans-serif;
-    font-size: 14px;
-    background-color: #fcfcfd;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
+.vs-bar {
+    box-sizing: border-box;
+    height: var(--bar-h);
+    margin: 3px var(--bar-right) 0 var(--bar-left);
+    padding: var(--bar-pad-y) var(--bar-pad-x);
+    border: var(--bar-border) solid #000;
+    border-radius: var(--bar-radius);
+    background: #fff;
 }
 
-.area-select:focus {
-    border-color: #000;
+.vs-bar-fill {
+    width: 0;
+    height: 100%;
+    border-radius: var(--bar-radius);
+    background: #000;
+    box-shadow: inset 0 4px 12.5px -3px rgba(0, 0, 0, 0.25);
+    transition: width 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* Live Score Cards */
-.live-score-list {
+/* แถวผลคะแนน: ข้อความอยู่บนแถบ ไม่มีหัวข้อแยก */
+.vs-bar-list--score .vs-bar {
+    margin-left: 6.4%;
+    margin-right: 0;
+}
+
+.vs-bar-list--score .vs-bar-sub {
+    padding-left: 0;
+}
+
+/* --------------------------------------------------------------------------
+   ตัวสลับบัญชีรายชื่อ / แบ่งเขต + ตัวเลือกจังหวัด/เขต (ทรง pill เดียวกับตัวกรองหน้าผลการเลือกตั้ง)
+   -------------------------------------------------------------------------- */
+.vs-switch,
+.vs-areas {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.score-card-item {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 18px 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.score-card-header {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.score-identity {
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
+    gap: 10px 16px;
 }
 
-.score-party-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+.vs-chip,
+.vs-select {
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 52px;
+    background: #fff;
+    box-shadow: var(--vs-shadow);
+    color: #000;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+.vs-chip {
+    min-width: 96px;
+    padding: 3px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.vs-chip:hover {
+    background: #f0f0f2;
+}
+
+.vs-chip.is-active {
     background: #000;
     color: #fff;
-    display: flex;
+}
+
+.vs-chip:focus-visible,
+.vs-select:focus-within,
+.vs-btn:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+.vs-select {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
     align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 13px;
-    flex-shrink: 0;
+    gap: 5px;
+    padding: 3px 10px;
 }
 
-.candidate-number {
-    background: #333;
+.vs-select::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 12px;
+    height: 6px;
+    margin-left: 4px;
+    background: #000;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    pointer-events: none;
 }
 
-.score-name {
-    font-size: 15px;
-    color: #111;
+.vs-select-label {
+    white-space: nowrap;
 }
 
-.score-numbers {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    color: #444;
-}
-
-.score-vote-count {
-    color: #000;
-    font-size: 14px;
-}
-
-.score-percentage {
-    font-weight: 500;
-    color: #666;
-}
-
-/* Progress bar fill colors */
-.score-bar-color-1 {
-    background: #000000;
-}
-
-.score-bar-color-2 {
-    background: #333333;
-}
-
-.score-bar-color-3 {
-    background: #555555;
-}
-
-.score-bar-color-4 {
-    background: #777777;
-}
-
-.score-bar-neutral {
-    background: #999999;
-}
-
-/* --------------------------------------------------------------------------
-   4. ตรวจสอบสถานะบัตรของคุณ (EXACT Match to User Uploaded Image)
-   -------------------------------------------------------------------------- */
-.card-verify-section {
-    margin-bottom: 24px;
-}
-
-.card-verify-container {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.card-verify-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111;
-    margin: 0 0 6px;
-}
-
-.card-verify-subtitle {
-    font-size: 13px;
-    color: #333;
-    margin: 0 0 16px;
-}
-
-/* Input Row */
-.card-verify-input-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 18px;
-    align-items: center;
-}
-
-.card-verify-search-wrap {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border: 1px solid #777;
-    border-radius: 12px;
-    padding: 8px 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-verify-search-wrap:focus-within {
-    border-color: #000;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
-}
-
-.card-verify-search-wrap .search-icon {
-    font-size: 16px;
-    color: #aaa;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-.card-verify-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-family: "Prompt", sans-serif;
-    font-size: 14px;
-    color: #000;
-    background: transparent;
-}
-
-.card-verify-input::placeholder {
-    color: #bbb;
-}
-
-.card-verify-btn {
-    border: none;
-    background: #000000;
-    color: #ffffff;
-    font-family: "Prompt", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 22px;
-    border-radius: 12px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.card-verify-btn:hover {
-    background: #2a2a2a;
-    transform: translateY(-1px);
-}
-
-/* Result Box */
-.card-verify-result-box {
-    background: #ffffff;
-    border: 1px solid #777;
-    border-radius: 14px;
-    padding: 18px 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    transition: border-color 0.2s ease;
-}
-
-.card-verify-result-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.card-verify-result-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111;
-    margin: 0 0 4px;
-}
-
-.card-verify-result-row {
-    font-size: 13px;
-    color: #333;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Right-side large green checkmark */
-.card-verify-result-icon {
-    font-size: 42px;
-    color: #198754; /* Green color matching design */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    line-height: 1;
-}
-
-.card-verify-result-icon i {
-    font-size: 42px;
-}
-
-/* --------------------------------------------------------------------------
-   5. Timeline Section
-   -------------------------------------------------------------------------- */
-.status-timeline-card {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    margin-bottom: 24px;
-}
-
-.timeline-subtitle {
-    font-size: 13px;
-    color: #666;
-    margin: -8px 0 16px;
-}
-
-.timeline-steps-list {
-    list-style: none;
+.vs-select select {
+    min-width: 0;
+    max-width: 62vw;
     padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.timeline-step-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 14px;
-    color: #333;
-    line-height: 1.45;
-}
-
-.step-num {
-    font-size: 15px;
-    color: #000;
-    flex-shrink: 0;
-}
-
-/* --------------------------------------------------------------------------
-   6. Ceremony CTA Banner
-   -------------------------------------------------------------------------- */
-.ceremony-cta-card {
-    background: #ffffff;
-    border-radius: 17px;
-    padding: 18px 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.ceremony-cta-title {
-    font-size: 16px;
-    color: #111;
-    margin: 0 0 4px;
-}
-
-.ceremony-cta-desc {
-    font-size: 13px;
-    color: #555;
-    margin: 0;
-}
-
-.btn-ceremony-watch {
-    border: none;
-    background: #000000;
-    color: #ffffff;
-    font-family: "Prompt", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 24px;
-    border-radius: 12px;
+    border: 0;
+    outline: 0;
+    appearance: none;
+    background: transparent;
+    color: inherit;
     cursor: pointer;
-    width: 100%;
-    transition: background 0.2s ease;
-}
-
-.btn-ceremony-watch:hover {
-    background: #2a2a2a;
+    font: inherit;
+    field-sizing: content;
+    text-overflow: ellipsis;
 }
 
 /* --------------------------------------------------------------------------
-   Responsive: Tablet (576px - 991px)
+   ตรวจสอบสถานะบัตรของคุณ
    -------------------------------------------------------------------------- */
-@media (min-width: 576px) {
-    .vote-status-main.page-container {
-        padding: 20px 24px 50px;
+.vs-check {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 10px;
+    border-radius: 17px;
+}
+
+.vs-check-head {
+    display: flex;
+    flex-direction: column;
+    gap: 3.3px;
+}
+
+.vs-check-sub {
+    margin: 0;
+    padding-left: 5.7px;
+    color: #000;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+.vs-check-form {
+    display: flex;
+    align-items: center;
+    gap: 9.5px;
+    margin: 0;
+    padding-left: 7.6px;
+}
+
+.vs-check-form .vote-searchbox {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+}
+
+.vs-check-result {
+    position: relative;
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 4.76px;
+    margin: 0 0 9.5px;
+    padding: 7.6px 70px 7.6px 4.76px;
+    border: 0.48px solid #000;
+    border-radius: 8.09px;
+    background: #fff;
+}
+
+.vs-check-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.9px;
+}
+
+.vs-check-result-title {
+    margin: 0 0 2px;
+    padding-left: 4.76px;
+    color: #000;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.vs-check-result-line {
+    margin: 0;
+    padding-left: 11px;
+    color: #000;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.vs-check-icon {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    color: #22c55e;
+    font-size: 54px;
+    line-height: 1;
+    transform: translateY(-50%);
+}
+
+.vs-check-result.is-error .vs-check-icon {
+    color: #e5484d;
+}
+
+/* --------------------------------------------------------------------------
+   กำหนดการ
+   -------------------------------------------------------------------------- */
+.vs-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 8px;
+}
+
+.vs-timeline-title {
+    margin: 0;
+    padding: 10px;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.27;
+}
+
+.vs-timeline-sub {
+    margin: 0;
+    padding: 0 10px;
+    color: #000;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.vs-timeline-steps {
+    display: flex;
+    margin: 0;
+    padding: 7.3px 4.6px;
+    flex-direction: column;
+    gap: 4.6px;
+    list-style: none;
+}
+
+.vs-timeline-steps li {
+    color: #000;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   ผู้แทนส่งรหัสเพื่อเปิดหีบดิจิตอล
+   -------------------------------------------------------------------------- */
+.vs-ceremony {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px;
+}
+
+.vs-ceremony-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.vs-ceremony-title {
+    margin: 0;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.27;
+}
+
+.vs-ceremony-desc {
+    margin: 0;
+    padding-left: 8px;
+    color: #000;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   ปุ่ม (BT-Confirm)
+   -------------------------------------------------------------------------- */
+.vs-btn {
+    display: inline-flex;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: #000;
+    color: #fff;
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.27;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.vs-btn:hover {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.vs-btn--check {
+    flex: 0 0 88.5px;
+    height: 30px;
+    border-radius: 8.4px;
+    font-size: 14px;
+}
+
+.vs-btn--watch {
+    flex: 0 0 auto;
+    width: 117.7px;
+    height: 30px;
+    border-radius: 8.4px;
+    font-size: 14px;
+}
+
+.vs-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.vs-btn--back {
+    width: 216px;
+    max-width: 100%;
+    padding: 3.75px;
+    border-radius: 6.4px;
+    box-shadow: 0 0.75px 2.6px rgba(0, 0, 0, 0.25);
+    font-size: 11px;
+}
+
+/* ==========================================================================
+   Tablet (>= 768px) — Figma 834px, เนื้อหากว้าง 674px
+   ========================================================================== */
+@media (min-width: 768px) {
+    .vote-check-main.vote-status-main.page-container {
+        --vs-gap: 18px;
+        --kpi-min-h: 120px;
+        --card-text: 13px;
+        --bar-left: 8.7%;
+        --bar-right: 5.2%;
+        --bar-pad-x: 4.5px;
+        --bar-sub-indent: 15px;
     }
 
-    .vote-status-heading {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+    .vs-kpis {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        column-gap: 22px;
     }
 
-    .vote-status-heading .topic {
-        font-size: 24px;
+    .vs-regions,
+    .vs-scores {
+        padding: 9.5px 0 9.5px 9.5px;
     }
 
-    .status-kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .vs-bar-list {
+        padding: 2.4px 19.5px;
+    }
+
+    .vs-chip,
+    .vs-select {
+        font-size: 12px;
+    }
+
+    .vs-check {
+        border-radius: 8.09px;
+    }
+
+    .vs-check-icon {
+        right: 34px;
+    }
+
+    .vs-btn--back {
+        width: 393px;
+        padding: 7.5px;
+        border-radius: 12.75px;
+        box-shadow: 0 1.5px 5.25px rgba(0, 0, 0, 0.25);
+        font-size: 21px;
+    }
+}
+
+/* ==========================================================================
+   Desktop (>= 992px) — Figma 1512px, เนื้อหากว้าง 1352px
+   ========================================================================== */
+@media (min-width: 992px) {
+    .vote-check-main.vote-status-main.page-container {
+        --vs-gap: 38px;
+        --vs-radius: 17px;
+
+        --kpi-gap-x: 31px;
+        --kpi-min-h: 250px;
+        --kpi-pad-y: 14px;
+        --kpi-gap: 11px;
+        --kpi-indent: 20px;
+        --kpi-title: 28px;
+        --kpi-text: 22px;
+        --kpi-big: 32px;
+        --kpi-time: 36px;
+        --kpi-small: 24px;
+
+        --card-title: 32px;
+        --card-text: 28px;
+        --bar-h: 50px;
+        --bar-border: 1px;
+        --bar-radius: 17px;
+        --bar-pad-x: 9.4px;
+        --bar-pad-y: 5px;
+        --bar-left: 8.7%;
+        --bar-right: 5.1%;
+        --bar-sub-indent: 30px;
+
+        padding-bottom: 37px;
+    }
+
+    .vs-kpis {
+        column-gap: 31px;
+    }
+
+    .vs-kpi-line {
+        padding-right: 10px;
+    }
+
+    .vs-regions {
+        padding: 20px 0 20px 20px;
+    }
+
+    .vs-regions .vs-card-title {
+        margin-bottom: 6px;
+    }
+
+    .vs-bar-list {
+        gap: 20px;
+        padding: 5px 53px 5px 41px;
+    }
+
+    .vs-bar-row .vs-bar {
+        margin-top: 8px;
+    }
+
+    .vs-scores {
+        padding: 20px;
+    }
+
+    .vs-scores .vs-bar-list {
+        padding: 0 34px;
+    }
+
+    .vs-bar-list--score .vs-bar {
+        margin-top: 12px;
+        margin-right: 5.9%;
+    }
+
+    .vs-switch,
+    .vs-areas {
+        gap: 16px 32px;
+    }
+
+    .vs-switch {
         gap: 18px;
     }
 
-    .score-card-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+    .vs-areas {
+        padding: 0 14px;
     }
 
-    .card-verify-btn {
-        padding: 10px 32px;
-        font-size: 15px;
+    .vs-chip,
+    .vs-select {
+        font-size: 18px;
     }
 
-    .card-verify-result-title {
-        font-size: 17px;
+    .vs-chip {
+        min-width: 165px;
+        padding: 5px 10px;
     }
 
-    .card-verify-result-row {
-        font-size: 14px;
+    .vs-select {
+        gap: 10px;
+        padding: 5px 10px;
     }
 
-    .card-verify-result-icon {
-        font-size: 48px;
+    .vs-select::after {
+        width: 25px;
+        height: 12px;
+        margin-left: 6px;
     }
 
-    .ceremony-cta-card {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 22px 28px;
+    .vs-select select {
+        max-width: 60vw;
     }
 
-    .btn-ceremony-watch {
-        width: auto;
-        min-width: 130px;
-        padding: 10px 28px;
-    }
-}
-
-/* --------------------------------------------------------------------------
-   Responsive: Desktop (>= 992px)
-   -------------------------------------------------------------------------- */
-@media (min-width: 992px) {
-    .vote-status-hero-placeholder {
-        min-height: 180px;
-        padding: 36px 30px;
+    .vs-check {
+        gap: 29px;
+        padding: 20px;
+        border-radius: 17px;
     }
 
-    .hero-placeholder-title {
-        font-size: 26px;
+    .vs-check-head {
+        gap: 7px;
     }
 
-    .hero-placeholder-subtitle {
-        font-size: 15px;
+    .vs-check-sub {
+        padding-left: 12px;
+        font-size: 24px;
     }
 
-    .vote-status-main.page-container {
-        padding: 28px 40px 60px;
+    .vs-check-form {
+        gap: 20px;
+        padding-left: 16px;
     }
 
-    .vote-status-heading .topic {
+    .vs-btn--check {
+        flex-basis: 186px;
+        height: 63px;
+        border-radius: 17.7px;
+        font-size: 29px;
+    }
+
+    .vs-check-result {
+        gap: 10px;
+        margin: 0 24px 20px;
+        padding: 16px 150px 16px 10px;
+        border-width: 1px;
+        border-radius: 17px;
+    }
+
+    .vs-check-result-info {
+        gap: 4px;
+    }
+
+    .vs-check-result-title {
+        margin: 0 0 6px;
+        padding-left: 10px;
+        font-size: 24px;
+    }
+
+    .vs-check-result-line {
+        padding-left: 23px;
+        font-size: 24px;
+    }
+
+    .vs-check-icon {
+        right: 50px;
+        font-size: 104px;
+    }
+
+    .vs-timeline {
+        gap: 6px;
+        padding: 10px 7px;
+        border-radius: 16.5px;
+    }
+
+    .vs-timeline-title {
+        font-size: 33px;
+    }
+
+    .vs-timeline-sub {
+        font-size: 24.7px;
+        font-weight: 500;
+    }
+
+    .vs-timeline-steps {
+        gap: 9.6px;
+        padding: 15.4px 15px;
+    }
+
+    .vs-timeline-steps li {
+        font-size: 27px;
+    }
+
+    .vs-ceremony {
+        gap: 131px;
+        padding: 20px;
+    }
+
+    .vs-ceremony-title {
+        font-size: 32px;
+    }
+
+    .vs-ceremony-desc {
+        padding-left: 20px;
+        font-size: 32px;
+    }
+
+    .vs-btn--watch {
+        width: 248px;
+        height: 63px;
+        border-radius: 17.7px;
+        font-size: 29px;
+    }
+
+    .vs-btn--back {
+        width: 438px;
+        padding: 10px;
+        border-radius: 17px;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
         font-size: 28px;
     }
-
-    /* 4 Columns for KPI Cards on Desktop */
-    .status-kpi-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-    }
-
-    .status-kpi-card {
-        padding: 20px 22px;
-        min-height: 130px;
-    }
-
-    .kpi-label {
-        font-size: 15px;
-    }
-
-    .kpi-value-row {
-        font-size: 14px;
-    }
-
-    .section-title {
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-
-    .regional-turnout-card {
-        padding: 28px 32px;
-    }
-
-    .score-card-item {
-        padding: 20px 26px;
-    }
-
-    .score-name {
-        font-size: 16px;
-    }
-
-    .score-vote-count {
-        font-size: 15px;
-    }
-
-    .card-verify-container {
-        padding: 28px 32px;
-    }
-
-    .card-verify-title {
-        font-size: 20px;
-    }
-
-    .card-verify-subtitle {
-        font-size: 14px;
-    }
-
-    .card-verify-result-box {
-        padding: 20px 28px;
-    }
-
-    .card-verify-result-title {
-        font-size: 18px;
-    }
-
-    .card-verify-result-row {
-        font-size: 15px;
-    }
-
-    .card-verify-result-icon {
-        font-size: 52px;
-    }
-
-    .status-timeline-card {
-        padding: 28px 32px;
-    }
-
-    .ceremony-cta-card {
-        padding: 26px 34px;
-    }
-
-    .ceremony-cta-title {
-        font-size: 18px;
-    }
-
-    .ceremony-cta-desc {
-        font-size: 14px;
-    }
-
-    .btn-ceremony-watch {
-        padding: 12px 34px;
-        font-size: 15px;
-    }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .vs-bar-fill {
+        transition: none;
+    }
+}
