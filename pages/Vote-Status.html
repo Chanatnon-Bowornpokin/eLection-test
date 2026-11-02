@@ -24,7 +24,7 @@
     <link href="../css/style.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-check.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-searchbox.css?v=20261102_v2" rel="stylesheet">
-    <link href="../css/vote-status.css?v=20261102_v4" rel="stylesheet">
+    <link href="../css/vote-status.css?v=20261102_v5" rel="stylesheet">
 
 </head>
 
@@ -57,23 +57,31 @@
         <section class="vs-kpis only-waiting" aria-label="สถิติภาพรวมการเลือกตั้ง">
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">สถานะ<br>การเลือกตั้ง</h2>
-                <p class="vs-kpi-status">อยู่ระหว่าง<br>การลงคะแนน</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-status">อยู่ระหว่าง<br>การลงคะแนน</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">จำนวนผู้มีสิทธิ<br>และ ผู้ใช้สิทธิแล้ว</h2>
-                <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
-                <p class="vs-kpi-line"><b>ใช้สิทธิแล้ว :</b> <span data-bind="used">34,120,450</span> คน</p>
-                <p class="vs-kpi-big">ใช้สิทธิแล้ว <span data-bind="usedPct">66.4</span>%</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
+                    <p class="vs-kpi-line"><b>ใช้สิทธิแล้ว :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    <p class="vs-kpi-big">ใช้สิทธิแล้ว <span data-bind="usedPct">66.4</span>%</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">บัตรในระบบ<br>ขณะนี้</h2>
-                <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
-                <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
+                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">เวลาที่เหลือ<br>ในการลงคะแนน</h2>
-                <p class="vs-kpi-time" data-bind="countdown">03 ชม. 45 นาที</p>
-                <p class="vs-kpi-small">ปิดหีบ : 17:00 น.</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-time" data-bind="countdown">03 ชม. 45 นาที</p>
+                    <p class="vs-kpi-small">ปิดหีบ : 17:00 น.</p>
+                </div>
             </article>
         </section>
 
@@ -83,24 +91,32 @@
         <section class="vs-kpis only-counting" aria-label="สถิติภาพรวมการเลือกตั้ง">
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">สถานะ<br>การเลือกตั้ง</h2>
-                <p class="vs-kpi-status" data-bind="countingStatus">กำลัง<br>นับคะแนน</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-status" data-bind="countingStatus">กำลัง<br>นับคะแนน</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">ผู้มาใช้สิทธิ<br>สุทธิ</h2>
-                <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
-                <p class="vs-kpi-line"><b>มาใช้สิทธิ :</b> <span data-bind="used">34,120,450</span> คน</p>
-                <p class="vs-kpi-big">คิดเป็น <span data-bind="usedPct">66.4</span>%</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">51,354,679</span> คน</p>
+                    <p class="vs-kpi-line"><b>มาใช้สิทธิ :</b> <span data-bind="used">34,120,450</span> คน</p>
+                    <p class="vs-kpi-big">คิดเป็น <span data-bind="usedPct">66.4</span>%</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">บัตรในระบบ<br>สุทธิ</h2>
-                <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
-                <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="ballotDistrict">34,120,450</span> ใบ</p>
+                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="ballotParty">34,120,450</span> ใบ</p>
+                </div>
             </article>
             <article class="vs-kpi">
                 <h2 class="vs-kpi-title">นับคะแนน<br>แล้ว</h2>
-                <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="countedDistrict">30,000,000</span> ใบ</p>
-                <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="countedParty">30,000,000</span> ใบ</p>
-                <p class="vs-kpi-big">คิดเป็น <span data-bind="countedPct">87.9</span>%</p>
+                <div class="vs-kpi-body">
+                    <p class="vs-kpi-line"><b>ส.ส. เขต :</b> <span data-bind="countedDistrict">30,000,000</span> ใบ</p>
+                    <p class="vs-kpi-line"><b>บัญชีรายชื่อ :</b> <span data-bind="countedParty">30,000,000</span> ใบ</p>
+                    <p class="vs-kpi-big">คิดเป็น <span data-bind="countedPct">87.9</span>%</p>
+                </div>
             </article>
         </section>
 
@@ -113,7 +129,7 @@
                 <div class="vs-bar-row">
                     <h3 class="vs-bar-name">ภาคกลาง</h3>
                     <div class="vs-bar-meta">
-                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 11,270,000 / 16,190,000 คน</span>
+                        <span class="vs-bar-sub">• ใช้สิทธิแล้ว 11,270,000 / 16,190,000 คน</span>
                         <span class="vs-bar-pct">คิดเป็น 69.6%</span>
                     </div>
                     <div class="vs-bar-track">
@@ -123,7 +139,7 @@
                 <div class="vs-bar-row">
                     <h3 class="vs-bar-name">ภาคเหนือ</h3>
                     <div class="vs-bar-meta">
-                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 5,460,000 / 8,400,000 คน</span>
+                        <span class="vs-bar-sub">• ใช้สิทธิแล้ว 5,460,000 / 8,400,000 คน</span>
                         <span class="vs-bar-pct">คิดเป็น 65.0%</span>
                     </div>
                     <div class="vs-bar-track">
@@ -133,7 +149,7 @@
                 <div class="vs-bar-row">
                     <h3 class="vs-bar-name">ภาคตะวันออกเฉียงเหนือ</h3>
                     <div class="vs-bar-meta">
-                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 10,850,000 / 17,010,000 คน</span>
+                        <span class="vs-bar-sub">• ใช้สิทธิแล้ว 10,850,000 / 17,010,000 คน</span>
                         <span class="vs-bar-pct">คิดเป็น 63.8%</span>
                     </div>
                     <div class="vs-bar-track">
@@ -143,7 +159,7 @@
                 <div class="vs-bar-row">
                     <h3 class="vs-bar-name">ภาคใต้</h3>
                     <div class="vs-bar-meta">
-                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 6,000,000 / 9,800,000 คน</span>
+                        <span class="vs-bar-sub">• ใช้สิทธิแล้ว 6,000,000 / 9,800,000 คน</span>
                         <span class="vs-bar-pct">คิดเป็น 61.2%</span>
                     </div>
                     <div class="vs-bar-track">
@@ -371,7 +387,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../script/supabase-client.js"></script>
     <script src="../script/events.js?v=20261102"></script>
-    <script src="../script/vote-status.js?v=20261102_v4"></script>
+    <script src="../script/vote-status.js?v=20261102_v5"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
         crossorigin="anonymous"></script>

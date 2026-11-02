@@ -73,9 +73,10 @@
     --bar-radius: 8.1px;
     --bar-pad-x: 2.7px;
     --bar-pad-y: 2.4px;
-    --bar-left: 11%;
+    --bar-name-indent: 4px;
+    --bar-sub-indent: 14px;
+    --bar-left: 6.4%;
     --bar-right: 4.4%;
-    --bar-sub-indent: 17px;
 
     display: flex;
     flex-direction: column;
@@ -114,7 +115,6 @@
     min-height: var(--kpi-min-h);
     flex-direction: column;
     align-items: center;
-    gap: var(--kpi-gap);
     padding: var(--kpi-pad-y) 0;
     border-radius: var(--vs-radius);
     background: #fff;
@@ -128,6 +128,19 @@
     font-weight: 700;
     line-height: 1.27;
     text-align: center;
+    flex-shrink: 0;
+}
+
+.vs-kpi-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+    width: 100%;
+    gap: var(--kpi-gap);
+    margin: 0;
+    padding: 2px 0;
 }
 
 .vs-kpi-line {
@@ -144,7 +157,7 @@
 }
 
 .vs-kpi-big {
-    margin: auto 0 0;
+    margin: 0;
     font-size: var(--kpi-big);
     font-weight: 500;
     line-height: 1.27;
@@ -152,7 +165,7 @@
 }
 
 .vs-kpi-status {
-    margin: auto 0;
+    margin: 0;
     font-size: var(--kpi-big);
     font-weight: 400;
     line-height: 1.27;
@@ -168,7 +181,7 @@
 }
 
 .vs-kpi-small {
-    margin: auto 0 0;
+    margin: 0;
     font-size: var(--kpi-small);
     font-weight: 400;
     line-height: 1.27;
@@ -187,12 +200,9 @@
     line-height: 1.27;
 }
 
-.vs-regions {
-    padding: 9.5px 0 9.5px 9.5px;
-}
-
+.vs-regions,
 .vs-scores {
-    padding: 9.5px 0 9.5px 9.5px;
+    padding: 12px 14px;
 }
 
 /* --------------------------------------------------------------------------
@@ -205,7 +215,8 @@
     padding: 0;
 }
 
-.vs-regions .vs-card-title {
+.vs-regions .vs-card-title,
+.vs-scores .vs-card-title {
     margin-bottom: 8px;
 }
 
@@ -218,6 +229,7 @@
 
 .vs-bar-name {
     margin: 0 0 2px;
+    padding-left: var(--bar-name-indent, 4px);
     color: #000;
     font-size: var(--card-title);
     font-weight: 700;
@@ -229,6 +241,8 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 8px;
+    padding-left: var(--bar-sub-indent, 14px);
+    padding-right: var(--bar-right, 4.4%);
     color: #000;
     font-size: var(--card-text);
     font-weight: 500;
@@ -251,9 +265,9 @@
 .vs-bar-track,
 .vs-bar {
     box-sizing: border-box;
-    width: 100%;
+    width: calc(100% - var(--bar-left, 6.4%) - var(--bar-right, 4.4%));
     height: var(--bar-h);
-    margin: 0;
+    margin: 0 0 0 var(--bar-left, 6.4%);
     padding: var(--bar-pad-y) var(--bar-pad-x);
     border: var(--bar-border) solid #000;
     border-radius: var(--bar-radius);
@@ -268,16 +282,6 @@
     background: #000;
     box-shadow: inset 0 4px 12.5px -3px rgba(0, 0, 0, 0.25);
     transition: width 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
-/* แถวผลคะแนน */
-.vs-bar-list--score .vs-bar-track,
-.vs-bar-list--score .vs-bar {
-    margin: 0;
-}
-
-.vs-bar-list--score .vs-bar-sub {
-    padding-left: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -724,10 +728,13 @@
         --vs-gap: 18px;
         --kpi-min-h: 120px;
         --card-text: 13px;
+        --bar-h: 30px;
+        --bar-radius: 12px;
+        --bar-name-indent: 8px;
+        --bar-sub-indent: 20px;
         --bar-left: 8.7%;
         --bar-right: 5.2%;
         --bar-pad-x: 4.5px;
-        --bar-sub-indent: 15px;
     }
 
     .vs-kpis {
@@ -737,7 +744,7 @@
 
     .vs-regions,
     .vs-scores {
-        padding: 12px 14px;
+        padding: 16px 20px;
     }
 
     .vs-bar-list {
@@ -834,8 +841,8 @@
 
         --kpi-gap-x: 31px;
         --kpi-min-h: 250px;
-        --kpi-pad-y: 14px;
-        --kpi-gap: 11px;
+        --kpi-pad-y: 18px;
+        --kpi-gap: 8px;
         --kpi-indent: 20px;
         --kpi-title: 28px;
         --kpi-text: 22px;
@@ -850,9 +857,10 @@
         --bar-radius: 17px;
         --bar-pad-x: 9.4px;
         --bar-pad-y: 5px;
+        --bar-name-indent: 14px;
+        --bar-sub-indent: 32px;
         --bar-left: 8.7%;
         --bar-right: 5.1%;
-        --bar-sub-indent: 30px;
 
         padding-bottom: 37px;
     }
@@ -865,21 +873,19 @@
         padding-right: 10px;
     }
 
-    .vs-regions {
-        padding: 20px 24px;
+    .vs-regions,
+    .vs-scores {
+        padding: 24px 30px;
     }
 
-    .vs-regions .vs-card-title {
-        margin-bottom: 12px;
+    .vs-regions .vs-card-title,
+    .vs-scores .vs-card-title {
+        margin-bottom: 16px;
     }
 
     .vs-bar-list {
         gap: 20px;
         padding: 0;
-    }
-
-    .vs-scores {
-        padding: 20px 24px;
     }
 
     .vs-score-head {

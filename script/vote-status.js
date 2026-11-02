@@ -122,7 +122,7 @@
 
         list.innerHTML = regions.map(region => {
             const share = pct(region.used, region.total);
-            const sub = `- ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
+            const sub = `• ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
             const pctStr = `คิดเป็น ${share}%`;
             return barRowHtml(
                 `<h3 class="vs-bar-name">${escapeHtml(region.name)}</h3>`,
@@ -144,7 +144,7 @@
             const els = regionEls[index];
             if (!els) return;
             const share = pct(region.used, region.total);
-            els.sub.textContent = `- ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
+            els.sub.textContent = `• ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
             els.pct.textContent = `คิดเป็น ${share}%`;
             els.fill.style.width = `${share}%`;
         });
