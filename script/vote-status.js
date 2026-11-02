@@ -64,7 +64,7 @@
         requestAnimationFrame(() => requestAnimationFrame(callback));
     }
 
-    function barRowHtml(nameHtml, subText, percentText) {
+    function barRowHtml(nameHtml, subText, percentText, widthPct = 0) {
         return `
             <div class="vs-bar-row">
                 ${nameHtml}
@@ -72,7 +72,7 @@
                     <span class="vs-bar-sub">${escapeHtml(subText)}</span>
                     <span class="vs-bar-pct">${escapeHtml(percentText)}</span>
                 </div>
-                <div class="vs-bar"><div class="vs-bar-fill"></div></div>
+                <div class="vs-bar-track vs-bar"><div class="vs-bar-fill" style="width: ${widthPct}%;"></div></div>
             </div>
         `;
     }
@@ -120,18 +120,23 @@
         const list = document.getElementById('regionList');
         if (!list) return;
 
-        list.innerHTML = regions.map(region => barRowHtml(
-            `<h3 class="vs-bar-name">${escapeHtml(region.name)}</h3>`,
-            '',
-            ''
-        )).join('');
+        list.innerHTML = regions.map(region => {
+            const share = pct(region.used, region.total);
+            const sub = `- ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
+            const pctStr = `คิดเป็น ${share}%`;
+            return barRowHtml(
+                `<h3 class="vs-bar-name">${escapeHtml(region.name)}</h3>`,
+                sub,
+                pctStr,
+                share
+            );
+        }).join('');
 
         regionEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
             pct: row.querySelector('.vs-bar-pct'),
             fill: row.querySelector('.vs-bar-fill'),
         }));
-        updateRegions();
     }
 
     function updateRegions() {
@@ -262,26 +267,36 @@
         rows.forEach(row => { row.weight = row.votes / sum; });
     }
 
+    const scoreTypeSelect = document.getElementById('scoreTypeSelect');
+    const scoreTypeLabel = document.getElementById('scoreTypeLabel');
+
     function renderScores() {
         const list = document.getElementById('scoreList');
-        const title = document.getElementById('scoreTitle');
         if (!list) return;
 
-        if (title) {
-            title.textContent = type === 'constituency'
-                ? 'ผลคะแนนการเลือกตั้งแบบเรียลไทม์ แบบแบ่งเขต'
-                : 'ผลคะแนนการเลือกตั้งแบบเรียลไทม์ แบบบัญชีรายชื่อ';
+        if (scoreTypeSelect) scoreTypeSelect.value = type;
+        if (scoreTypeLabel) {
+            scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
         }
 
         const rows = currentRows();
         ensureWeights(rows);
-        list.innerHTML = rows.map(() => barRowHtml('', '', '')).join('');
+        const total = rows.reduce((acc, row) => acc + row.votes, 0);
+
+        list.innerHTML = rows.map(row => {
+            const share = pct(row.votes, total);
+            const sub = row.hideVotes
+                ? `• ${row.label}`
+                : `• ${row.label} ${fmt(row.votes)} คะแนน`;
+            const pctStr = `คิดเป็น ${share}%`;
+            return barRowHtml('', sub, pctStr, share);
+        }).join('');
+
         scoreEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
             pct: row.querySelector('.vs-bar-pct'),
             fill: row.querySelector('.vs-bar-fill'),
         }));
-        updateScores(true);
     }
 
     function updateScores(intro) {
@@ -293,16 +308,10 @@
             if (!els) return;
             const share = pct(row.votes, total);
             els.sub.textContent = row.hideVotes
-                ? `- ${row.label}`
-                : `- ${row.label} ${fmt(row.votes)} คะแนน`;
+                ? `• ${row.label}`
+                : `• ${row.label} ${fmt(row.votes)} คะแนน`;
             els.pct.textContent = `คิดเป็น ${share}%`;
-
-            if (intro) {
-                els.fill.style.width = '0';
-                afterPaint(() => { els.fill.style.width = `${share}%`; });
-            } else {
-                els.fill.style.width = `${share}%`;
-            }
+            els.fill.style.width = `${share}%`;
         });
     }
 
@@ -329,25 +338,27 @@
         }
     }
 
-    // ตัวสลับ บัญชีรายชื่อ / แบ่งเขต
+    // ตัวสลับ บัญชีรายชื่อ / แบ่งเขต (ผ่าน dropdown สามเหลี่ยมตามดีไซน์)
     function setType(nextType) {
         type = nextType;
         main.dataset.type = type;
-        document.querySelectorAll('.vs-switch .vs-chip').forEach(chip => {
-            const active = chip.dataset.type === type;
-            chip.classList.toggle('is-active', active);
-            chip.setAttribute('aria-pressed', String(active));
-        });
+        if (scoreTypeSelect) scoreTypeSelect.value = type;
+        if (scoreTypeLabel) {
+            scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
+        }
         renderScores();
     }
 
     function initSwitch() {
-        document.querySelectorAll('.vs-switch .vs-chip').forEach(chip => {
-            chip.addEventListener('click', () => setType(chip.dataset.type));
-            const active = chip.dataset.type === type;
-            chip.classList.toggle('is-active', active);
-            chip.setAttribute('aria-pressed', String(active));
-        });
+        if (scoreTypeSelect) {
+            scoreTypeSelect.value = type;
+            if (scoreTypeLabel) {
+                scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
+            }
+            scoreTypeSelect.addEventListener('change', () => {
+                setType(scoreTypeSelect.value);
+            });
+        }
     }
 
     // ตัวเลือกจังหวัด / เขตเลือกตั้ง

@@ -109,32 +109,120 @@
              ========================================================= -->
         <section class="vs-card vs-regions only-waiting" aria-labelledby="regionTitle">
             <h2 class="vs-card-title" id="regionTitle">สถิติการออกมาใช้สิทธิแยกตามภูมิภาค</h2>
-            <div class="vs-bar-list" id="regionList"></div>
+            <div class="vs-bar-list" id="regionList">
+                <div class="vs-bar-row">
+                    <h3 class="vs-bar-name">ภาคกลาง</h3>
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 11,270,000 / 16,190,000 คน</span>
+                        <span class="vs-bar-pct">คิดเป็น 69.6%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 69.6%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <h3 class="vs-bar-name">ภาคเหนือ</h3>
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 5,460,000 / 8,400,000 คน</span>
+                        <span class="vs-bar-pct">คิดเป็น 65.0%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <h3 class="vs-bar-name">ภาคตะวันออกเฉียงเหนือ</h3>
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 10,850,000 / 17,010,000 คน</span>
+                        <span class="vs-bar-pct">คิดเป็น 63.8%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 63.8%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <h3 class="vs-bar-name">ภาคใต้</h3>
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">- ใช้สิทธิแล้ว 6,000,000 / 9,800,000 คน</span>
+                        <span class="vs-bar-pct">คิดเป็น 61.2%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 61.2%;"></div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- =========================================================
-             ระหว่างนับคะแนน : ผลคะแนนเรียลไทม์ (บัญชีรายชื่อ / แบ่งเขต)
+             ระหว่างนับคะแนน : ผลคะแนนเรียลไทม์ (เปลี่ยนแบบบัญชีรายชื่อ / แบ่งเขต ด้วยสามเหลี่ยม drop down)
              ========================================================= -->
-        <div class="vs-switch only-counting" role="group" aria-label="เลือกประเภทบัตร">
-            <button type="button" class="vs-chip is-active" data-type="partylist" aria-pressed="true">บัญชีรายชื่อ</button>
-            <button type="button" class="vs-chip" data-type="constituency" aria-pressed="false">แบ่งเขต</button>
-        </div>
-
-        <h2 class="vs-section-title only-counting" id="scoreTitle">ผลคะแนนการเลือกตั้งแบบเรียลไทม์ แบบบัญชีรายชื่อ</h2>
-
-        <div class="vs-areas only-constituency" aria-label="เลือกพื้นที่เลือกตั้ง">
-            <label class="vs-select">
-                <span class="vs-select-label">จังหวัด :</span>
-                <select id="provinceSelect" aria-label="จังหวัด"></select>
-            </label>
-            <label class="vs-select">
-                <span class="vs-select-label">เขตเลือกตั้ง :</span>
-                <select id="districtSelect" aria-label="เขตเลือกตั้ง"></select>
-            </label>
-        </div>
-
         <section class="vs-card vs-scores only-counting" aria-labelledby="scoreTitle">
-            <div class="vs-bar-list vs-bar-list--score" id="scoreList"></div>
+            <div class="vs-score-head">
+                <div class="vs-score-dropdown-wrap">
+                    <h2 class="vs-card-title vs-score-title" id="scoreTitle">
+                        <span class="vs-score-title-text">ผลคะแนนการเลือกตั้งแบบเรียลไทม์</span>
+                        <span class="vs-score-dropdown-btn">
+                            <span id="scoreTypeLabel">แบบบัญชีรายชื่อ</span>
+                            <i class="fa-solid fa-caret-down vs-caret" aria-hidden="true"></i>
+                        </span>
+                    </h2>
+                    <select id="scoreTypeSelect" class="vs-native-dropdown" aria-label="เลือกประเภทผลคะแนนการเลือกตั้ง">
+                        <option value="partylist" selected>แบบบัญชีรายชื่อ</option>
+                        <option value="constituency">แบบแบ่งเขต</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ตัวเลือก จังหวัด / เขตเลือกตั้ง (แสดงเมื่อเลือก แบบแบ่งเขต) -->
+            <div class="vs-areas only-constituency" aria-label="เลือกพื้นที่เลือกตั้ง">
+                <label class="vs-select">
+                    <span class="vs-select-label">จังหวัด :</span>
+                    <select id="provinceSelect" aria-label="จังหวัด"></select>
+                </label>
+                <label class="vs-select">
+                    <span class="vs-select-label">เขตเลือกตั้ง :</span>
+                    <select id="districtSelect" aria-label="เขตเลือกตั้ง"></select>
+                </label>
+            </div>
+
+            <div class="vs-bar-list vs-bar-list--score" id="scoreList">
+                <div class="vs-bar-row">
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">• พรรค ก. (เบอร์ 1) 10,000,000 คะแนน</span>
+                        <span class="vs-bar-pct">คิดเป็น 26.0%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 26%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">• พรรค ข. (เบอร์ 4) 8,400,000 คะแนน</span>
+                        <span class="vs-bar-pct">คิดเป็น 21.8%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 21.8%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">• พรรค ค. (เบอร์ 2) 10,000,000 คะแนน</span>
+                        <span class="vs-bar-pct">คิดเป็น 26.0%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 26%;"></div>
+                    </div>
+                </div>
+                <div class="vs-bar-row">
+                    <div class="vs-bar-meta">
+                        <span class="vs-bar-sub">• พรรค ง. (เบอร์ 3) 10,000,000 คะแนน</span>
+                        <span class="vs-bar-pct">คิดเป็น 26.0%</span>
+                    </div>
+                    <div class="vs-bar-track">
+                        <div class="vs-bar-fill" style="width: 26%;"></div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- =========================================================

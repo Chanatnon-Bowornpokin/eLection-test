@@ -201,22 +201,23 @@
 .vs-bar-list {
     display: flex;
     flex-direction: column;
-    gap: 9.5px;
-    padding: 2.4px 19.5px 2.4px 19.5px;
+    gap: 12px;
+    padding: 0;
 }
 
 .vs-regions .vs-card-title {
-    margin-bottom: 3px;
+    margin-bottom: 8px;
 }
 
 .vs-bar-row {
     display: flex;
     min-width: 0;
     flex-direction: column;
+    gap: 4px;
 }
 
 .vs-bar-name {
-    margin: 0;
+    margin: 0 0 2px;
     color: #000;
     font-size: var(--card-title);
     font-weight: 700;
@@ -236,7 +237,9 @@
 
 .vs-bar-sub {
     min-width: 0;
-    padding-left: var(--bar-sub-indent);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .vs-bar-pct {
@@ -245,29 +248,32 @@
     white-space: nowrap;
 }
 
+.vs-bar-track,
 .vs-bar {
     box-sizing: border-box;
+    width: 100%;
     height: var(--bar-h);
-    margin: 3px var(--bar-right) 0 var(--bar-left);
+    margin: 0;
     padding: var(--bar-pad-y) var(--bar-pad-x);
     border: var(--bar-border) solid #000;
     border-radius: var(--bar-radius);
     background: #fff;
+    overflow: hidden;
 }
 
 .vs-bar-fill {
     width: 0;
     height: 100%;
-    border-radius: var(--bar-radius);
+    border-radius: calc(var(--bar-radius) - 2px);
     background: #000;
     box-shadow: inset 0 4px 12.5px -3px rgba(0, 0, 0, 0.25);
     transition: width 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* แถวผลคะแนน: ข้อความอยู่บนแถบ ไม่มีหัวข้อแยก */
+/* แถวผลคะแนน */
+.vs-bar-list--score .vs-bar-track,
 .vs-bar-list--score .vs-bar {
-    margin-left: 6.4%;
-    margin-right: 0;
+    margin: 0;
 }
 
 .vs-bar-list--score .vs-bar-sub {
@@ -275,7 +281,71 @@
 }
 
 /* --------------------------------------------------------------------------
-   ตัวสลับบัญชีรายชื่อ / แบ่งเขต + ตัวเลือกจังหวัด/เขต (ทรง pill เดียวกับตัวกรองหน้าผลการเลือกตั้ง)
+   ส่วนหัวผลคะแนน พร้อมสามเหลี่ยม drop down สลับ บัญชีรายชื่อ / แบ่งเขต
+   -------------------------------------------------------------------------- */
+.vs-score-head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.vs-score-dropdown-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+}
+
+.vs-score-title {
+    margin: 0;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--card-title);
+    font-weight: 700;
+    color: #000;
+    line-height: 1.3;
+}
+
+.vs-score-dropdown-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.vs-score-dropdown-btn .vs-caret {
+    font-size: 0.75em;
+    color: #000;
+    transition: transform 0.2s ease;
+}
+
+.vs-score-dropdown-wrap:hover .vs-caret {
+    transform: translateY(2px);
+}
+
+.vs-native-dropdown {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.vs-native-dropdown:focus-visible + .vs-score-title .vs-score-dropdown-btn {
+    outline: 2px solid #000;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   ตัวเลือกจังหวัด/เขต (ทรง pill ตามดีไซน์)
    -------------------------------------------------------------------------- */
 .vs-switch,
 .vs-areas {
@@ -283,6 +353,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 10px 16px;
+    margin-bottom: 10px;
 }
 
 .vs-chip,
@@ -515,20 +586,20 @@
 }
 
 .vs-ceremony-title {
-    margin: 0;
+    margin: 0 0 2px;
     color: #000;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.27;
+    line-height: 1.3;
 }
 
 .vs-ceremony-desc {
     margin: 0;
-    padding-left: 8px;
+    padding-left: 6px;
     color: #000;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 /* --------------------------------------------------------------------------
@@ -605,11 +676,32 @@
 
     .vs-regions,
     .vs-scores {
-        padding: 9.5px 0 9.5px 9.5px;
+        padding: 12px 14px;
     }
 
     .vs-bar-list {
-        padding: 2.4px 19.5px;
+        padding: 0;
+        gap: 14px;
+    }
+
+    .vs-score-head {
+        margin-bottom: 12px;
+    }
+
+    .vs-ceremony-title {
+        font-size: 16px;
+    }
+
+    .vs-ceremony-desc {
+        padding-left: 8px;
+        font-size: 13.5px;
+    }
+
+    .vs-btn--watch {
+        width: 120px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: 13.5px;
     }
 
     .vs-chip,
@@ -676,38 +768,39 @@
     }
 
     .vs-regions {
-        padding: 20px 0 20px 20px;
+        padding: 20px 24px;
     }
 
     .vs-regions .vs-card-title {
-        margin-bottom: 6px;
+        margin-bottom: 12px;
     }
 
     .vs-bar-list {
         gap: 20px;
-        padding: 5px 53px 5px 41px;
-    }
-
-    .vs-bar-row .vs-bar {
-        margin-top: 8px;
+        padding: 0;
     }
 
     .vs-scores {
-        padding: 20px;
+        padding: 20px 24px;
+    }
+
+    .vs-score-head {
+        margin-bottom: 18px;
+    }
+
+    .vs-score-title {
+        font-size: 32px;
+        gap: 12px;
     }
 
     .vs-scores .vs-bar-list {
-        padding: 0 34px;
-    }
-
-    .vs-bar-list--score .vs-bar {
-        margin-top: 12px;
-        margin-right: 5.9%;
+        padding: 0;
     }
 
     .vs-switch,
     .vs-areas {
         gap: 16px 32px;
+        margin-bottom: 16px;
     }
 
     .vs-switch {
@@ -823,24 +916,25 @@
     }
 
     .vs-ceremony {
-        gap: 131px;
-        padding: 20px;
+        gap: 32px;
+        padding: 24px 30px;
     }
 
     .vs-ceremony-title {
-        font-size: 32px;
+        font-size: 28px;
     }
 
     .vs-ceremony-desc {
-        padding-left: 20px;
-        font-size: 32px;
+        padding-left: 14px;
+        font-size: 20px;
+        line-height: 1.35;
     }
 
     .vs-btn--watch {
         width: 248px;
         height: 63px;
         border-radius: 17.7px;
-        font-size: 29px;
+        font-size: 24px;
     }
 
     .vs-btn--back {
