@@ -9,27 +9,29 @@
     <meta http-equiv="Expires" content="0">
     <title>ปลดล็อค Private Key - รวมรหัสเปิดหีบ</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Prompt -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
 
-    <!-- Icons -->
+    <!-- FontAwesome Icons -->
     <link href="../fontawesome/css/fontawesome.css" rel="stylesheet">
     <link href="../fontawesome/css/brands.css" rel="stylesheet">
     <link href="../fontawesome/css/solid.css" rel="stylesheet">
 
-    <!-- Global Styles & Vote Styles -->
+    <!-- Global Styles & Vote Unlock Styles -->
     <link href="../css/style.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-check.css?v=20261102_v2" rel="stylesheet">
-    <link href="../css/vote-unlock.css?v=20261103_v1" rel="stylesheet">
+    <link href="../css/vote-unlock.css?v=20261103_v2" rel="stylesheet">
 </head>
 
 <body>
 
-    <!-- Header & Navigation Bar -->
+    <!-- ==========================================================================
+         Header & Navigation Bar (คงโครงสร้างและคลาสเดิมจาก style.css)
+         ========================================================================== -->
     <header class="vote-check-header">
         <div class="navbar">
             <div class="toplogo">
@@ -42,93 +44,167 @@
             </div>
         </div>
 
-        <!-- Hero Section: พื้นที่สีเทาพร้อมข้อความและ placeholder สัดส่วนตาม Figma -->
-        <div class="vote-unlock-hero" role="img" aria-label="แบนเนอร์ปลดล็อค Private Key">
-            <div class="vu-hero-content">
-                <div class="vu-hero-text-wrap">
-                    <h1 class="vu-hero-title" id="heroTitle">Hero Section<br>ผลการเลือกตั้ง<br>ปลดล็อค Private Key</h1>
+        <!-- ==========================================================================
+             Hero Section (Figma: Desktop 457px, Tablet 214px, Mobile 179px)
+             ========================================================================== -->
+        <div class="vote-unlock-hero" role="region" aria-label="แบนเนอร์ปลดล็อค Private Key">
+            <div class="vu-hero-container">
+                <div class="vu-hero-content">
+                    <span class="vu-hero-badge" id="heroBadge">ผลการเลือกตั้ง</span>
+                    <h1 class="vu-hero-title" id="heroTitle">ปลดล็อค Private Key</h1>
                 </div>
-                <!-- Placeholder container รอไฟล์ภาพเวกเตอร์ในอนาคต (Figma: Desktop 410px x 399px) -->
-                <div class="vu-hero-graphic-placeholder" aria-label="พื้นที่ภาพประกอบเวกเตอร์">
-                    <i class="fa-solid fa-key" aria-hidden="true"></i>
-                    <span>Private Key Ceremony Graphic</span>
-                    <small style="opacity: 0.7;">(410 &times; 399 px)</small>
+                <!-- Banner Placeholder (ขนาดตาม Figma Desktop 410px x 399px รอใส่ภาพเวกเตอร์) -->
+                <div class="vu-hero-placeholder" aria-label="พื้นที่ภาพประกอบเวกเตอร์ Private Key">
+                    <i class="fa-solid fa-key" style="font-size: 28px; color: #000000; opacity: 0.7;" aria-hidden="true"></i>
+                    <span style="font-size: 13px; font-weight: 500; color: #000000; margin-top: 6px;">Private Key Asset</span>
+                    <small style="font-size: 11px; opacity: 0.6; color: #000000;">(410 &times; 399 px)</small>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="page-container vu-main">
+    <!-- ==========================================================================
+         Main Section (Figma Desktop 1352px, Tablet 674px, Mobile 372px)
+         ========================================================================== -->
+    <main class="vu-main-container">
 
-        <!-- Title & Subtitle Header -->
-        <section class="vu-header-section" aria-labelledby="mainTitle">
-            <h2 class="vu-main-title" id="mainTitle">กลไกความปลอดภัยร่วม 5 ฝ่าย</h2>
-            <p class="vu-main-subtitle" id="mainSubtitle">ต้องได้รับการยืนยันรหัสอย่างน้อย 3 ใน 5 ฝ่าย เพื่อเริ่มเปิดหีบนับคะแนน</p>
+        <!-- Header: กลไกความปลอดภัยร่วม 5 ฝ่าย -->
+        <section class="vu-stakeholder-header" aria-labelledby="secTitle">
+            <h2 class="vu-sec-title" id="secTitle">กลไกความปลอดภัยร่วม 5 ฝ่าย</h2>
+            <p class="vu-sec-subtitle" id="secSubtitle">ต้องได้รับการยืนยันรหัสอย่างน้อย 3 ใน 5 ฝ่าย เพื่อเริ่มเปิดหีบนับคะแนน</p>
         </section>
 
-        <!-- Progress Tracker Section -->
-        <section class="vu-tracker-section" aria-label="ความคืบหน้าการส่งรหัส">
-            <div class="vu-tracker-header">
-                <p class="vu-tracker-status" id="trackerStatus">ส่งรหัสแล้ว 0 / 5 ฝ่าย</p>
+        <!-- Progress Bar หลักด้านบน -->
+        <section class="vu-tracker-wrap" aria-label="ความคืบหน้าการส่งรหัส">
+            <p class="vu-tracker-label" id="trackerLabel">ส่งรหัสแล้ว 4 / 5 ฝ่าย</p>
+            <div class="vu-main-progress-track">
+                <div class="vu-main-progress-fill" id="mainProgressFill" style="width: 80%;"></div>
             </div>
-            <div class="vu-tracker-track">
-                <div class="vu-tracker-fill" id="trackerFill"></div>
-            </div>
         </section>
 
-        <!-- 5 Stakeholders Key Ceremony List -->
-        <section class="vu-stakeholders-list" id="stakeholdersList" aria-label="รายชื่อฝ่ายที่ร่วมถือรหัส">
-            <!-- Rendered dynamically by script/vote-unlock.js -->
+        <!-- รายการ 5 ฝ่าย (Key Share Stakeholder Cards) -->
+        <section class="vu-cards-list" id="stakeholderCardsList" aria-label="รายชื่อ 5 ฝ่ายผู้ถือรหัส">
+
+            <!-- ฝ่ายที่ 1: ผู้แทนสำนักงาน กกต. (สถานะ: ยืนยันรหัสแล้ว) -->
+            <article class="vu-stakeholder-card" id="card-ect">
+                <div class="vu-card-content-left">
+                    <div class="vu-status-icon-wrap vu-icon-confirmed" aria-label="ยืนยันแล้ว">
+                        <svg viewBox="0 0 91 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M75.8333 21.25L34.125 63.75L15.1667 44.4318" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="vu-card-text-block">
+                        <h3 class="vu-party-name" id="name-1">  1. ผู้แทนสำนักงาน กกต.</h3>
+                        <p class="vu-party-status" id="status-1">สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #EC-881B)</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ฝ่ายที่ 2: ตัวแทนพรรค ก / ผู้แทนรัฐสภา (สถานะ: ยืนยันรหัสแล้ว) -->
+            <article class="vu-stakeholder-card" id="card-party1">
+                <div class="vu-card-content-left">
+                    <div class="vu-status-icon-wrap vu-icon-confirmed" aria-label="ยืนยันแล้ว">
+                        <svg viewBox="0 0 91 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M75.8333 21.25L34.125 63.75L15.1667 44.4318" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="vu-card-text-block">
+                        <h3 class="vu-party-name" id="name-2">  2. ตัวแทนพรรค ก</h3>
+                        <p class="vu-party-status" id="status-2">สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #PT-192A)</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ฝ่ายที่ 3: ตัวแทนพรรค ข / ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 1 (สถานะ: ยืนยันรหัสแล้ว) -->
+            <article class="vu-stakeholder-card" id="card-party2">
+                <div class="vu-card-content-left">
+                    <div class="vu-status-icon-wrap vu-icon-confirmed" aria-label="ยืนยันแล้ว">
+                        <svg viewBox="0 0 91 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M75.8333 21.25L34.125 63.75L15.1667 44.4318" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="vu-card-text-block">
+                        <h3 class="vu-party-name" id="name-3">  3. ตัวแทนพรรค ข</h3>
+                        <p class="vu-party-status" id="status-3">สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #PT-247C)</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ฝ่ายที่ 4: ตัวแทนพรรค ค / ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 2 (สถานะ: ยืนยันรหัสแล้ว) -->
+            <article class="vu-stakeholder-card" id="card-party3">
+                <div class="vu-card-content-left">
+                    <div class="vu-status-icon-wrap vu-icon-confirmed" aria-label="ยืนยันแล้ว">
+                        <svg viewBox="0 0 91 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M75.8333 21.25L34.125 63.75L15.1667 44.4318" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="vu-card-text-block">
+                        <h3 class="vu-party-name" id="name-4">  4. ตัวแทนพรรค ค</h3>
+                        <p class="vu-party-status" id="status-4">สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #PT-385E)</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ฝ่ายที่ 5: ผู้แทนภาคประชาชนและผู้สังเกตการณ์ (สถานะ: รอดำเนินการ พร้อมปุ่ม [ ส่งรหัส ]) -->
+            <article class="vu-stakeholder-card" id="card-citizen">
+                <div class="vu-card-content-left">
+                    <div class="vu-status-icon-wrap" id="iconWrap-5">
+                        <div class="vu-icon-pending" aria-label="รอดำเนินการยืนยันรหัส"></div>
+                    </div>
+                    <div class="vu-card-text-block">
+                        <h3 class="vu-party-name" id="name-5">5. ผู้แทนภาคประชาชนและผู้สังเกตการณ์</h3>
+                        <p class="vu-party-status" id="status-5">สถานะ: รอดำเนินการยืนยันรหัส</p>
+                    </div>
+                </div>
+                <div class="vu-card-action-right" id="actionWrap-5">
+                    <button type="button" class="vu-btn-confirm" id="btnSubmitCode" aria-label="ส่งรหัส">ส่งรหัส</button>
+                </div>
+            </article>
+
         </section>
 
-        <!-- Security Note Box -->
-        <section class="vu-note-box" aria-label="คำชี้แจงความปลอดภัย">
-            <p class="vu-note-text">  - การรวมรหัสจะใช้เปิดหีบเฉพาะบัตรที่ผ่านการตัดข้อมูลตัวตนออกแล้วเท่านั้น ไม่สามารถตรวจสอบย้อนหลังได้ว่าใครลงคะแนนให้ผู้ใด
+        <!-- Security Note Box ตาม Figma -->
+        <p class="vu-security-notice">  - การรวมรหัสจะใช้เปิดหีบเฉพาะบัตรที่ผ่านการตัดข้อมูลตัวตนออกแล้วเท่านั้น ไม่สามารถตรวจสอบย้อนหลังได้ว่าใครลงคะแนนให้ผู้ใด
   - ระบบจะดำเนินการเปิดหีบและนำเข้าสู่การนับคะแนนสดโดยอัตโนมัติทันทีที่การยืนยันรหัสเสร็จสมบูรณ์</p>
-        </section>
 
-        <hr class="vote-check-divider">
+        <hr class="vu-section-divider">
 
-        <!-- Processing & Digital Box Opening Section -->
-        <section class="vu-processing-section" aria-labelledby="processHeading">
-            <h2 class="vu-section-heading" id="processHeading">สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล</h2>
+        <!-- Section: สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล -->
+        <section aria-labelledby="processingTitle">
+            <h2 class="vu-processing-section-title" id="processingTitle">สถานะการประมวลผลและเปิดหีบบัตรดิจิทัล</h2>
 
-            <article class="vu-processing-card">
-                <h3 class="vu-processing-header" id="processTitle">รวมรหัสครบตามเกณฑ์แล้ว (ระบบกำลังเริ่มประมวลผลอัตโนมัติ)</h3>
+            <article class="vu-process-box">
+                <h3 class="vu-process-box-header" id="processHeader">รวมรหัสครบตามเกณฑ์แล้ว (ระบบกำลังเริ่มประมวลผลอัตโนมัติ)</h3>
 
-                <div class="vu-steps-list">
-                    <!-- Step 1: Strip Identity -->
-                    <div class="vu-step-row">
+                <div class="vu-steps-container">
+                    <!-- Step 1: ตัดข้อมูลตัวตนออกจากบัตร -->
+                    <div class="vu-step-item">
                         <span>ตัดข้อมูลตัวตนออกจากบัตร</span>
-                        <span class="vu-step-badge vu-step-badge--waiting" id="step1Badge">รอดำเนินการ</span>
+                        <span class="vu-step-status-tag" id="step1Tag">สำเร็จ</span>
                     </div>
 
-                    <!-- Step 2: Cryptographic Shuffle -->
-                    <div class="vu-step-row">
+                    <!-- Step 2: สลับลำดับบัตรแบบสุ่ม -->
+                    <div class="vu-step-item">
                         <span>สลับลำดับบัตรแบบสุ่ม</span>
-                        <span class="vu-step-badge vu-step-badge--waiting" id="step2Badge">รอดำเนินการ</span>
+                        <span class="vu-step-status-tag" id="step2Tag">สำเร็จ</span>
                     </div>
 
-                    <!-- Step 3: Decrypt Ballots -->
-                    <div class="vu-step-row">
+                    <!-- Step 3: ถอดรหัสบัตรลงคะแนน -->
+                    <div class="vu-step-item">
                         <span>ถอดรหัสบัตรลงคะแนน</span>
-                        <span class="vu-decrypt-pct" id="step3Pct">0%</span>
+                        <span class="vu-step-status-tag" id="step3Tag">XX%</span>
                     </div>
                 </div>
 
-                <!-- Decryption Progress Bar -->
-                <div class="vu-decrypt-track">
-                    <div class="vu-decrypt-fill" id="decryptFill"></div>
+                <!-- แถบ Progress Bar ล่าง -->
+                <div class="vu-process-progress-track">
+                    <div class="vu-process-progress-fill" id="processProgressFill" style="width: 75%;"></div>
                 </div>
 
-                <!-- Live Tallied Box Info -->
-                <div class="vu-tallied-summary" id="talliedSummary"></div>
-
-                <!-- Navigation Button to Live Results (Revealed at 100%) -->
-                <div class="vu-action-view-result" id="viewResultSection">
-                    <a href="Vote-Result.html" class="vu-btn-result" id="viewResultBtn">
-                        <i class="fa-solid fa-chart-pie" aria-hidden="true"></i> ดูผลการเลือกตั้งแบบเรียลไทม์
+                <!-- ปุ่มดูผลการเลือกตั้ง (แสดงเมื่อการถอดรหัสเสร็จสมบูรณ์) -->
+                <div class="vu-finished-nav" id="finishedNav">
+                    <a href="Vote-Result.html" class="vu-btn-view-results" id="btnViewResults">
+                        ดูผลการเลือกตั้งแบบเรียลไทม์
                     </a>
                 </div>
             </article>
@@ -136,12 +212,9 @@
 
     </main>
 
-    <!-- Role Simulator Pill Bar (Bottom Floating for Easy Interactive Testing) -->
-    <aside class="vu-role-simulator-bar" id="roleSimulatorBar" aria-label="แถบจำลองบทบาทผู้ใช้">
-        <!-- Rendered dynamically -->
-    </aside>
-
-    <!-- Site Footer -->
+    <!-- ==========================================================================
+         Site Footer & Report an Incident Banner (ดึงโครงสร้างเดิมจาก style.css)
+         ========================================================================== -->
     <footer class="site-footer">
         <div class="report-banner">
             <img src="../img/Banner/Report_Banner.png" alt="แจ้งเหตุผิดปกติเกี่ยวกับการเลือกตั้ง">
@@ -205,13 +278,91 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../script/supabase-client.js"></script>
-    <script src="../script/voter-identity.js?v=20261102_v2"></script>
-    <script src="../script/vote-unlock.js?v=20261103_v1"></script>
+    <!-- Scripts (เฉพาะ UI และการปรับเปลี่ยนชื่อฝ่ายตามประเภทงาน ส.ส. / ประชามติ) -->
+    <script>
+        (function () {
+            'use strict';
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventParam = (urlParams.get('event') || urlParams.get('id') || '').toLowerCase();
+            const isReferendum = eventParam.includes('ref') || eventParam === 'referendum-2569-03';
+
+            if (isReferendum) {
+                // อัปเดตหัวข้อและป้ายกำกับ
+                const badge = document.getElementById('heroBadge');
+                if (badge) badge.textContent = 'ผลการลงประชามติ';
+
+                const name2 = document.getElementById('name-2');
+                if (name2) name2.textContent = '  2. ผู้แทนรัฐสภา';
+                const status2 = document.getElementById('status-2');
+                if (status2) status2.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #PL-772A)';
+
+                const name3 = document.getElementById('name-3');
+                if (name3) name3.textContent = '  3. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 1';
+                const status3 = document.getElementById('status-3');
+                if (status3) status3.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #OB-01CA)';
+
+                const name4 = document.getElementById('name-4');
+                if (name4) name4.textContent = '  4. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 2';
+                const status4 = document.getElementById('status-4');
+                if (status4) status4.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: #OB-02DB)';
+
+                const name5 = document.getElementById('name-5');
+                if (name5) name5.textContent = '5. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 3';
+
+                const btnView = document.getElementById('btnViewResults');
+                if (btnView) btnView.textContent = 'ดูผลการลงประชามติแบบเรียลไทม์';
+            }
+
+            // Interactive simulation: คลิกปุ่ม [ ส่งรหัส ] ใน Card 5
+            const btnSubmit = document.getElementById('btnSubmitCode');
+            if (btnSubmit) {
+                btnSubmit.addEventListener('click', function () {
+                    // เปลี่ยนไอคอนเป็นเครื่องหมายถูกสีเขียว
+                    const iconWrap = document.getElementById('iconWrap-5');
+                    if (iconWrap) {
+                        iconWrap.className = 'vu-status-icon-wrap vu-icon-confirmed';
+                        iconWrap.innerHTML = `
+                            <svg viewBox="0 0 91 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M75.8333 21.25L34.125 63.75L15.1667 44.4318" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        `;
+                    }
+
+                    // อัปเดตข้อความสถานะ
+                    const status5 = document.getElementById('status-5');
+                    if (status5) {
+                        const refCode = isReferendum ? '#OB-03EC' : '#OB-904F';
+                        status5.textContent = `สถานะ: ยืนยันรหัสปลดล็อกแล้ว (รหัสอ้างอิง: ${refCode})`;
+                    }
+
+                    // ซ่อนปุ่ม [ ส่งรหัส ]
+                    const actionWrap = document.getElementById('actionWrap-5');
+                    if (actionWrap) {
+                        actionWrap.innerHTML = '<span style="font-size: 14px; font-weight: 600; color: #22C55E;">✓ ส่งรหัสแล้ว</span>';
+                    }
+
+                    // อัปเดตแถบความคืบหน้าด้านบนเป็น 5 / 5 ฝ่าย (100%)
+                    const trackerLabel = document.getElementById('trackerLabel');
+                    if (trackerLabel) trackerLabel.textContent = 'ส่งรหัสแล้ว 5 / 5 ฝ่าย';
+
+                    const mainProgressFill = document.getElementById('mainProgressFill');
+                    if (mainProgressFill) mainProgressFill.style.width = '100%';
+
+                    // อัปเดตแถบประมวลผลล่างเป็น 100%
+                    const step3Tag = document.getElementById('step3Tag');
+                    if (step3Tag) step3Tag.textContent = '100%';
+
+                    const processProgressFill = document.getElementById('processProgressFill');
+                    if (processProgressFill) processProgressFill.style.width = '100%';
+
+                    // แสดงปุ่มนำทางไปหน้าผลคะแนน
+                    const finishedNav = document.getElementById('finishedNav');
+                    if (finishedNav) finishedNav.style.display = 'block';
+                });
+            }
+        })();
+    </script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
 </body>
 
 </html>
-
