@@ -790,7 +790,9 @@
     const ceremonyBtn = document.getElementById('ceremonyBtn');
     if (ceremonyBtn) {
         ceremonyBtn.addEventListener('click', () => {
-            window.alert('ระบบเปิดให้เข้าชมการเปิดหีบบัตรดิจิทัลหลังการปิดหีบ 17:00 น.');
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id') || 'house-election-2569';
+            window.location.href = `Vote-Unlock.html?id=${encodeURIComponent(eventId)}`;
         });
     }
 
