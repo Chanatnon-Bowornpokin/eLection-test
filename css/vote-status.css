@@ -290,51 +290,60 @@
     margin-bottom: 8px;
 }
 
-.vs-score-dropdown-wrap {
-    position: relative;
-    display: inline-block;
-    max-width: 100%;
-}
-
-.vs-score-title-btn {
+.vs-score-title {
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 4px 8px;
     margin: 0;
     padding: 0;
+    color: #000;
+    font-size: var(--card-title);
+    font-weight: 700;
+    line-height: 1.27;
+}
+
+.vs-score-dropdown-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.vs-score-type-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 1px 4px;
     border: 0;
+    border-radius: 6px;
     outline: 0;
     background: transparent;
     color: #000;
     font-family: inherit;
-    font-size: var(--card-title);
-    font-weight: 700;
-    line-height: 1.27;
-    text-align: left;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
     cursor: pointer;
+    transition: background-color 0.15s ease;
 }
 
-.vs-score-title-btn:focus-visible {
+.vs-score-type-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.vs-score-type-btn:focus-visible {
     outline: 2px solid #000;
-    outline-offset: 4px;
-    border-radius: 4px;
+    outline-offset: 2px;
 }
 
-.vs-score-type-current {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-.vs-score-type-current .vs-caret {
+.vs-score-type-btn .vs-caret {
     font-size: 0.7em;
     color: #000;
     transition: transform 0.2s ease;
 }
 
-.vs-score-title-btn[aria-expanded="true"] .vs-caret {
+.vs-score-type-btn[aria-expanded="true"] .vs-caret {
     transform: rotate(180deg);
 }
 
@@ -877,9 +886,14 @@
         margin-bottom: 18px;
     }
 
-    .vs-score-title-btn {
+    .vs-score-title {
         font-size: 32px;
-        gap: 12px;
+        gap: 8px 14px;
+    }
+
+    .vs-score-type-btn {
+        padding: 2px 8px;
+        border-radius: 8px;
     }
 
     .vs-score-dropdown-menu {

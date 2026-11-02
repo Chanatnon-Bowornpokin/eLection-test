@@ -30,6 +30,15 @@
     main.dataset.state = state;
     main.dataset.type = type;
 
+    // --------------------------------------------------------------- Helpers
+    const TICK_MS = 1400;
+    const fmt = value => Math.round(value).toLocaleString('en-US');
+    const pct = (part, total, digits = 1) => (total > 0 ? (part / total) * 100 : 0).toFixed(digits);
+    const pad = value => String(value).padStart(2, '0');
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+
     if (typeof EVENTS !== 'undefined' && Array.isArray(EVENTS)) {
         const current = EVENTS.find(item => item.id === eventId);
         if (current) {
@@ -43,15 +52,6 @@
             }
         }
     }
-
-    // --------------------------------------------------------------- Helpers
-    const TICK_MS = 1400;
-    const fmt = value => Math.round(value).toLocaleString('en-US');
-    const pct = (part, total, digits = 1) => (total > 0 ? (part / total) * 100 : 0).toFixed(digits);
-    const pad = value => String(value).padStart(2, '0');
-    const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[c]));
 
     function setBind(name, value) {
         document.querySelectorAll(`[data-bind="${name}"]`).forEach(el => {
