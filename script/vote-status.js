@@ -466,23 +466,42 @@
     const scoreTypeSelect = document.getElementById('scoreTypeSelect');
     const scoreTypeLabel = document.getElementById('scoreTypeLabel');
 
-    function currentScoreRows() {
-        if (isReferendum) {
-            return [
-                { label: 'เห็นชอบ (Approve)', votes: referendumVotes.approve },
-                { label: 'ไม่เห็นชอบ (Disapprove)', votes: referendumVotes.disapprove },
-                { label: 'ไม่แสดงความคิดเห็น / งดออกเสียง (Abstain)', votes: referendumVotes.abstain },
-            ];
-        }
+    function renderReferendumResults(container = document.getElementById('scoreList')) {
+        const list = container || document.getElementById('scoreList');
+        if (!list) return '';
 
-        const selectedBallots = type === 'constituency'
+        const rows = [
+            { label: 'เห็นชอบ (Approve)', votes: referendumVotes.approve || 0 },
+            { label: 'ไม่เห็นชอบ (Disapprove)', votes: referendumVotes.disapprove || 0 },
+            { label: 'ไม่แสดงความคิดเห็น (Abstain)', votes: referendumVotes.abstain || 0 },
+        ];
+
+        const total = rows.reduce((sum, row) => sum + row.votes, 0);
+
+        const html = rows.map(row => {
+            const share = total > 0 ? Number(pct(row.votes, total)) : 0;
+            const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
+            const sub = `${row.label} ${fmt(row.votes)} ใบ`;
+            const pctStr = `คิดเป็น ${shareStr}%`;
+            return barRowHtml('', sub, pctStr, share);
+        }).join('');
+
+        list.innerHTML = html;
+        return html;
+    }
+
+    function renderMpResults(container = document.getElementById('scoreList'), mpType = type) {
+        const list = container || document.getElementById('scoreList');
+        if (!list) return '';
+
+        const selectedBallots = mpType === 'constituency'
             ? votesByBallot.filter(ballot => ballot.districtCode === selected.district)
             : votesByBallot;
         const voteCounts = new Map();
         let abstainCount = 0;
 
         selectedBallots.forEach(ballot => {
-            const vote = type === 'constituency' ? ballot.candidateNumber : ballot.partyNumber;
+            const vote = mpType === 'constituency' ? ballot.candidateNumber : ballot.partyNumber;
             if (vote === 'abstain') {
                 abstainCount += 1;
             } else if (vote !== null) {
@@ -490,7 +509,7 @@
             }
         });
 
-        const rows = type === 'constituency'
+        const rows = mpType === 'constituency'
             ? candidateMetadata
                 .filter(candidate => candidate.district_code === selected.district)
                 .map(candidate => ({
@@ -504,8 +523,26 @@
                 votes: voteCounts.get(party.party_number) || 0,
             }));
 
-        if (abstainCount > 0) rows.push({ number: Number.MAX_SAFE_INTEGER, label: 'ไม่ประสงค์ลงคะแนน', votes: abstainCount });
-        return rows.sort((left, right) => right.votes - left.votes || left.number - right.number);
+        if (abstainCount > 0) {
+            rows.push({ number: Number.MAX_SAFE_INTEGER, label: 'ไม่ประสงค์ลงคะแนน', votes: abstainCount });
+        }
+
+        rows.sort((left, right) => right.votes - left.votes || left.number - right.number);
+
+        if (rows.length === 0) return '';
+
+        const total = rows.reduce((sum, row) => sum + row.votes, 0);
+
+        const html = rows.map(row => {
+            const share = total > 0 ? Number(pct(row.votes, total)) : 0;
+            const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
+            const sub = `${row.label} ${fmt(row.votes)} คะแนน`;
+            const pctStr = `คิดเป็น ${shareStr}%`;
+            return barRowHtml('', sub, pctStr, share);
+        }).join('');
+
+        list.innerHTML = html;
+        return html;
     }
 
     function renderScores() {
@@ -519,19 +556,11 @@
                 : type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
         }
 
-        const rows = currentScoreRows();
-        if (totals.processed === 0 || (type === 'constituency' && !rows.length)) {
-            scoreMessage('ยังไม่มีบัตรที่ประมวลผลในฐานข้อมูล');
-            return;
+        if (isReferendum) {
+            renderReferendumResults(list);
+        } else {
+            renderMpResults(list, type);
         }
-        const total = isReferendum ? totals.processed : rows.reduce((sum, row) => sum + row.votes, 0);
-
-        list.innerHTML = rows.map(row => {
-            const share = Number(pct(row.votes, total));
-            const sub = `${row.label} ${fmt(row.votes)} คะแนน`;
-            const pctStr = `คิดเป็น ${share}%`;
-            return barRowHtml('', sub, pctStr, share);
-        }).join('');
 
         scoreEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
@@ -1073,6 +1102,8 @@
     // ---------------------------------------------------------------- Boot
     window.loadMpResults = loadMpResults;
     window.loadReferendumResults = loadReferendumResults;
+    window.renderReferendumResults = renderReferendumResults;
+    window.renderMpResults = renderMpResults;
 
     applyReferendumLabels();
     renderKpis();

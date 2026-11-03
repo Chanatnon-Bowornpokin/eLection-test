@@ -481,6 +481,87 @@
         };
     }
 
+    const fmt = value => Math.round(Number(value) || 0).toLocaleString('en-US');
+    const pct = (part, total, digits = 1) => (total > 0 ? (part / total) * 100 : 0).toFixed(digits);
+
+    function barRowHtml(nameHtml, subText, percentText, widthPct = 0) {
+        const cleanSub = String(subText).replace(/^[•\s-]+/, '').trim();
+        return `
+            <div class="vs-bar-row">
+                ${nameHtml}
+                <div class="vs-bar-meta">
+                    <span class="vs-bar-sub"><span class="vs-bullet" aria-hidden="true">•</span><span class="vs-bar-text">${escapeHtml(cleanSub)}</span></span>
+                    <span class="vs-bar-pct">${escapeHtml(percentText)}</span>
+                </div>
+                <div class="vs-bar-track vs-bar"><div class="vs-bar-fill" style="width: ${widthPct}%;"></div></div>
+            </div>
+        `;
+    }
+
+    async function renderReferendumResults(container = document.getElementById('scoreList')) {
+        const list = container || document.getElementById('scoreList');
+        const results = await loadReferendumResults();
+        const counts = results?.counts || { approve: 0, disapprove: 0, abstain: 0 };
+        const total = results?.finalCount || 0;
+
+        const rows = [
+            { label: 'เห็นชอบ (Approve)', votes: counts.approve || 0 },
+            { label: 'ไม่เห็นชอบ (Disapprove)', votes: counts.disapprove || 0 },
+            { label: 'ไม่แสดงความคิดเห็น (Abstain)', votes: counts.abstain || 0 },
+        ];
+
+        const html = rows.map(row => {
+            const share = total > 0 ? Number(pct(row.votes, total)) : 0;
+            const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
+            const sub = `${row.label} ${fmt(row.votes)} ใบ`;
+            const pctStr = `คิดเป็น ${shareStr}%`;
+            return barRowHtml('', sub, pctStr, share);
+        }).join('');
+
+        if (list) list.innerHTML = html;
+        return html;
+    }
+
+    async function renderMpResults(container = document.getElementById('scoreList'), mpType = 'partylist', district = null) {
+        const list = container || document.getElementById('scoreList');
+        const results = await loadMpResults();
+        let rows = [];
+
+        if (mpType === 'constituency') {
+            const candidates = results?.candidateResults || [];
+            const targetDistrict = district || candidates[0]?.district_code;
+            rows = candidates
+                .filter(c => !targetDistrict || c.district_code === targetDistrict)
+                .map(c => ({
+                    label: `เบอร์ ${c.candidate_number} ${c.candidate_name} (${c.party_name})`,
+                    votes: c.votes || 0,
+                    number: c.candidate_number,
+                }));
+        } else {
+            const parties = results?.partyResults || [];
+            rows = parties.map(p => ({
+                label: `${p.party_name} (เบอร์ ${p.party_number})`,
+                votes: p.votes || 0,
+                number: p.party_number,
+            }));
+        }
+
+        rows.sort((a, b) => b.votes - a.votes || a.number - b.number);
+
+        const total = rows.reduce((sum, r) => sum + r.votes, 0);
+
+        const html = rows.map(row => {
+            const share = total > 0 ? Number(pct(row.votes, total)) : 0;
+            const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
+            const sub = `${row.label} ${fmt(row.votes)} คะแนน`;
+            const pctStr = `คิดเป็น ${shareStr}%`;
+            return barRowHtml('', sub, pctStr, share);
+        }).join('');
+
+        if (list) list.innerHTML = html;
+        return html;
+    }
+
     function updateElectionCardsDOM() {
         if (!resultList) return;
         resultList.querySelectorAll('.vote-election-card').forEach(card => {
@@ -520,6 +601,8 @@
     // เปิดให้เรียกใช้งานจากภายนอกหรือ Console ได้โดยตรง
     window.loadMpResults = loadMpResults;
     window.loadReferendumResults = loadReferendumResults;
+    window.renderReferendumResults = renderReferendumResults;
+    window.renderMpResults = renderMpResults;
 
     renderElections();
     pollResultCounts();
