@@ -523,9 +523,12 @@
                 votes: voteCounts.get(party.party_number) || 0,
             }));
 
-        if (abstainCount > 0) {
-            rows.push({ number: Number.MAX_SAFE_INTEGER, label: 'ไม่ประสงค์ลงคะแนน', votes: abstainCount });
-        }
+        // นำเข้าตัวเลือก "ไม่ประสงค์ลงคะแนน (Abstain)" เสมอ พร้อมคำนวณคะแนนและแถบความคืบหน้า
+        rows.push({
+            number: Number.MAX_SAFE_INTEGER,
+            label: 'ไม่ประสงค์ลงคะแนน (Abstain)',
+            votes: abstainCount || 0
+        });
 
         rows.sort((left, right) => right.votes - left.votes || left.number - right.number);
 

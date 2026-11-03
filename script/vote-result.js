@@ -311,6 +311,8 @@
 
         const constituencyCounts = new Map();
         const partyListCounts = new Map();
+        let constituencyAbstainCount = 0;
+        let partyListAbstainCount = 0;
         const ballots = [];
 
         for (const row of finalRows) {
@@ -361,11 +363,16 @@
                 partyNumber
             });
 
-            if (candidateNumber !== null) {
+            if (candidateNumber === 'abstain') {
+                constituencyAbstainCount += 1;
+            } else if (candidateNumber !== null) {
                 const key = `${districtCode}:${candidateNumber}`;
                 constituencyCounts.set(key, (constituencyCounts.get(key) || 0) + 1);
             }
-            if (partyNumber !== null) {
+
+            if (partyNumber === 'abstain') {
+                partyListAbstainCount += 1;
+            } else if (partyNumber !== null) {
                 partyListCounts.set(partyNumber, (partyListCounts.get(partyNumber) || 0) + 1);
             }
         }
@@ -400,7 +407,9 @@
             totalCount: finalRows.length + pendingCount,
             ballots,
             candidateResults,
-            partyResults
+            partyResults,
+            constituencyAbstainCount,
+            partyListAbstainCount
         };
     }
 
@@ -529,7 +538,7 @@
 
         if (mpType === 'constituency') {
             const candidates = results?.candidateResults || [];
-            const targetDistrict = district || candidates[0]?.district_code;
+            const targetDistrict = district || candidates[0]?.district_code || 'BKK-01';
             rows = candidates
                 .filter(c => !targetDistrict || c.district_code === targetDistrict)
                 .map(c => ({
@@ -537,6 +546,11 @@
                     votes: c.votes || 0,
                     number: c.candidate_number,
                 }));
+            rows.push({
+                label: 'ไม่ประสงค์ลงคะแนน (Abstain)',
+                votes: results?.constituencyAbstainCount || 0,
+                number: Number.MAX_SAFE_INTEGER,
+            });
         } else {
             const parties = results?.partyResults || [];
             rows = parties.map(p => ({
@@ -544,6 +558,11 @@
                 votes: p.votes || 0,
                 number: p.party_number,
             }));
+            rows.push({
+                label: 'ไม่ประสงค์ลงคะแนน (Abstain)',
+                votes: results?.partyListAbstainCount || 0,
+                number: Number.MAX_SAFE_INTEGER,
+            });
         }
 
         rows.sort((a, b) => b.votes - a.votes || a.number - b.number);

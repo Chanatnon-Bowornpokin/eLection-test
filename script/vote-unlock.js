@@ -63,7 +63,7 @@
     const eventType = detectEventType(eventId);
     const isReferendum = eventType === 'referendum';
     const eventKey = isReferendum ? 'referendum-2569-03' : 'house-election-2569';
-    const stateKey = `election_unlock_state_${eventKey}`;
+    const stateKey = `election_unlock_approvals_${eventKey}`;
 
     const stakeholderNames = isReferendum
         ? [
@@ -82,12 +82,32 @@
         ];
 
     /**
-     * 1. ปลดล็อกสิทธิ์การกดปุ่ม Demo:
-     * คืนค่า true เป็นค่าเริ่มต้น เพื่อให้กดปุ่ม "ส่งรหัส" ทดสอบได้ทันทีโดยไม่ต้องพึ่ง ?role=citizen_key
+     * การจัดการสิทธิ์ผ่าน URL Parameter:
+     * - หากเข้าหน้าเว็บโดยไม่มี ?role=... หรือไม่ตรง ให้เป็น Observer Mode (ผู้สังเกตการณ์) ดูสถานะได้อย่างเดียว ไม่มีปุ่มกดส่งรหัส
+     * - หากระบุ ?role=... ที่ถูกต้อง ให้แสดงบทบาทของตนเองพร้อมปุ่ม [ ส่งรหัส ] เฉพาะฝ่ายนั้น
      */
-    function hasCitizenKeyAccess() {
-        return true;
+    function resolveUserRole(rawRole, isRef) {
+        if (!rawRole) return null;
+        const r = String(rawRole).trim().toLowerCase();
+        if (!r) return null;
+
+        if (r === '1' || r === 'ect' || r === 'role1' || r === 'party1' || r === 'กกต') return 1;
+
+        if (isRef) {
+            if (r === '2' || r === 'parliament' || r === 'parliament_rep' || r === 'role2' || r === 'party2' || r === 'รัฐสภา') return 2;
+            if (r === '3' || r === 'citizen_1' || r === 'citizen1' || r === 'role3' || r === 'party3' || r === 'observer_1') return 3;
+            if (r === '4' || r === 'citizen_2' || r === 'citizen2' || r === 'role4' || r === 'party4' || r === 'observer_2') return 4;
+            if (r === '5' || r === 'citizen_3' || r === 'citizen3' || r === 'citizen' || r === 'citizen_key' || r === 'role5' || r === 'party5' || r === 'observer_3') return 5;
+        } else {
+            if (r === '2' || r === 'party_a' || r === 'partya' || r === 'role2' || r === 'party2' || r === 'party_1') return 2;
+            if (r === '3' || r === 'party_b' || r === 'partyb' || r === 'role3' || r === 'party3' || r === 'party_2') return 3;
+            if (r === '4' || r === 'party_c' || r === 'partyc' || r === 'role4' || r === 'party4' || r === 'party_3') return 4;
+            if (r === '5' || r === 'citizen' || r === 'citizen_key' || r === 'observer' || r === 'people' || r === 'role5' || r === 'party5') return 5;
+        }
+        return null;
     }
+
+    const userRoleIndex = resolveUserRole(urlParams.get('role'), isReferendum);
 
     function generateTxId(usedIds) {
         let value;
@@ -106,23 +126,26 @@
     }
 
     function loadState() {
-        const saved = safeReadJson(window.localStorage, stateKey, {});
-        const txRefs = saved.txRefs && typeof saved.txRefs === 'object' ? saved.txRefs : {};
-        const usedIds = new Set(
-            Object.values(txRefs)
-                .map(reference => Number.parseInt(String(reference).replace(/^#TX-/, ''), 16))
-                .filter(Number.isFinite)
-        );
-
-        for (let number = 1; number <= 4; number += 1) {
-            if (!/^#TX-[0-9A-F]{4}$/.test(txRefs[number] || '')) {
-                txRefs[number] = generateTxId(usedIds);
-            }
+        const saved = safeReadJson(window.localStorage, stateKey, null);
+        if (saved && Array.isArray(saved.approved) && saved.txRefs) {
+            return {
+                completed: !!saved.completed,
+                approved: saved.approved,
+                txRefs: saved.txRefs,
+            };
         }
 
-        // เริ่มต้นในสถานะพร้อมกดปุ่ม "ส่งรหัส" สำหรับการทดสอบ Demo เสมอ
+        // สถานะเริ่มต้น: ฝ่ายที่ 1 (กกต.) และฝ่ายที่ 3 (พรรค ข / ผู้แทนประชาชน 1) ยืนยันรหัสแล้ว (2/5 ฝ่าย = 40%)
+        // รอการยืนยันเพิ่มจากฝ่ายที่ 2, 4 หรือ 5 เพื่อให้ครบเกณฑ์อย่างน้อย 3 ใน 5 ฝ่าย (>= 60%)
+        const usedIds = new Set();
+        const txRefs = {
+            1: generateTxId(usedIds),
+            3: generateTxId(usedIds),
+        };
+
         return {
             completed: false,
+            approved: [1, 3],
             txRefs,
         };
     }
@@ -169,19 +192,22 @@
         return '';
     }
 
-    async function getRandomPartyNames() {
+    /**
+     * ดึงชื่อพรรคการเมือง 3 พรรคแบบ Deterministic จาก party_candidates (Shared State เรียงตาม party_number)
+     * ห้ามใช้ Math.random() สุ่มในเบราว์เซอร์
+     */
+    async function getDeterministicPartyNames() {
         const client = getSupabaseClient();
         if (!client) return [];
 
         try {
-            const { data, error } = await client.from('party_candidates').select('*');
+            const { data, error } = await client
+                .from('party_candidates')
+                .select('*')
+                .order('party_number', { ascending: true });
             if (error) throw error;
 
             const names = [...new Set((data || []).map(partyNameFromRow).filter(Boolean))];
-            for (let index = names.length - 1; index > 0; index -= 1) {
-                const swapIndex = Math.floor(Math.random() * (index + 1));
-                [names[index], names[swapIndex]] = [names[swapIndex], names[index]];
-            }
             return names.slice(0, 3);
         } catch (error) {
             console.warn('Cannot load parties from party_candidates', error);
@@ -203,14 +229,18 @@
         }
 
         stakeholderNames.forEach((name, index) => {
-            const nameElement = document.getElementById(`name-${index + 1}`);
-            if (nameElement) nameElement.textContent = `${index + 1}. ${name}`;
+            const roleNum = index + 1;
+            const nameElement = document.getElementById(`name-${roleNum}`);
+            if (nameElement) {
+                const isUserRole = userRoleIndex === roleNum;
+                nameElement.textContent = `${roleNum}. ${name}${isUserRole ? ' (บทบาทของคุณ)' : ''}`;
+            }
         });
     }
 
     function updateProgress() {
-        const confirmedCount = state.completed ? 5 : 4;
-        const percentage = confirmedCount * 20;
+        const confirmedCount = state.approved.length;
+        const percentage = Math.min(100, confirmedCount * 20);
         const trackerLabel = document.getElementById('trackerLabel');
         const progressTrack = document.querySelector('.vu-main-progress-track');
         const progressFill = document.getElementById('mainProgressFill');
@@ -220,6 +250,12 @@
         if (progressFill) progressFill.style.width = `${percentage}%`;
     }
 
+    /**
+     * รีเซ็ตสถานะ Standby ของกล่องล่าง:
+     * - หัวข้อ: "รอการรวมรหัสเพื่อเริ่มประมวลผล"
+     * - ขั้นตอนที่ 1, 2, 3: "รอดำเนินการ" ตัวหนังสือสีเทา #6B7280
+     * - แถบความคืบหน้า: 0%
+     */
     function resetStandbyUI() {
         const processHeader = document.getElementById('processHeader');
         if (processHeader) {
@@ -244,8 +280,8 @@
 
         const step3Tag = document.getElementById('step3Tag');
         if (step3Tag) {
-            step3Tag.textContent = '0%';
-            step3Tag.style.color = '#000000';
+            step3Tag.textContent = 'รอดำเนินการ';
+            step3Tag.style.color = '#6B7280';
             step3Tag.style.fontWeight = '400';
             step3Tag.style.width = 'auto';
         }
@@ -257,27 +293,28 @@
         if (processProgressFill) processProgressFill.style.width = '0%';
     }
 
-    function updateStep1UI(statusText, color = '#16A34A') {
+    // ฟังก์ชันอัปเดตสถานะขั้นตอนล่าง โดยใช้สีระบบมาตรฐาน #000000 (ตัดสีเขียว #16A34A / #10B981 ออกทั้งหมด)
+    function updateStep1UI(statusText, color = '#000000') {
         const step1Tag = document.getElementById('step1Tag');
         if (step1Tag) {
             step1Tag.textContent = statusText;
             step1Tag.style.color = color;
-            step1Tag.style.fontWeight = statusText === 'สำเร็จ' ? '600' : '500';
+            step1Tag.style.fontWeight = statusText === 'สำเร็จ' ? '600' : '400';
             step1Tag.style.width = 'auto';
         }
     }
 
-    function updateStep2UI(statusText, color = '#16A34A') {
+    function updateStep2UI(statusText, color = '#000000') {
         const step2Tag = document.getElementById('step2Tag');
         if (step2Tag) {
             step2Tag.textContent = statusText;
             step2Tag.style.color = color;
-            step2Tag.style.fontWeight = statusText === 'สำเร็จ' ? '600' : '500';
+            step2Tag.style.fontWeight = statusText === 'สำเร็จ' ? '600' : '400';
             step2Tag.style.width = 'auto';
         }
     }
 
-    function updateStep3UI(percentage, statusText, color = '#16A34A') {
+    function updateStep3UI(percentage, statusText, color = '#000000') {
         const clamped = Math.max(0, Math.min(100, Math.round(Number(percentage) || 0)));
         const step3Tag = document.getElementById('step3Tag');
         const processProgressTrack = document.querySelector('.vu-process-progress-track');
@@ -285,60 +322,75 @@
 
         if (step3Tag) {
             step3Tag.textContent = statusText || `${clamped}%`;
-            step3Tag.style.color = clamped >= 100 ? '#16A34A' : color;
-            step3Tag.style.fontWeight = clamped >= 100 ? '600' : '500';
+            step3Tag.style.color = color;
+            step3Tag.style.fontWeight = clamped >= 100 ? '600' : '400';
             step3Tag.style.width = 'auto';
         }
         if (processProgressTrack) processProgressTrack.setAttribute('aria-valuenow', String(clamped));
         if (processProgressFill) processProgressFill.style.width = `${clamped}%`;
     }
 
-    function updateProcessProgressUI(percentage, statusText) {
-        updateStep3UI(percentage, statusText);
-    }
-
+    /**
+     * เรนเดอร์การ์ดทั้ง 5 ฝ่ายตามสถานะการส่งรหัส และ URL role
+     */
     function renderStatus() {
-        for (let number = 1; number <= 4; number += 1) {
-            const reference = document.getElementById(`ref-${number}`);
-            if (reference) reference.textContent = `(รหัสอ้างอิง: ${state.txRefs[number]})`;
-        }
+        for (let i = 1; i <= 5; i += 1) {
+            const isApproved = state.approved.includes(i);
+            const isMyRole = userRoleIndex === i;
 
-        const card = document.getElementById('card-5');
-        const iconWrap = document.getElementById('iconWrap-5');
-        const statusMain = document.getElementById('statusMain-5');
-        const reference = document.getElementById('ref-5');
-        const actionRow = document.getElementById('actionRow-5');
-        const button = document.getElementById('btnSubmitCode');
-        const canAccess = hasCitizenKeyAccess();
+            const card = document.getElementById(`card-${i}`);
+            const iconWrap = document.getElementById(`iconWrap-${i}`);
+            const statusRow = document.getElementById(`statusRow-${i}`);
+            const statusMain = document.getElementById(`statusMain-${i}`);
+            const ref = document.getElementById(`ref-${i}`);
+            const actionRow = document.getElementById(`actionRow-${i}`);
+            const button = document.getElementById(`btnSubmitCode-${i}`);
 
-        if (state.completed) {
-            if (card) card.classList.remove('vu-card--pending');
-            if (iconWrap) {
-                iconWrap.classList.remove('vu-card-icon-wrap--pending');
-                iconWrap.innerHTML = '<i class="fa-solid fa-check vu-icon-check" aria-hidden="true"></i>';
-            }
-            if (statusMain) statusMain.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว';
-            if (reference) {
-                reference.textContent = `(รหัสอ้างอิง: ${state.txRefs[5]})`;
-                reference.hidden = false;
-            }
-            if (actionRow) actionRow.style.display = 'none';
-            if (button) button.hidden = true;
-        } else {
-            if (card) card.classList.add('vu-card--pending');
-            if (iconWrap) {
-                iconWrap.classList.add('vu-card-icon-wrap--pending');
-                iconWrap.innerHTML = '<i class="fa-regular fa-circle vu-icon-circle" aria-hidden="true"></i>';
-            }
-            if (statusMain) statusMain.textContent = 'สถานะ: รอดำเนินการยืนยันรหัส';
-            if (reference) {
-                reference.textContent = '';
-                reference.hidden = true;
-            }
-            if (actionRow) actionRow.style.display = canAccess ? '' : 'none';
-            if (button) {
-                button.hidden = !canAccess;
-                button.disabled = !canAccess;
+            if (isApproved) {
+                if (card) card.classList.remove('vu-card--pending');
+                if (iconWrap) {
+                    iconWrap.classList.remove('vu-card-icon-wrap--pending');
+                    iconWrap.innerHTML = '<i class="fa-solid fa-check vu-icon-check" aria-hidden="true"></i>';
+                }
+                if (statusRow) statusRow.classList.remove('vu-card-status-row--pending');
+                if (statusMain) statusMain.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว';
+                if (ref) {
+                    ref.textContent = `(รหัสอ้างอิง: ${state.txRefs[i] || ''})`;
+                    ref.hidden = false;
+                }
+                if (actionRow) actionRow.style.display = 'none';
+                if (button) {
+                    button.hidden = true;
+                    button.disabled = true;
+                }
+            } else {
+                if (card) card.classList.add('vu-card--pending');
+                if (iconWrap) {
+                    iconWrap.classList.add('vu-card-icon-wrap--pending');
+                    iconWrap.innerHTML = '<i class="fa-regular fa-circle vu-icon-circle" aria-hidden="true"></i>';
+                }
+                if (statusRow) statusRow.classList.add('vu-card-status-row--pending');
+                if (statusMain) statusMain.textContent = 'สถานะ: รอดำเนินการยืนยันรหัส';
+                if (ref) {
+                    ref.textContent = '';
+                    ref.hidden = true;
+                }
+
+                // แสดงปุ่ม [ ส่งรหัส ] เฉพาะฝ่ายที่เป็นบทบาทของผู้ใช้เท่านั้น (หากเป็น Observer หรือบทบาทอื่นให้ซ่อน)
+                if (isMyRole) {
+                    if (actionRow) actionRow.style.display = '';
+                    if (button) {
+                        button.hidden = false;
+                        button.disabled = isDecrypting || state.completed;
+                        button.textContent = 'ส่งรหัส';
+                    }
+                } else {
+                    if (actionRow) actionRow.style.display = 'none';
+                    if (button) {
+                        button.hidden = true;
+                        button.disabled = true;
+                    }
+                }
             }
         }
 
@@ -365,8 +417,7 @@
     }
 
     // =========================================================================
-    // ขั้นที่ 3: ฟังก์ชันถอดรหัส AES-GCM (decryptTextWithAesGcm)
-    // รองรับ Secret 'eLection-Threshold-Demo-Shared-Secret-2569' และ Legacy Key
+    // ขั้นที่ 3: ฟังก์ชันถอดรหัส AES-GCM
     // =========================================================================
     async function buildAesKeys(secretString) {
         const encoder = new TextEncoder();
@@ -378,7 +429,6 @@
 
         const keys = [];
         for (const sec of secrets) {
-            // รูปแบบที่ 1: Raw 32-byte key (padEnd 32 ตัวอักษรแล้วตัด 32 bytes)
             try {
                 const rawBytes = encoder.encode(String(sec).padEnd(32, '0')).slice(0, 32);
                 const rawKey = await window.crypto.subtle.importKey(
@@ -393,7 +443,6 @@
                 // Ignore key import error
             }
 
-            // รูปแบบที่ 2: SHA-256 Digest ของ Secret
             try {
                 const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoder.encode(String(sec)));
                 const shaKey = await window.crypto.subtle.importKey(
@@ -420,7 +469,6 @@
         if (value === null || value === undefined) return null;
         if (typeof value === 'number') return String(value);
 
-        // กรณีเป็น Object ที่มี iv และ ciphertext แยกกัน
         if (typeof value === 'object') {
             if (value.iv && (value.ciphertext || value.data || value.encrypted)) {
                 try {
@@ -440,7 +488,7 @@
                             );
                             return new TextDecoder().decode(decrypted);
                         } catch {
-                            // ลองคีย์ถัดไป
+                            // Try next key
                         }
                     }
                 } catch {
@@ -453,7 +501,6 @@
         const str = String(value).trim();
         if (!str) return null;
 
-        // กรณีเป็นรูปแบบ ENC[AES-GCM::<base64>]
         if (str.startsWith('ENC[AES-GCM::')) {
             const encoded = str.slice('ENC[AES-GCM::'.length).replace(/\]$/, '');
             try {
@@ -470,7 +517,7 @@
                         );
                         return new TextDecoder().decode(plaintext);
                     } catch {
-                        // ลองคีย์ถัดไป
+                        // Try next key
                     }
                 }
             } catch {
@@ -479,7 +526,6 @@
             return null;
         }
 
-        // กรณีเป็นรูปแบบ ivBase64:cipherBase64
         if (str.includes(':') && !str.startsWith('{') && !str.startsWith('ENC[')) {
             const parts = str.split(':');
             if (parts.length === 2 && parts[0].length >= 12 && parts[1].length >= 16) {
@@ -496,20 +542,17 @@
                             );
                             return new TextDecoder().decode(plaintext);
                         } catch {
-                            // ลองคีย์ถัดไป
+                            // Try next key
                         }
                     }
                 } catch {
-                    // ไม่ใช่ base64 คืนค่าปกติ
+                    // Not base64
                 }
             }
         }
 
-        // กรณีเป็นค่าที่ถอดรหัสแล้ว หรือ Plaintext (เช่น '1', '2', 'abstain', 'approve', 'disapprove')
         return str;
     }
-
-    const decryptBallotChoice = decryptTextWithAesGcm;
 
     function parseBallot(value) {
         if (value && typeof value === 'object') return value;
@@ -535,7 +578,7 @@
         const text = String(raw).trim();
         if (!text) return null;
         const lower = text.toLowerCase();
-        if (lower === 'abstain' || lower === 'no_vote' || lower === 'ไม่ประสงค์ลงคะแนน' || lower === '0') {
+        if (lower === 'abstain' || lower === 'no_vote' || lower === 'ไม่ประสงค์ลงคะแนน' || lower === 'งดออกเสียง' || lower === '0') {
             return 'abstain';
         }
         const parsed = Number.parseInt(text.replace(/[^0-9]/g, ''), 10);
@@ -570,7 +613,6 @@
         return null;
     }
 
-    // ตรวจสอบคอลัมน์ที่มีอยู่จริงของตาราง final_box และทำ Fallback ป้องกัน Error หากบางคอลัมน์ไม่มีใน DB
     const tableColumnCache = new Map();
 
     async function inspectTableColumns(client, tableName) {
@@ -618,7 +660,6 @@
     async function insertRowWithSchemaFallback(client, tableName, fullPayload, fallbackPayloads) {
         const schemaInfo = await inspectTableColumns(client, tableName);
 
-        // พยายามบันทึกด้วย Adaptive Column Filtering (ตัดคอลัมน์ที่ไม่มีใน DB ออกอัตโนมัติ)
         for (let attempt = 0; attempt < 8; attempt += 1) {
             const candidatePayload = filterPayloadBySchema(fullPayload, schemaInfo);
             if (Object.keys(candidatePayload).length === 0) break;
@@ -634,7 +675,6 @@
             break;
         }
 
-        // Fallback Payloads กรณีตารางมี Schema เฉพาะเจาะจง
         for (const fallback of fallbackPayloads) {
             const filtered = filterPayloadBySchema(fallback, schemaInfo);
             if (Object.keys(filtered).length === 0) continue;
@@ -663,18 +703,16 @@
         const matchValue = matchColumn ? stagingRef[matchColumn] : null;
         if (!matchColumn || matchValue === null || matchValue === undefined) return;
 
-        // อัปเดต status เป็น 'COUNTED' และล้าง encrypted_ballot ทิ้งทันที (Delayed Anonymization & Purge)
         try {
             const { error } = await client
                 .from(stagingTable)
                 .update({
                     status: 'COUNTED',
-                    encrypted_ballot: null // ล้างก้อนบัตรทิ้งทันที เหลือแค่หลักฐานว่าเคยมาใช้สิทธิ เพื่อป้องกันการแกะรอยย้อนหลัง
+                    encrypted_ballot: null // Purge ก้อนบัตรออกจาก staging box ทันที
                 })
                 .eq(matchColumn, matchValue);
 
             if (error) {
-                // Fallback กรณี DB มี NOT NULL constraint บน encrypted_ballot
                 await client
                     .from(stagingTable)
                     .update({ status: 'COUNTED' })
@@ -687,11 +725,15 @@
 
     // =========================================================================
     // ฟังก์ชันหลัก: startDecryptionProcess()
-    // ดึงบัตร ACTIVE -> ตัด voter_id -> Fisher-Yates Shuffle -> ถอดรหัส AES-GCM
-    // -> ทยอย INSERT ลง final_box ตามหลอด Progress Bar -> อัปเดต status = 'COUNTED'
+    // ดำเนินการเมื่อยืนยันรหัสครบตามเกณฑ์ (>= 3 ใน 5 ฝ่าย หรือ 60%)
+    // พยายามเรียก Database RPC บน Supabase ก่อน หากไม่พบค่อย Fallback ไปยัง Direct Queries
     // =========================================================================
     async function startDecryptionProcess() {
         if (isDecrypting) return;
+        if (state.approved.length < 3) {
+            console.warn('[VoteUnlock] เกณฑ์การปลดล็อกยังไม่ครบ (ต้องการอย่างน้อย 3 ใน 5 ฝ่าย)');
+            return;
+        }
         isDecrypting = true;
 
         const client = getSupabaseClient();
@@ -701,11 +743,37 @@
         try {
             // Step 1: แสดงสถานะ "กำลังตัดข้อมูลตัวตน..."
             updateStep1UI('กำลังตัดข้อมูลตัวตน...', '#2563EB');
-            await new Promise(resolve => window.setTimeout(resolve, 500));
+            await new Promise(resolve => window.setTimeout(resolve, 600));
 
-            // ดึงข้อมูลที่ status = 'ACTIVE' จาก Staging Box
-            let activeBallots = [];
+            // พยายามเรียก Supabase RPC ฟังก์ชัน server-side process_decryption_threshold ก่อน
+            let rpcSucceeded = false;
             if (client) {
+                try {
+                    const rpcApprovals = state.approved.map(idx => stakeholderNames[idx - 1] || `Party-${idx}`);
+                    const { data: rpcData, error: rpcError } = await client.rpc('process_decryption_threshold', {
+                        p_event_type: eventId,
+                        p_approvals: rpcApprovals
+                    });
+                    if (!rpcError && rpcData && rpcData.success) {
+                        rpcSucceeded = true;
+                        console.log('[VoteUnlock] Server-side RPC process_decryption_threshold completed:', rpcData);
+                    }
+                } catch (rpcErr) {
+                    console.info('[VoteUnlock] Fallback to direct client-side database query flow:', rpcErr);
+                }
+            }
+
+            // ตัดข้อมูลตัวตน (voter_id) ออกอย่างเด็ดขาด
+            updateStep1UI('สำเร็จ', '#000000');
+            await new Promise(resolve => window.setTimeout(resolve, 400));
+
+            // Step 2: แสดงสถานะ "กำลังสลับลำดับบัตร..."
+            updateStep2UI('กำลังสลับลำดับบัตร...', '#2563EB');
+            await new Promise(resolve => window.setTimeout(resolve, 600));
+
+            // หาก RPC ยังไม่ได้ทำงานบน Server ให้ดึงบัตร ACTIVE และรันกระบวนการย้ายเข้า final_box
+            let activeBallots = [];
+            if (!rpcSucceeded && client) {
                 const { data, error: fetchError } = await client
                     .from(stagingTable)
                     .select('*')
@@ -715,7 +783,6 @@
                 }
             }
 
-            // ตัดข้อมูลตัวตน (voter_id) ออกอย่างเด็ดขาด ห้ามนำติดข้ามไป final_box
             const stagingRefMap = new Map();
             const strippedBallots = activeBallots.map((row, index) => {
                 const refToken = `stg_${index}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -725,7 +792,6 @@
                     tracking_hash: row.tracking_hash || row.tracking_code || null,
                 });
 
-                // ตัด voter_id ออกอย่างเด็ดขาด ไม่นำติดไปใน Payload
                 return {
                     _refToken: refToken,
                     encrypted_ballot: row.encrypted_ballot,
@@ -734,173 +800,167 @@
                 };
             });
 
-            // เมื่อตัด voter_id ทิ้งแล้วจึงเปลี่ยนเป็น "สำเร็จ" (สีเขียว)
-            updateStep1UI('สำเร็จ', '#16A34A');
-            await new Promise(resolve => window.setTimeout(resolve, 300));
-
-            // Step 2: แสดงสถานะ "กำลังสลับลำดับบัตร..."
-            updateStep2UI('กำลังสลับลำดับบัตร...', '#2563EB');
-            await new Promise(resolve => window.setTimeout(resolve, 500));
-
-            // ดำเนินการสุ่มสลับลำดับอาร์เรย์บัตร (Fisher-Yates Shuffle) ในหน่วยความจำ
             const shuffledBallots = fisherYatesShuffle(strippedBallots);
+            updateStep2UI('สำเร็จ', '#000000');
+            await new Promise(resolve => window.setTimeout(resolve, 400));
 
-            // แล้วเปลี่ยนสถานะเป็น "สำเร็จ" (สีเขียว)
-            updateStep2UI('สำเร็จ', '#16A34A');
-            await new Promise(resolve => window.setTimeout(resolve, 300));
+            // Step 3: ถอดรหัสบัตรลงคะแนนและทยอยนำเข้า final_box พร้อมปรับ Progress Bar
+            updateStep3UI(0, '0%', '#000000');
 
-            // Step 3: เริ่มกระบวนการถอดรหัส ทยอยนำบัตรเข้า final_box พร้อมขยับตัวเลข % และความกว้างของหลอด Progress Bar จาก 0% ไปจนถึง 100%
-            updateStep3UI(0, '0%', '#2563EB');
-
-            const totalBallots = shuffledBallots.length;
-            if (totalBallots === 0) {
-                // กรณีไม่มีบัตรค้างใน staging_box ให้รันอนิเมชันหลอดจาก 0% -> 100%
-                const demoSteps = [15, 40, 70, 90, 100];
-                for (const pct of demoSteps) {
-                    await new Promise(resolve => window.setTimeout(resolve, 200));
-                    updateStep3UI(pct, `${pct}%`, pct === 100 ? '#16A34A' : '#2563EB');
-                }
-                updateStep3UI(100, '100%', '#16A34A');
-                isDecrypting = false;
-                return;
-            }
-
-            let processedCount = 0;
-            let insertedCount = 0;
-            const batchSize = totalBallots <= 12 ? 1 : Math.max(1, Math.ceil(totalBallots / 10));
-
-            for (let startIdx = 0; startIdx < totalBallots; startIdx += batchSize) {
-                const batch = shuffledBallots.slice(startIdx, startIdx + batchSize);
-
-                for (const ballot of batch) {
-                    const stagingRef = stagingRefMap.get(ballot._refToken);
-                    let envelope = parseBallot(ballot.encrypted_ballot);
-
-                    if (typeof ballot.encrypted_ballot === 'string' && ballot.encrypted_ballot.startsWith('ENC[AES-GCM::')) {
-                        const decryptedWhole = await decryptTextWithAesGcm(ballot.encrypted_ballot, SHARED_SECRET);
-                        const parsedWhole = parseBallot(decryptedWhole);
-                        if (Object.keys(parsedWhole).length > 0) {
-                            envelope = parsedWhole;
-                        } else if (isReferendum && decryptedWhole) {
-                            envelope = { choice: decryptedWhole };
-                        }
-                    }
-
-                    const ballotId = createBallotId();
-                    const countedAt = new Date().toISOString();
-                    let inserted = false;
-
-                    if (isReferendum) {
-                        const rawCipher = envelope.ciphertext ?? envelope.choice ?? envelope.vote ?? envelope.decrypted_vote ?? ballot.encrypted_ballot;
-                        const decryptedText = await decryptTextWithAesGcm(rawCipher, SHARED_SECRET);
-                        const normalizedChoice = normalizeReferendumChoiceValue(decryptedText);
-
-                        if (normalizedChoice) {
-                            const fullRefPayload = {
-                                ballot_id: ballotId,
-                                decrypted_vote: normalizedChoice,
-                                encrypted_ballot: ballot.encrypted_ballot,
-                                tracking_hash: ballot.tracking_hash || undefined,
-                                counted_at: countedAt,
-                            };
-                            const refFallbacks = [
-                                {
-                                    ballot_id: ballotId,
-                                    decrypted_vote: normalizedChoice,
-                                    encrypted_ballot: ballot.encrypted_ballot,
-                                    counted_at: countedAt,
-                                },
-                                {
-                                    decrypted_vote: normalizedChoice,
-                                    encrypted_ballot: ballot.encrypted_ballot,
-                                },
-                            ];
-                            if (client) {
-                                inserted = await insertRowWithSchemaFallback(client, finalTable, fullRefPayload, refFallbacks);
-                            }
-                        }
-                    } else {
-                        const rawConstituency = envelope.constituency ?? envelope.candidate_number ?? envelope.candidate ?? envelope.b1;
-                        const rawPartyList = envelope.partyList ?? envelope.party_list ?? envelope.party_number ?? envelope.party ?? envelope.b2;
-
-                        const [decryptedConstituency, decryptedPartyList] = await Promise.all([
-                            decryptTextWithAesGcm(rawConstituency, SHARED_SECRET),
-                            decryptTextWithAesGcm(rawPartyList, SHARED_SECRET),
-                        ]);
-
-                        const constituencyChoice = normalizeMpChoiceValue(decryptedConstituency);
-                        const partyListChoice = normalizeMpChoiceValue(decryptedPartyList);
-
-                        if (constituencyChoice && partyListChoice) {
-                            const candidateNumInt = constituencyChoice === 'abstain'
-                                ? null
-                                : Number.parseInt(constituencyChoice, 10);
-                            const partyNumInt = partyListChoice === 'abstain'
-                                ? null
-                                : Number.parseInt(partyListChoice, 10);
-
-                            const decryptedBallotData = {
-                                constituency: constituencyChoice,
-                                partyList: partyListChoice,
-                            };
-
-                            const fullMpPayload = {
-                                ballot_id: ballotId,
-                                district_code: ballot.district_code || 'BKK-01',
-                                candidate_number: Number.isInteger(candidateNumInt) ? candidateNumInt : undefined,
-                                party_number: Number.isInteger(partyNumInt) ? partyNumInt : undefined,
-                                decrypted_vote: JSON.stringify(decryptedBallotData),
-                                encrypted_ballot: decryptedBallotData,
-                                tracking_hash: ballot.tracking_hash || undefined,
-                                counted_at: countedAt,
-                            };
-
-                            const mpFallbacks = [
-                                {
-                                    ballot_id: ballotId,
-                                    district_code: ballot.district_code || 'BKK-01',
-                                    decrypted_vote: decryptedBallotData,
-                                    encrypted_ballot: decryptedBallotData,
-                                    counted_at: countedAt,
-                                },
-                                {
-                                    ballot_id: ballotId,
-                                    district_code: ballot.district_code || 'BKK-01',
-                                    encrypted_ballot: decryptedBallotData,
-                                    counted_at: countedAt,
-                                },
-                                {
-                                    district_code: ballot.district_code || 'BKK-01',
-                                    encrypted_ballot: decryptedBallotData,
-                                },
-                            ];
-
-                            if (client) {
-                                inserted = await insertRowWithSchemaFallback(client, finalTable, fullMpPayload, mpFallbacks);
-                            }
-                        }
-                    }
-
-                    if (inserted) {
-                        insertedCount += 1;
-                        if (client) {
-                            await updateStagingStatusToCounted(client, stagingTable, stagingRef);
-                        }
-                    }
-
-                    processedCount += 1;
-                }
-
-                const percentage = Math.min(100, Math.round((processedCount / totalBallots) * 100));
-                updateStep3UI(percentage, `${percentage}%`, '#2563EB');
-
-                if (processedCount < totalBallots) {
+            if (rpcSucceeded || shuffledBallots.length === 0) {
+                // อนิเมชันจำลองการขยับของหลอดความคืบหน้าอย่างนุ่มนวล
+                const steps = [20, 45, 75, 95, 100];
+                for (const pct of steps) {
                     await new Promise(resolve => window.setTimeout(resolve, 250));
+                    updateStep3UI(pct, `${pct}%`, '#000000');
                 }
+            } else {
+                const totalBallots = shuffledBallots.length;
+                let processedCount = 0;
+                let insertedCount = 0;
+                const batchSize = totalBallots <= 12 ? 1 : Math.max(1, Math.ceil(totalBallots / 10));
+
+                for (let startIdx = 0; startIdx < totalBallots; startIdx += batchSize) {
+                    const batch = shuffledBallots.slice(startIdx, startIdx + batchSize);
+
+                    for (const ballot of batch) {
+                        const stagingRef = stagingRefMap.get(ballot._refToken);
+                        let envelope = parseBallot(ballot.encrypted_ballot);
+
+                        if (typeof ballot.encrypted_ballot === 'string' && ballot.encrypted_ballot.startsWith('ENC[AES-GCM::')) {
+                            const decryptedWhole = await decryptTextWithAesGcm(ballot.encrypted_ballot, SHARED_SECRET);
+                            const parsedWhole = parseBallot(decryptedWhole);
+                            if (Object.keys(parsedWhole).length > 0) {
+                                envelope = parsedWhole;
+                            } else if (isReferendum && decryptedWhole) {
+                                envelope = { choice: decryptedWhole };
+                            }
+                        }
+
+                        const ballotId = createBallotId();
+                        const countedAt = new Date().toISOString();
+                        let inserted = false;
+
+                        if (isReferendum) {
+                            const rawCipher = envelope.ciphertext ?? envelope.choice ?? envelope.vote ?? envelope.decrypted_vote ?? ballot.encrypted_ballot;
+                            const decryptedText = await decryptTextWithAesGcm(rawCipher, SHARED_SECRET);
+                            const normalizedChoice = normalizeReferendumChoiceValue(decryptedText);
+
+                            if (normalizedChoice) {
+                                const fullRefPayload = {
+                                    ballot_id: ballotId,
+                                    decrypted_vote: normalizedChoice,
+                                    encrypted_ballot: ballot.encrypted_ballot,
+                                    tracking_hash: ballot.tracking_hash || undefined,
+                                    counted_at: countedAt,
+                                };
+                                const refFallbacks = [
+                                    {
+                                        ballot_id: ballotId,
+                                        decrypted_vote: normalizedChoice,
+                                        encrypted_ballot: ballot.encrypted_ballot,
+                                        counted_at: countedAt,
+                                    },
+                                    {
+                                        decrypted_vote: normalizedChoice,
+                                        encrypted_ballot: ballot.encrypted_ballot,
+                                    },
+                                ];
+                                if (client) {
+                                    inserted = await insertRowWithSchemaFallback(client, finalTable, fullRefPayload, refFallbacks);
+                                }
+                            }
+                        } else {
+                            const rawConstituency = envelope.constituency ?? envelope.candidate_number ?? envelope.candidate ?? envelope.b1;
+                            const rawPartyList = envelope.partyList ?? envelope.party_list ?? envelope.party_number ?? envelope.party ?? envelope.b2;
+
+                            const [decryptedConstituency, decryptedPartyList] = await Promise.all([
+                                decryptTextWithAesGcm(rawConstituency, SHARED_SECRET),
+                                decryptTextWithAesGcm(rawPartyList, SHARED_SECRET),
+                            ]);
+
+                            const constituencyChoice = normalizeMpChoiceValue(decryptedConstituency);
+                            const partyListChoice = normalizeMpChoiceValue(decryptedPartyList);
+
+                            if (constituencyChoice && partyListChoice) {
+                                const candidateNumInt = constituencyChoice === 'abstain'
+                                    ? null
+                                    : Number.parseInt(constituencyChoice, 10);
+                                const partyNumInt = partyListChoice === 'abstain'
+                                    ? null
+                                    : Number.parseInt(partyListChoice, 10);
+
+                                const decryptedBallotData = {
+                                    constituency: constituencyChoice,
+                                    partyList: partyListChoice,
+                                };
+
+                                const fullMpPayload = {
+                                    ballot_id: ballotId,
+                                    district_code: ballot.district_code || 'BKK-01',
+                                    candidate_number: Number.isInteger(candidateNumInt) ? candidateNumInt : undefined,
+                                    party_number: Number.isInteger(partyNumInt) ? partyNumInt : undefined,
+                                    decrypted_vote: JSON.stringify(decryptedBallotData),
+                                    encrypted_ballot: decryptedBallotData,
+                                    tracking_hash: ballot.tracking_hash || undefined,
+                                    counted_at: countedAt,
+                                };
+
+                                const mpFallbacks = [
+                                    {
+                                        ballot_id: ballotId,
+                                        district_code: ballot.district_code || 'BKK-01',
+                                        decrypted_vote: decryptedBallotData,
+                                        encrypted_ballot: decryptedBallotData,
+                                        counted_at: countedAt,
+                                    },
+                                    {
+                                        ballot_id: ballotId,
+                                        district_code: ballot.district_code || 'BKK-01',
+                                        encrypted_ballot: decryptedBallotData,
+                                        counted_at: countedAt,
+                                    },
+                                    {
+                                        district_code: ballot.district_code || 'BKK-01',
+                                        encrypted_ballot: decryptedBallotData,
+                                    },
+                                ];
+
+                                if (client) {
+                                    inserted = await insertRowWithSchemaFallback(client, finalTable, fullMpPayload, mpFallbacks);
+                                }
+                            }
+                        }
+
+                        if (inserted) {
+                            insertedCount += 1;
+                            if (client) {
+                                await updateStagingStatusToCounted(client, stagingTable, stagingRef);
+                            }
+                        }
+
+                        processedCount += 1;
+                    }
+
+                    const percentage = Math.min(100, Math.round((processedCount / totalBallots) * 100));
+                    updateStep3UI(percentage, `${percentage}%`, '#000000');
+
+                    if (processedCount < totalBallots) {
+                        await new Promise(resolve => window.setTimeout(resolve, 200));
+                    }
+                }
+
+                console.log(`[VoteUnlock] บันทึกคะแนนลง ${finalTable} สำเร็จ ${insertedCount}/${totalBallots} ใบ (Purged in Staging Box)`);
             }
 
-            updateStep3UI(100, '100%', '#16A34A');
-            console.log(`[VoteUnlock] ถอดรหัสและย้ายบัตรเข้า ${finalTable} สำเร็จ ${insertedCount}/${totalBallots} ใบ (Purged in Staging Box)`);
+            updateStep3UI(100, '100%', '#000000');
+            state.completed = true;
+            saveState();
+
+            const processHeader = document.getElementById('processHeader');
+            if (processHeader) {
+                processHeader.innerHTML = 'ประมวลผลและเปิดหีบสำเร็จ<br class="vu-br-mobile"> (นำเข้าสู่การนับคะแนนสดแล้ว)';
+            }
         } catch (error) {
             console.error(`Could not process ballots from ${stagingTable}`, error);
             updateStep3UI(0, 'ประมวลผลไม่สำเร็จ', '#EF4444');
@@ -909,50 +969,90 @@
         }
     }
 
-    const processStagingBallots = startDecryptionProcess;
+    /**
+     * ดำเนินการเมื่อผู้ใช้กดปุ่ม [ ส่งรหัส ] ในบทบาทของตนเอง
+     */
+    async function submitUnlockCodeForRole(roleIndex) {
+        if (state.approved.includes(roleIndex) || isDecrypting || state.completed) return;
 
-    async function submitUnlockCode() {
-        if (!hasCitizenKeyAccess() || isDecrypting) return;
+        // ล็อกปุ่มและเปลี่ยนข้อความทันที
+        const button = document.getElementById(`btnSubmitCode-${roleIndex}`);
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'ส่งรหัสแล้ว';
+        }
 
         const usedIds = new Set(
             Object.values(state.txRefs)
                 .map(ref => Number.parseInt(String(ref).replace(/^#TX-/, ''), 16))
                 .filter(Number.isFinite)
         );
-        state.txRefs[5] = generateTxId(usedIds);
-        state.completed = true;
+        state.txRefs[roleIndex] = generateTxId(usedIds);
+        if (!state.approved.includes(roleIndex)) {
+            state.approved.push(roleIndex);
+        }
         saveState();
 
         renderStatus();
 
-        const processHeader = document.getElementById('processHeader');
-        if (processHeader) {
-            processHeader.innerHTML = 'รวมรหัสครบตามเกณฑ์แล้ว<br class="vu-br-mobile"> (ระบบกำลังเริ่มประมวลผลอัตโนมัติ)';
+        // ตรวจสอบเกณฑ์ปลดล็อก: เมื่อยืนยันรหัสครบอย่างน้อย 3 ใน 5 ฝ่าย (>= 60%)
+        if (state.approved.length >= 3) {
+            const processHeader = document.getElementById('processHeader');
+            if (processHeader) {
+                processHeader.innerHTML = 'รวมรหัสครบตามเกณฑ์แล้ว<br class="vu-br-mobile"> (ระบบกำลังเริ่มประมวลผลอัตโนมัติ)';
+            }
+            await startDecryptionProcess();
         }
-
-        await startDecryptionProcess();
     }
 
     function init() {
         const backLink = document.getElementById('backLink');
         if (backLink) backLink.href = `Vote-Status.html?id=${encodeURIComponent(eventKey)}`;
 
-        const button = document.getElementById('btnSubmitCode');
-        if (button) button.addEventListener('click', submitUnlockCode);
+        // ผูก Event Listener ปุ่มส่งรหัสของแต่ละการ์ด (1 ถึง 5)
+        for (let i = 1; i <= 5; i += 1) {
+            const button = document.getElementById(`btnSubmitCode-${i}`);
+            if (button) {
+                button.addEventListener('click', () => submitUnlockCodeForRole(i));
+            }
+        }
+
+        // Backward compatibility สำหรับโค้ดที่ query #btnSubmitCode
+        const legacyBtn = document.getElementById('btnSubmitCode');
+        if (legacyBtn && !legacyBtn.id.includes('-')) {
+            legacyBtn.addEventListener('click', () => {
+                if (userRoleIndex) submitUnlockCodeForRole(userRoleIndex);
+                else submitUnlockCodeForRole(5);
+            });
+        }
 
         renderNames([]);
         renderStatus();
-        resetStandbyUI();
+
+        if (state.completed) {
+            updateStep1UI('สำเร็จ', '#000000');
+            updateStep2UI('สำเร็จ', '#000000');
+            updateStep3UI(100, '100%', '#000000');
+            const processHeader = document.getElementById('processHeader');
+            if (processHeader) {
+                processHeader.innerHTML = 'ประมวลผลและเปิดหีบสำเร็จ<br class="vu-br-mobile"> (นำเข้าสู่การนับคะแนนสดแล้ว)';
+            }
+        } else if (state.approved.length >= 3) {
+            startDecryptionProcess();
+        } else {
+            resetStandbyUI();
+        }
 
         if (!isReferendum) {
-            getRandomPartyNames().then(renderNames);
+            getDeterministicPartyNames().then(renderNames);
         }
     }
 
-    // Export ฟังก์ชันสำหรับเรียกใช้งานหรือทดสอบผ่าน Console
-    window.hasCitizenKeyAccess = hasCitizenKeyAccess;
+    // Export สำหรับทดสอบหรือเรียกผ่าน Console
+    window.hasCitizenKeyAccess = () => Boolean(userRoleIndex);
     window.decryptTextWithAesGcm = decryptTextWithAesGcm;
     window.startDecryptionProcess = startDecryptionProcess;
+    window.submitUnlockCodeForRole = submitUnlockCodeForRole;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init, { once: true });
