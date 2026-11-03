@@ -64,9 +64,9 @@
                         <p class="vu-sec-subtitle" id="secSubtitle">ต้องได้รับการยืนยันรหัสอย่างน้อย 3 ใน 5 ฝ่าย<br class="vu-br-mobile"> เพื่อเริ่มเปิดหีบนับคะแนน</p>
                     </div>
                     <div class="vu-tracker-group">
-                        <p class="vu-tracker-label" id="trackerLabel">ส่งรหัสแล้ว 2 / 5 ฝ่าย</p>
-                        <div class="vu-main-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
-                            <div class="vu-main-progress-fill" id="mainProgressFill" style="width: 40%;"></div>
+                        <p class="vu-tracker-label" id="trackerLabel">ส่งรหัสแล้ว 0 / 5 ฝ่าย</p>
+                        <div class="vu-main-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="vu-main-progress-fill" id="mainProgressFill" style="width: 0%;"></div>
                         </div>
                     </div>
                 </div>
@@ -78,20 +78,20 @@
              ========================================================= -->
         <section class="vu-cards-list" id="stakeholderCardsList" aria-label="รายชื่อ 5 ฝ่ายผู้ถือรหัส">
 
-            <!-- ฝ่ายที่ 1: กกต. (เริ่มต้น: ยืนยันรหัสแล้ว) -->
-            <article class="vu-card" id="card-1">
-                <div class="vu-card-icon-wrap" id="iconWrap-1">
-                    <i class="fa-solid fa-check vu-icon-check" aria-hidden="true"></i>
+            <!-- ฝ่ายที่ 1: กกต. (เริ่มต้น: รอดำเนินการ) -->
+            <article class="vu-card vu-card--pending" id="card-1">
+                <div class="vu-card-icon-wrap vu-card-icon-wrap--pending" id="iconWrap-1">
+                    <i class="fa-regular fa-circle vu-icon-circle" aria-hidden="true"></i>
                 </div>
-                <div class="vu-card-body" id="body-1">
+                <div class="vu-card-body vu-card-body--pending" id="body-1">
                     <div class="vu-card-text-group">
                         <div class="vu-card-title-row">
                             <h2 class="vu-party-name" id="name-1">1. ผู้แทนสำนักงาน กกต.</h2>
                         </div>
-                        <div class="vu-card-status-row" id="statusRow-1">
+                        <div class="vu-card-status-row vu-card-status-row--pending" id="statusRow-1">
                             <p class="vu-party-status" id="status-1">
-                                <span class="vu-status-main" id="statusMain-1">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                                <span class="vu-status-ref" id="ref-1"></span>
+                                <span class="vu-status-main" id="statusMain-1">สถานะ: รอดำเนินการยืนยันรหัส</span>
+                                <span class="vu-status-ref" id="ref-1" hidden></span>
                             </p>
                         </div>
                     </div>
@@ -128,20 +128,20 @@
                 </div>
             </article>
 
-            <!-- ฝ่ายที่ 3: ตัวแทนพรรค ข / ผู้แทนภาคประชาชน 1 (เริ่มต้น: ยืนยันรหัสแล้ว) -->
-            <article class="vu-card" id="card-3">
-                <div class="vu-card-icon-wrap" id="iconWrap-3">
-                    <i class="fa-solid fa-check vu-icon-check" aria-hidden="true"></i>
+            <!-- ฝ่ายที่ 3: ตัวแทนพรรค ข / ผู้แทนภาคประชาชน 1 (เริ่มต้น: รอดำเนินการ) -->
+            <article class="vu-card vu-card--pending" id="card-3">
+                <div class="vu-card-icon-wrap vu-card-icon-wrap--pending" id="iconWrap-3">
+                    <i class="fa-regular fa-circle vu-icon-circle" aria-hidden="true"></i>
                 </div>
-                <div class="vu-card-body" id="body-3">
+                <div class="vu-card-body vu-card-body--pending" id="body-3">
                     <div class="vu-card-text-group">
                         <div class="vu-card-title-row">
                             <h2 class="vu-party-name" id="name-3">3. ตัวแทนพรรคการเมือง</h2>
                         </div>
-                        <div class="vu-card-status-row" id="statusRow-3">
+                        <div class="vu-card-status-row vu-card-status-row--pending" id="statusRow-3">
                             <p class="vu-party-status" id="status-3">
-                                <span class="vu-status-main" id="statusMain-3">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                                <span class="vu-status-ref" id="ref-3"></span>
+                                <span class="vu-status-main" id="statusMain-3">สถานะ: รอดำเนินการยืนยันรหัส</span>
+                                <span class="vu-status-ref" id="ref-3" hidden></span>
                             </p>
                         </div>
                     </div>

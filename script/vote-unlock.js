@@ -128,25 +128,32 @@
     function loadState() {
         const saved = safeReadJson(window.localStorage, stateKey, null);
         if (saved && Array.isArray(saved.approved) && saved.txRefs) {
+            const approved = [...new Set(saved.approved.map(Number).filter(role => role >= 1 && role <= 5))];
+            const isOldDemoSeed = !saved.completed
+                && approved.length === 2
+                && approved.includes(1)
+                && approved.includes(3);
+
+            if (isOldDemoSeed) {
+                try {
+                    window.localStorage.removeItem(stateKey);
+                } catch {
+                    // Keep the clean in-memory default if storage is unavailable.
+                }
+                return { completed: false, approved: [], txRefs: {} };
+            }
+
             return {
                 completed: !!saved.completed,
-                approved: saved.approved,
+                approved,
                 txRefs: saved.txRefs,
             };
         }
 
-        // สถานะเริ่มต้น: ฝ่ายที่ 1 (กกต.) และฝ่ายที่ 3 (พรรค ข / ผู้แทนประชาชน 1) ยืนยันรหัสแล้ว (2/5 ฝ่าย = 40%)
-        // รอการยืนยันเพิ่มจากฝ่ายที่ 2, 4 หรือ 5 เพื่อให้ครบเกณฑ์อย่างน้อย 3 ใน 5 ฝ่าย (>= 60%)
-        const usedIds = new Set();
-        const txRefs = {
-            1: generateTxId(usedIds),
-            3: generateTxId(usedIds),
-        };
-
         return {
             completed: false,
-            approved: [1, 3],
-            txRefs,
+            approved: [],
+            txRefs: {},
         };
     }
 

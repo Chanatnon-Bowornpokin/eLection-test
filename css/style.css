@@ -257,18 +257,18 @@ body {
 }
 
 .btn-main-icon {
-    font-size: 50px;
+    font-size: 40px;
     color: #000;
 }
 
 .btn-main-text {
-    font-size: 20px;
+    font-size: 16px;
     color: #000;
     font-weight: bold;
 }
 
 img.btn-sub-icon {
-    height: 30px;
+    height: 28px;
     width: auto;
     display: block;
     margin-left: auto;
@@ -278,13 +278,13 @@ img.btn-sub-icon {
 }
 
 .btn-sub-icon {
-    font-size: 36px;
+    font-size: 28px;
     color: #000;
 }
 
 
 .btn-sub-text {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
     color: #000;
 }
@@ -1475,33 +1475,37 @@ img.btn-sub-icon {
     }
 
     .btn-main-icon {
-        font-size: 280px;
+        font-size: 200px;
+        line-height: 1;
         color: #000;
     }
 
     .btn-main-text {
-        font-size: 80px;
+        font-size: 54px;
+        line-height: 1.15;
         font-weight: bold;
     }
 
     img.btn-sub-icon {
-        height: 180px;
+        height: 130px;
         width: auto;
         display: block;
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: 18px;
-        margin-top: 18px;
+        margin-bottom: 8px;
+        margin-top: 10px;
     }
 
     .btn-sub-icon {
-        font-size: 200px;
+        font-size: 130px;
+        line-height: 1;
         color: #000;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .btn-sub-text {
-        font-size: 50px;
+        font-size: 30px;
+        line-height: 1.15;
         font-weight: bold;
     }
 
@@ -1528,7 +1532,8 @@ img.btn-sub-icon {
 
     .eventCard {
         --ev-radius: 15.38px;
-        --ev-height: 75px;
+        --ev-height: auto;
+        min-height: 75px;
         --ev-date-w: 77.93px;
         --ev-month-fs: 15.85px;
         --ev-day-fs: 34px;
@@ -1695,4 +1700,43 @@ img.btn-sub-icon {
         font-size: 20px;
     }
 
+}
+
+@media (width >=768px) and (width <1400px) {
+    .main-btn-row {
+        --bs-gutter-x: 26px;
+        margin-top: 30px;
+    }
+
+    .sub-btn-row {
+        --bs-gutter-x: 18px;
+        margin-top: 15px;
+    }
+
+    .btn-main-icon {
+        font-size: clamp(90px, 12.5vw, 176px);
+    }
+
+    .btn-main-text {
+        font-size: clamp(30px, 3.8vw, 52px);
+        line-height: 1.1;
+    }
+
+    img.btn-sub-icon {
+        height: clamp(70px, 8.75vw, 120px);
+        margin-top: clamp(6px, 1vw, 12px);
+        margin-bottom: clamp(2px, 0.4vw, 6px);
+    }
+
+    .btn-sub-icon {
+        font-size: clamp(70px, 8.75vw, 120px);
+        line-height: 1;
+        margin-top: clamp(4px, 0.7vw, 10px);
+        margin-bottom: clamp(4px, 0.7vw, 10px);
+    }
+
+    .btn-sub-text {
+        font-size: clamp(20px, 2.4vw, 30px);
+        line-height: 1.1;
+    }
 }

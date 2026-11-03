@@ -87,7 +87,7 @@ function checkEligibility(currentEventId) {
         }
         if (list) {
             list.innerHTML = `
-                <div class="vote-todo-card" style="text-align: center; padding: 36px 20px;">
+                <div class="vote-todo-card" style="text-align: center;">
                     <div style="font-size: 20px; font-weight: 700; color: #dc2626; margin-bottom: 10px;">
                         ท่านไม่มีสิทธิลงคะแนนในรายการนี้
                     </div>
