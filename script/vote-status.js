@@ -5,8 +5,7 @@
  *  - waiting  : ก่อนนับคะแนน (สถิติผู้ใช้สิทธิรายภูมิภาค + เวลาที่เหลือ)
  *  - counting : ระหว่างนับคะแนน (ผลคะแนนเรียลไทม์ บัญชีรายชื่อ / แบ่งเขต)
  *
- * ตัวเลขทั้งหมดเป็นข้อมูลจำลอง (simulation) ที่ขยับเองเพื่อให้เห็น progress bar เคลื่อนไหว
- * แทนการรอข้อมูลจริงจากระบบนับคะแนน
+ * คะแนนและ progress มาจาก final box ของ Supabase และอัปเดตด้วย polling
  */
 (function () {
     'use strict';
@@ -21,17 +20,18 @@
         'house-election-2569': 'counting',
     };
     const eventId = params.get('id') || 'house-election-2569';
+    const isReferendum = eventId.toLowerCase().includes('ref');
     const requestedState = params.get('state');
-    const state = (requestedState === 'waiting' || requestedState === 'counting')
+    const state = isReferendum ? 'counting' : (requestedState === 'waiting' || requestedState === 'counting')
         ? requestedState
         : (STATE_BY_EVENT[eventId] || 'counting');
-    let type = (state === 'counting' && params.get('type') === 'constituency') ? 'constituency' : 'partylist';
+    let type = isReferendum ? 'referendum' : (state === 'counting' && params.get('type') === 'constituency') ? 'constituency' : 'partylist';
 
     main.dataset.state = state;
     main.dataset.type = type;
 
     // --------------------------------------------------------------- Helpers
-    const TICK_MS = 1400;
+    const POLL_MS = 5000;
     const fmt = value => Math.round(value).toLocaleString('en-US');
     const pct = (part, total, digits = 1) => (total > 0 ? (part / total) * 100 : 0).toFixed(digits);
     const pad = value => String(value).padStart(2, '0');
@@ -79,85 +79,44 @@
     }
 
     // -------------------------------------------------------------- Base data
-    const ELIGIBLE = 51354679;
-    const BALLOTS_IN_SYSTEM = 34120450;
-
     const totals = {
-        used: 34120450,
-        countedDistrict: 30000000,
-        countedParty: 30000000,
+        submitted: 0,
+        processed: 0,
     };
 
     function renderKpis() {
-        setBind('eligible', fmt(ELIGIBLE));
-        setBind('used', fmt(totals.used));
-        setBind('usedPct', pct(totals.used, ELIGIBLE));
+        const progress = pct(totals.processed, totals.submitted);
 
-        if (state === 'waiting') {
-            setBind('ballotDistrict', fmt(totals.used));
-            setBind('ballotParty', fmt(totals.used));
+        if (isReferendum) {
+            setBind('eligible', fmt(totals.submitted));
+            setBind('used', fmt(totals.processed));
+            setBind('usedPct', progress);
+            setBind('ballotDistrict', fmt(referendumVotes.approve));
+            setBind('ballotParty', fmt(referendumVotes.disapprove));
+            setBind('countedDistrict', fmt(totals.processed));
+            setBind('countedParty', fmt(referendumVotes.abstain));
+            setBind('countedPct', progress);
         } else {
-            setBind('ballotDistrict', fmt(BALLOTS_IN_SYSTEM));
-            setBind('ballotParty', fmt(BALLOTS_IN_SYSTEM));
-            setBind('countedDistrict', fmt(totals.countedDistrict));
-            setBind('countedParty', fmt(totals.countedParty));
-            setBind(
-                'countedPct',
-                pct(totals.countedDistrict + totals.countedParty, BALLOTS_IN_SYSTEM * 2)
-            );
+            setBind('eligible', '—');
+            setBind('used', fmt(totals.submitted));
+            setBind('usedPct', progress);
+            setBind('ballotDistrict', fmt(totals.submitted));
+            setBind('ballotParty', fmt(totals.submitted));
+            setBind('countedDistrict', fmt(totals.processed));
+            setBind('countedParty', fmt(totals.processed));
+            setBind('countedPct', progress);
         }
     }
 
     // ------------------------------------------------ Waiting: รายภูมิภาค + เวลา
-    const regions = [
-        { name: 'ภาคกลาง', used: 11270000, total: 16190000 },
-        { name: 'ภาคเหนือ', used: 5460000, total: 8400000 },
-        { name: 'ภาคตะวันออกเฉียงเหนือ', used: 10850000, total: 17010000 },
-        { name: 'ภาคใต้', used: 6000000, total: 9800000 },
-    ];
-    let regionEls = [];
-
     function renderRegions() {
         const list = document.getElementById('regionList');
         if (!list) return;
-
-        list.innerHTML = regions.map(region => {
-            const share = pct(region.used, region.total);
-            const sub = `• ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
-            const pctStr = `คิดเป็น ${share}%`;
-            return barRowHtml(
-                `<h3 class="vs-bar-name">${escapeHtml(region.name)}</h3>`,
-                sub,
-                pctStr,
-                share
-            );
-        }).join('');
-
-        regionEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
-            sub: row.querySelector('.vs-bar-sub'),
-            text: row.querySelector('.vs-bar-text'),
-            pct: row.querySelector('.vs-bar-pct'),
-            fill: row.querySelector('.vs-bar-fill'),
-        }));
+        list.innerHTML = barRowHtml('', 'ยังไม่มีข้อมูลการใช้สิทธิแยกตามภูมิภาคจากฐานข้อมูล', '', 0);
     }
 
-    function updateRegions() {
-        regions.forEach((region, index) => {
-            const els = regionEls[index];
-            if (!els) return;
-            const share = pct(region.used, region.total);
-            const label = `ใช้สิทธิแล้ว ${fmt(region.used)} / ${fmt(region.total)} คน`;
-            if (els.text) {
-                els.text.textContent = label;
-            } else if (els.sub) {
-                els.sub.textContent = `• ${label}`;
-            }
-            els.pct.textContent = `คิดเป็น ${share}%`;
-            els.fill.style.width = `${share}%`;
-        });
-    }
-
-    const closeAt = Date.now() + (3 * 60 + 45) * 60 * 1000;
+    const closeAt = new Date();
+    closeAt.setHours(17, 0, 0, 0);
 
     function updateCountdown() {
         const remaining = Math.max(0, closeAt - Date.now());
@@ -165,117 +124,151 @@
         setBind('countdown', `${pad(Math.floor(minutes / 60))} ชม. ${pad(minutes % 60)} นาที`);
     }
 
-    function tickWaiting() {
-        let added = 0;
-        regions.forEach(region => {
-            const before = region.used;
-            region.used = Math.min(region.total, region.used + region.total * (0.001 + Math.random() * 0.003));
-            added += region.used - before;
-        });
-        totals.used = Math.min(ELIGIBLE, totals.used + added);
-        renderKpis();
-        updateRegions();
-    }
-
     // ------------------------------------------ Counting: ผลคะแนนเรียลไทม์
-    const partyRows = [
-        { label: 'พรรค ก. (เบอร์ 1)', votes: 10000000 },
-        { label: 'พรรค ข. (เบอร์ 4)', votes: 8400000 },
-        { label: 'พรรค ค. (เบอร์ 2)', votes: 10000000 },
-        { label: 'พรรค ง. (เบอร์ 3)', votes: 10000000 },
-    ];
-
-    const candidate = (no, name, party, votes) => ({ label: `เบอร์ ${no} ${name} (พรรค ${party})`, votes });
-    const abstain = votes => ({ label: 'ไม่ประสงค์ลงคะแนน', votes, hideVotes: true });
-
-    const AREAS = {
-        bkk: {
-            name: 'กรุงเทพมหานคร',
-            districts: [
-                {
-                    label: 'เขตที่ 1 (พระนคร, ป้อมปราบฯ)', rows: [
-                        candidate(1, 'นายสมชาย มุ่งมั่น', 'ก.', 45210),
-                        candidate(4, 'น.ส.วิภา สดใส', 'ข.', 38150),
-                        candidate(2, 'ดร.เอกชัย รักถิ่น', 'ค.', 15420),
-                        abstain(3200),
-                    ],
-                },
-                {
-                    label: 'เขตที่ 2 (ดุสิต, พญาไท)', rows: [
-                        candidate(3, 'นายปกรณ์ ใจดี', 'ง.', 41880),
-                        candidate(1, 'น.ส.รัตนา ศรีสุข', 'ก.', 39260),
-                        candidate(4, 'นายธนา พัฒนผล', 'ข.', 18040),
-                        abstain(2900),
-                    ],
-                },
-            ],
-        },
-        cmi: {
-            name: 'เชียงใหม่',
-            districts: [
-                {
-                    label: 'เขตที่ 1 (เมืองเชียงใหม่)', rows: [
-                        candidate(2, 'นายสุรชัย ดอยสูง', 'ค.', 36700),
-                        candidate(1, 'น.ส.ศิริพร ล้านนา', 'ก.', 35120),
-                        candidate(4, 'นายวีระ เมฆา', 'ข.', 12980),
-                        abstain(2400),
-                    ],
-                },
-                {
-                    label: 'เขตที่ 2 (สารภี, ดอยสะเก็ด)', rows: [
-                        candidate(1, 'นายอนันต์ ภูผา', 'ก.', 33540),
-                        candidate(3, 'น.ส.กมลา พิงค์', 'ง.', 30210),
-                        candidate(2, 'นายประเสริฐ ขุนเขา', 'ค.', 14650),
-                        abstain(2100),
-                    ],
-                },
-            ],
-        },
-        pkt: {
-            name: 'ภูเก็ต',
-            districts: [
-                {
-                    label: 'เขตที่ 1 (เมืองภูเก็ต)', rows: [
-                        candidate(4, 'น.ส.ทะเล คลื่นใส', 'ข.', 28430),
-                        candidate(1, 'นายอันดา วารี', 'ก.', 26990),
-                        candidate(2, 'นายชัยวัฒน์ หาดทอง', 'ค.', 9870),
-                        abstain(1800),
-                    ],
-                },
-            ],
-        },
-    };
-
-    // เก็บข้อมูลที่ขยับแล้วของแต่ละเขต เพื่อให้ตัวเลขต่อเนื่องเมื่อสลับเขตไปมา
-    const areaRows = {};
-    const areaKey = (province, district) => `${province}:${district}`;
-
-    function rowsForArea(province, districtIndex) {
-        const key = areaKey(province, districtIndex);
-        if (!areaRows[key]) {
-            areaRows[key] = AREAS[province].districts[districtIndex].rows.map(row => ({ ...row }));
-        }
-        return areaRows[key];
-    }
-
-    const selected = { province: 'bkk', district: 0 };
+    const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
+    const PAGE_SIZE = 1000;
+    const votesByBallot = [];
+    const referendumVotes = { approve: 0, disapprove: 0, abstain: 0 };
+    const selected = { province: '', district: '' };
+    let cachedFinalRows = [];
+    let lastFinalCount = -1;
+    let partyMetadata = [];
+    let candidateMetadata = [];
+    let areaSelectsInitialized = false;
     let scoreEls = [];
 
-    function currentRows() {
-        return type === 'constituency'
-            ? rowsForArea(selected.province, selected.district)
-            : partyRows;
+    async function fetchAllRows(table, columns) {
+        if (!db) throw new Error('Supabase client is unavailable');
+
+        const rows = [];
+        for (let offset = 0; ; offset += PAGE_SIZE) {
+            const { data, error } = await db.from(table)
+                .select(columns)
+                .order('ballot_id', { ascending: true })
+                .range(offset, offset + PAGE_SIZE - 1);
+            if (error) throw error;
+            rows.push(...(data || []));
+            if (!data || data.length < PAGE_SIZE) break;
+        }
+        return rows;
     }
 
-    // น้ำหนักเริ่มต้น ใช้กำหนดทิศทางที่คะแนนจะไหลเข้าในแต่ละรอบ
-    function ensureWeights(rows) {
-        if (rows.every(row => row.weight)) return;
-        const sum = rows.reduce((acc, row) => acc + row.votes, 0);
-        rows.forEach(row => { row.weight = row.votes / sum; });
+    async function fetchTableCount(table, column) {
+        if (!db) throw new Error('Supabase client is unavailable');
+        const { count, error } = await db.from(table).select(column, { count: 'exact', head: true });
+        if (error) throw error;
+        return count || 0;
+    }
+
+    async function loadMasterData() {
+        if (candidateMetadata.length && partyMetadata.length) return;
+        if (!db) throw new Error('Supabase client is unavailable');
+
+        const [candidateResult, partyResult] = await Promise.all([
+            db.from('mp_candidates').select('district_code,candidate_number,candidate_name,party_name,party_number'),
+            db.from('party_candidates').select('party_number,party_name'),
+        ]);
+        if (candidateResult.error) throw candidateResult.error;
+        if (partyResult.error) throw partyResult.error;
+        candidateMetadata = candidateResult.data || [];
+        partyMetadata = partyResult.data || [];
+    }
+
+    async function decryptVoteChoice(value) {
+        if (typeof value !== 'string' || !value.startsWith('ENC[AES-GCM::')) return value;
+
+        const encoded = value.slice('ENC[AES-GCM::'.length).replace(/\]$/, '');
+        try {
+            const bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
+            const key = await crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode('eLection-ECT-SecretKey-2026-BKK'.padEnd(32, '0')),
+                { name: 'AES-GCM' },
+                false,
+                ['decrypt']
+            );
+            const plaintext = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: bytes.slice(0, 12) },
+                key,
+                bytes.slice(12)
+            );
+            return new TextDecoder().decode(plaintext);
+        } catch {
+            return null;
+        }
+    }
+
+    function parseEnvelope(value) {
+        if (value && typeof value === 'object') return value;
+        if (typeof value === 'string') {
+            try { return JSON.parse(value); } catch { return {}; }
+        }
+        return {};
+    }
+
+    function choiceNumber(value) {
+        if (String(value || '').toLowerCase() === 'abstain') return 'abstain';
+        const number = Number.parseInt(value, 10);
+        return Number.isInteger(number) && number > 0 ? number : null;
+    }
+
+    function referendumChoice(value) {
+        const choice = String(value || '').trim().toLowerCase();
+        if (['approve', 'yes', 'เห็นชอบ'].includes(choice)) return 'approve';
+        if (['disapprove', 'no', 'ไม่เห็นชอบ'].includes(choice)) return 'disapprove';
+        if (['abstain', 'no opinion', 'ไม่แสดงความคิดเห็น', 'งดออกเสียง'].includes(choice)) return 'abstain';
+        return null;
+    }
+
+    function scoreMessage(message) {
+        const list = document.getElementById('scoreList');
+        if (list) list.innerHTML = barRowHtml('', message, '', 0);
     }
 
     const scoreTypeSelect = document.getElementById('scoreTypeSelect');
     const scoreTypeLabel = document.getElementById('scoreTypeLabel');
+
+    function currentScoreRows() {
+        if (isReferendum) {
+            return [
+                { label: 'เห็นชอบ (Approve)', votes: referendumVotes.approve },
+                { label: 'ไม่เห็นชอบ (Disapprove)', votes: referendumVotes.disapprove },
+                { label: 'ไม่แสดงความคิดเห็น / งดออกเสียง (Abstain)', votes: referendumVotes.abstain },
+            ];
+        }
+
+        const selectedBallots = type === 'constituency'
+            ? votesByBallot.filter(ballot => ballot.districtCode === selected.district)
+            : votesByBallot;
+        const voteCounts = new Map();
+        let abstainCount = 0;
+
+        selectedBallots.forEach(ballot => {
+            const vote = type === 'constituency' ? ballot.candidateNumber : ballot.partyNumber;
+            if (vote === 'abstain') {
+                abstainCount += 1;
+            } else if (vote !== null) {
+                voteCounts.set(vote, (voteCounts.get(vote) || 0) + 1);
+            }
+        });
+
+        const rows = type === 'constituency'
+            ? candidateMetadata
+                .filter(candidate => candidate.district_code === selected.district)
+                .map(candidate => ({
+                    number: candidate.candidate_number,
+                    label: `เบอร์ ${candidate.candidate_number} ${candidate.candidate_name} (${candidate.party_name})`,
+                    votes: voteCounts.get(candidate.candidate_number) || 0,
+                }))
+            : partyMetadata.map(party => ({
+                number: party.party_number,
+                label: `${party.party_name} (เบอร์ ${party.party_number})`,
+                votes: voteCounts.get(party.party_number) || 0,
+            }));
+
+        if (abstainCount > 0) rows.push({ number: Number.MAX_SAFE_INTEGER, label: 'ไม่ประสงค์ลงคะแนน', votes: abstainCount });
+        return rows.sort((left, right) => right.votes - left.votes || left.number - right.number);
+    }
 
     function renderScores() {
         const list = document.getElementById('scoreList');
@@ -283,18 +276,21 @@
 
         if (scoreTypeSelect) scoreTypeSelect.value = type;
         if (scoreTypeLabel) {
-            scoreTypeLabel.textContent = type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
+            scoreTypeLabel.textContent = isReferendum
+                ? 'ผลการออกเสียงประชามติ'
+                : type === 'constituency' ? 'แบบแบ่งเขต' : 'แบบบัญชีรายชื่อ';
         }
 
-        const rows = currentRows();
-        ensureWeights(rows);
-        const total = rows.reduce((acc, row) => acc + row.votes, 0);
+        const rows = currentScoreRows();
+        if (totals.processed === 0 || (type === 'constituency' && !rows.length)) {
+            scoreMessage('ยังไม่มีบัตรที่ประมวลผลในฐานข้อมูล');
+            return;
+        }
+        const total = isReferendum ? totals.processed : rows.reduce((sum, row) => sum + row.votes, 0);
 
         list.innerHTML = rows.map(row => {
-            const share = pct(row.votes, total);
-            const sub = row.hideVotes
-                ? `• ${row.label}`
-                : `• ${row.label} ${fmt(row.votes)} คะแนน`;
+            const share = Number(pct(row.votes, total));
+            const sub = `${row.label} ${fmt(row.votes)} คะแนน`;
             const pctStr = `คิดเป็น ${share}%`;
             return barRowHtml('', sub, pctStr, share);
         }).join('');
@@ -307,52 +303,29 @@
         }));
     }
 
-    function updateScores(intro) {
-        const rows = currentRows();
-        const total = rows.reduce((acc, row) => acc + row.votes, 0);
+    function applyReferendumLabels() {
+        if (!isReferendum) return;
 
-        rows.forEach((row, index) => {
-            const els = scoreEls[index];
-            if (!els) return;
-            const share = pct(row.votes, total);
-            const label = row.hideVotes
-                ? row.label
-                : `${row.label} ${fmt(row.votes)} คะแนน`;
-            if (els.text) {
-                els.text.textContent = label;
-            } else if (els.sub) {
-                els.sub.textContent = `• ${label}`;
-            }
-            els.pct.textContent = `คิดเป็น ${share}%`;
-            els.fill.style.width = `${share}%`;
-        });
-    }
-
-    function tickCounting() {
-        const step = () => 40000 + Math.random() * 100000;
-        totals.countedDistrict = Math.min(BALLOTS_IN_SYSTEM, totals.countedDistrict + step());
-        totals.countedParty = Math.min(BALLOTS_IN_SYSTEM, totals.countedParty + step());
-
-        const rows = currentRows();
-        const total = rows.reduce((acc, row) => acc + row.votes, 0);
-        const chunk = total * 0.004;
-        rows.forEach(row => {
-            row.votes += chunk * (row.weight || 0.25) * (0.4 + Math.random() * 1.2);
-        });
-
-        renderKpis();
-        updateScores(false);
-
-        if (totals.countedDistrict >= BALLOTS_IN_SYSTEM && totals.countedParty >= BALLOTS_IN_SYSTEM) {
-            setBind('countingStatus', 'นับคะแนน');
-            document.querySelectorAll('[data-bind="countingStatus"]').forEach(el => {
-                el.innerHTML = 'นับคะแนน<br>ครบแล้ว';
-            });
-        }
+        const cards = main.querySelectorAll('.only-counting .vs-kpi');
+        if (cards.length < 4) return;
+        cards[1].querySelector('.vs-kpi-title').innerHTML = 'บัตรประชามติ<br>ที่รับเข้าระบบ';
+        cards[1].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>รับเข้าระบบ :</b> <span data-bind="eligible">0</span> ใบ';
+        cards[1].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>ประมวลผลแล้ว :</b> <span data-bind="used">0</span> ใบ';
+        cards[1].querySelector('.vs-kpi-big').innerHTML = 'คิดเป็น <span data-bind="usedPct">0.0</span>%';
+        cards[2].querySelector('.vs-kpi-title').innerHTML = 'ผลการออกเสียง<br>ประชามติ';
+        cards[2].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>เห็นชอบ :</b> <span data-bind="ballotDistrict">0</span> ใบ';
+        cards[2].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>ไม่เห็นชอบ :</b> <span data-bind="ballotParty">0</span> ใบ';
+        cards[3].querySelector('.vs-kpi-title').innerHTML = 'งดออกเสียง<br>และความคืบหน้า';
+        cards[3].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>ประมวลผลทั้งหมด :</b> <span data-bind="countedDistrict">0</span> ใบ';
+        cards[3].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>งดออกเสียง :</b> <span data-bind="countedParty">0</span> ใบ';
+        cards[3].querySelector('.vs-kpi-big').innerHTML = 'คิดเป็น <span data-bind="countedPct">0.0</span>%';
+        const scoreTitlePrefix = document.querySelector('.vs-score-title-prefix');
+        if (scoreTitlePrefix) scoreTitlePrefix.textContent = 'ผลการออกเสียงประชามติแบบเรียลไทม์';
     }
 
     // ตัวสลับ บัญชีรายชื่อ / แบ่งเขต (ผ่าน dropdown สามเหลี่ยมตามดีไซน์)
     function setType(nextType) {
+        if (isReferendum || !['partylist', 'constituency'].includes(nextType)) return;
         type = nextType;
         main.dataset.type = type;
         if (scoreTypeSelect) scoreTypeSelect.value = type;
@@ -380,6 +353,12 @@
         const wrap = document.getElementById('scoreDropdownWrap');
         const btn = document.getElementById('scoreTypeBtn');
         const menu = document.getElementById('scoreDropdownMenu');
+
+        if (isReferendum) {
+            if (wrap) wrap.hidden = true;
+            if (scoreTypeLabel) scoreTypeLabel.textContent = 'ผลการออกเสียงประชามติ';
+            return;
+        }
 
         if (scoreTypeSelect) {
             scoreTypeSelect.value = type;
@@ -439,21 +418,37 @@
     function initAreaSelects() {
         const provinceSelect = document.getElementById('provinceSelect');
         const districtSelect = document.getElementById('districtSelect');
-        if (!provinceSelect || !districtSelect) return;
+        if (!provinceSelect || !districtSelect || isReferendum) return;
 
-        provinceSelect.innerHTML = Object.entries(AREAS)
-            .map(([key, area]) => `<option value="${key}">${escapeHtml(area.name)}</option>`)
+        const provinceNames = { BKK: 'กรุงเทพมหานคร', CMI: 'เชียงใหม่', PKT: 'ภูเก็ต' };
+        const provinces = [...new Set(candidateMetadata
+            .map(candidate => String(candidate.district_code || '').split('-')[0])
+            .filter(Boolean))];
+        if (!provinces.length) {
+            provinceSelect.innerHTML = '<option value="">ไม่มีข้อมูลพื้นที่</option>';
+            districtSelect.innerHTML = '<option value="">ไม่มีข้อมูลเขต</option>';
+            return;
+        }
+
+        provinceSelect.innerHTML = provinces
+            .map(code => `<option value="${escapeHtml(code)}">${escapeHtml(provinceNames[code] || code)}</option>`)
             .join('');
+        selected.province = provinces.includes(selected.province) ? selected.province : provinces[0];
 
         function fillDistricts() {
-            districtSelect.innerHTML = AREAS[selected.province].districts
-                .map((district, index) => `<option value="${index}">${escapeHtml(district.label)}</option>`)
+            const districts = [...new Set(candidateMetadata
+                .filter(candidate => String(candidate.district_code || '').startsWith(`${selected.province}-`))
+                .map(candidate => candidate.district_code))];
+            districtSelect.innerHTML = districts
+                .map(code => `<option value="${escapeHtml(code)}">เขต ${escapeHtml(code)}</option>`)
                 .join('');
-            districtSelect.value = String(selected.district);
+            selected.district = districts.includes(selected.district) ? selected.district : (districts[0] || '');
+            districtSelect.value = selected.district;
         }
 
         provinceSelect.value = selected.province;
         fillDistricts();
+        areaSelectsInitialized = true;
 
         provinceSelect.addEventListener('change', () => {
             selected.province = provinceSelect.value;
@@ -463,9 +458,67 @@
         });
 
         districtSelect.addEventListener('change', () => {
-            selected.district = Number(districtSelect.value);
+            selected.district = districtSelect.value;
             renderScores();
         });
+    }
+
+    async function pollLiveResults() {
+        try {
+            if (!isReferendum) {
+                await loadMasterData();
+                if (!areaSelectsInitialized) initAreaSelects();
+            }
+
+            const finalTable = isReferendum ? 'referendum_final_box' : 'mp_final_box';
+            const stagingTable = isReferendum ? 'referendum_staging_box' : 'mp_staging_box';
+            const columns = isReferendum
+                ? 'ballot_id,decrypted_vote,counted_at'
+                : 'ballot_id,encrypted_ballot,district_code,counted_at';
+            const [finalCount, stagingCount] = await Promise.all([
+                fetchTableCount(finalTable, 'ballot_id'),
+                fetchTableCount(stagingTable, 'voter_id'),
+            ]);
+
+            if (finalCount !== lastFinalCount) {
+                cachedFinalRows = await fetchAllRows(finalTable, columns);
+                lastFinalCount = finalCount;
+                votesByBallot.length = 0;
+                referendumVotes.approve = 0;
+                referendumVotes.disapprove = 0;
+                referendumVotes.abstain = 0;
+
+                if (isReferendum) {
+                    cachedFinalRows.forEach(row => {
+                        const choice = referendumChoice(row.decrypted_vote);
+                        if (choice) referendumVotes[choice] += 1;
+                    });
+                } else {
+                    for (const row of cachedFinalRows) {
+                        const envelope = parseEnvelope(row.encrypted_ballot);
+                        const [candidateChoice, partyChoice] = await Promise.all([
+                            decryptVoteChoice(envelope.constituency),
+                            decryptVoteChoice(envelope.partyList),
+                        ]);
+                        votesByBallot.push({
+                            districtCode: row.district_code,
+                            candidateNumber: choiceNumber(candidateChoice),
+                            partyNumber: choiceNumber(partyChoice),
+                        });
+                    }
+                }
+            }
+
+            totals.submitted = Math.max(stagingCount, finalCount);
+            totals.processed = finalCount;
+            renderKpis();
+            renderScores();
+        } catch (error) {
+            console.warn('Unable to load live election results from Supabase', error);
+            scoreMessage('ไม่สามารถโหลดผลคะแนนจากฐานข้อมูลได้');
+        } finally {
+            window.setTimeout(pollLiveResults, POLL_MS);
+        }
     }
 
     // ------------------------------------------------ ตรวจสอบสถานะบัตร
@@ -492,13 +545,6 @@
         return now.getHours() >= 17;
     }
 
-    // รหัสตัวอย่างตามดีไซน์ Figma
-    const SAMPLE = {
-        code: '#a8f9-4c2e-991b-88ff',
-        time: '14 ม.ค. 2569 | 14:37 น.',
-        status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
-    };
-
     function formatRecordedTime(value) {
         const date = value ? new Date(value) : null;
         if (!date || Number.isNaN(date.getTime())) return '-';
@@ -508,6 +554,7 @@
 
     function showResult(result) {
         if (!resultBox) return;
+        resultBox.style.display = 'flex';
         const ok = Boolean(result && result.ok);
         resultBox.classList.toggle('is-error', !ok);
         if (resultIcon) {
@@ -717,8 +764,6 @@
         }
 
         const cleanWithHash = code.startsWith('#') ? code : `#${code}`;
-        const target = cleanWithHash.toLowerCase();
-
         // 1. ค้นหาใน Supabase จริง (ทั้ง 4 ตาราง: mp_final_box, referendum_final_box, mp_staging_box, referendum_staging_box)
         const remote = await lookupSupabase(code);
         if (remote) return remote;
@@ -727,17 +772,7 @@
         const local = lookupLocal(code);
         if (local) return local;
 
-        // 3. กรณีทดสอบรหัสตัวอย่าง Figma (#a8f9-4c2e-991b-88ff)
-        if (target === SAMPLE.code.toLowerCase()) {
-            return {
-                ok: true,
-                code: SAMPLE.code,
-                time: SAMPLE.time,
-                status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
-            };
-        }
-
-        // 4. กรณีค้นหาไม่พบรหัส
+        // 3. กรณีค้นหาไม่พบรหัส
         return {
             ok: false,
             code: cleanWithHash,
@@ -746,13 +781,7 @@
     }
 
     function initCheckForm() {
-        // แสดงตัวอย่างตามดีไซน์ก่อนที่ผู้ใช้จะค้นหา
-        showResult({
-            ok: true,
-            code: SAMPLE.code,
-            time: SAMPLE.time,
-            status: isAfter17() ? STATUS_PROCESSED : STATUS_BEFORE_17
-        });
+        if (resultBox) resultBox.style.display = 'none';
 
         // ตรวจสอบว่ามีพารามิเตอร์รหัสส่งมาใน URL หรือไม่ (เช่น ?code=... หรือ ?hash=...)
         const urlParams = new URLSearchParams(window.location.search);
@@ -798,23 +827,16 @@
 
     // ---------------------------------------------------------------- Boot
     renderKpis();
+    applyReferendumLabels();
     initCheckForm();
 
     if (state === 'waiting') {
         renderRegions();
-        afterPaint(() => { /* ให้แถบภูมิภาคเลื่อนจาก 0 ไปยังค่าปัจจุบัน */ });
-        regionEls.forEach(els => {
-            const target = els.fill.style.width;
-            els.fill.style.width = '0';
-            afterPaint(() => { els.fill.style.width = target; });
-        });
         updateCountdown();
         window.setInterval(updateCountdown, 1000);
-        window.setInterval(tickWaiting, TICK_MS);
     } else {
         initSwitch();
-        initAreaSelects();
-        renderScores();
-        window.setInterval(tickCounting, TICK_MS);
     }
+
+    pollLiveResults();
 })();

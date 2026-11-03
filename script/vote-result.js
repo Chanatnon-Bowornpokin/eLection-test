@@ -21,6 +21,9 @@
         waiting: 'ยังไม่ถึงเวลานับคะแนน',
         counting: 'กำลังนับคะแนน',
     };
+    const POLL_MS = 5000;
+    const resultCounts = new Map();
+    const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
         '&': '&amp;',
@@ -62,8 +65,13 @@
                 year: 'numeric',
             }).format(new Date(`${election.date}T00:00:00`));
             const deadline = election.voteDeadline ? escapeHtml(election.voteDeadline) : '';
-            const statusText = STATE_TEXT[meta.state];
-            const indicatorColor = meta.state === 'counting' ? 'yellow' : 'gray';
+            const count = resultCounts.get(electionId);
+            const statusText = count
+                ? (count.final > 0 ? `ประมวลผลแล้ว ${count.final} / ${count.total} ใบ` : `รอประมวลผล ${count.total} ใบ`)
+                : STATE_TEXT[meta.state];
+            const indicatorColor = count
+                ? count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray'
+                : meta.state === 'counting' ? 'yellow' : 'gray';
             const indicator = `<i class="fa-solid fa-circle vote-election-indicator status-dot ${indicatorColor}" aria-hidden="true"></i>`;
             const href = `Vote-Status.html?id=${encodeURIComponent(electionId)}&state=${meta.state}`;
 
@@ -124,5 +132,57 @@
         });
     }
 
+    async function fetchCount(table, column) {
+        if (!db) throw new Error('Supabase client is unavailable');
+        const { count, error } = await db.from(table).select(column, { count: 'exact', head: true });
+        if (error) throw error;
+        return count || 0;
+    }
+
+    async function pollResultCounts() {
+        if (!db) return;
+
+        try {
+            const [mpFinal, mpPending, referendumFinal, referendumPending] = await Promise.all([
+                fetchCount('mp_final_box', 'ballot_id'),
+                fetchCount('mp_staging_box', 'voter_id'),
+                fetchCount('referendum_final_box', 'ballot_id'),
+                fetchCount('referendum_staging_box', 'voter_id'),
+            ]);
+            resultCounts.set('house-election-2569', {
+                final: mpFinal,
+                pending: mpPending,
+                total: mpFinal + mpPending,
+            });
+            resultCounts.set('referendum-2569-03', {
+                final: referendumFinal,
+                pending: referendumPending,
+                total: referendumFinal + referendumPending,
+            });
+
+            resultList.querySelectorAll('.vote-election-card').forEach(card => {
+                const count = resultCounts.get(card.dataset.electionId);
+                const status = card.querySelector('.vote-election-status');
+                const indicator = card.querySelector('.status-dot');
+                if (!count || !status || !indicator) return;
+
+                status.textContent = count.final > 0
+                    ? `ประมวลผลแล้ว ${count.final.toLocaleString('th-TH')} / ${count.total.toLocaleString('th-TH')} ใบ`
+                    : count.pending > 0
+                        ? `รอประมวลผล ${count.pending.toLocaleString('th-TH')} ใบ`
+                        : 'ยังไม่มีบัตรที่ประมวลผล';
+                status.setAttribute('aria-label', `สถานะ: ${status.textContent}`);
+
+                indicator.classList.remove('green', 'yellow', 'gray');
+                indicator.classList.add(count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray');
+            });
+        } catch (error) {
+            console.warn('Unable to load final box counts for result list', error);
+        } finally {
+            window.setTimeout(pollResultCounts, POLL_MS);
+        }
+    }
+
     renderElections();
+    pollResultCounts();
 })();

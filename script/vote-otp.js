@@ -41,7 +41,7 @@ function initHeroBanner(currentEventId) {
 }
 
 // สถานะของ OTP
-let currentMockOtp = '842109';
+let currentMockOtp = '';
 let currentRefCode = 'AB12';
 let countdownInterval = null;
 let remainingSeconds = 90;
@@ -60,6 +60,23 @@ function generateRefCode() {
 // สุ่มรหัส OTP 6 หลัก
 function generateOtpCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function issueOtpCode() {
+    currentMockOtp = generateOtpCode();
+    try {
+        sessionStorage.setItem('current_session_otp', currentMockOtp);
+    } catch (error) {
+        console.warn('Cannot store session OTP', error);
+    }
+}
+
+function getCurrentSessionOtp() {
+    try {
+        return sessionStorage.getItem('current_session_otp') || '';
+    } catch {
+        return currentMockOtp;
+    }
 }
 
 // อัปเดตรหัสอ้างอิงและรหัส OTP ในหน้าเว็บ
@@ -263,7 +280,7 @@ function initActions(currentEventId) {
     // ปุ่มขอรหัส OTP อีกครั้ง (กดได้ตลอดเวลาเพื่อสุ่มรหัสใหม่และรีเซ็ตเวลา)
     if (resendBtn) {
         resendBtn.addEventListener('click', () => {
-            currentMockOtp = generateOtpCode();
+            issueOtpCode();
             currentRefCode = generateRefCode();
             startCountdown();
             showMockSmsToast();
@@ -300,8 +317,9 @@ function initActions(currentEventId) {
             if (entered.length !== 6) return;
 
             // ตรวจสอบรหัส (ยอมรับรหัสจำลอง หรือถ้ากรอกครบ 6 หลัก)
-            if (entered !== currentMockOtp) {
-                alert(`รหัส OTP ไม่ถูกต้อง โปรดตรวจสอบรหัสใน SMS จำลอง (${currentMockOtp})`);
+            const expectedOtp = getCurrentSessionOtp();
+            if (!expectedOtp || entered !== expectedOtp) {
+                alert(`รหัส OTP ไม่ถูกต้อง โปรดตรวจสอบรหัสใน SMS จำลอง (${expectedOtp || 'ไม่มีรหัสที่ใช้งาน'})`);
                 return;
             }
 
@@ -313,6 +331,9 @@ function initActions(currentEventId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const currentEventId = getCurrentEventId();
+    issueOtpCode();
+    currentRefCode = generateRefCode();
+    updateOtpDisplay();
     initHeroBanner(currentEventId);
     initDigitInputs();
     initActions(currentEventId);

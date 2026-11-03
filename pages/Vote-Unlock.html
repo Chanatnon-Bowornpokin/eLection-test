@@ -51,7 +51,7 @@
     <main class="container-fluid page-container vote-check-main vote-unlock-main" id="unlockMain">
 
         <!-- =========================================================
-             ส่วนหัวกลไกความปลอดภัยร่วม X ฝ่าย + แถบความคืบหน้าด้านบน
+             ส่วนหัวกลไกความปลอดภัยร่วม 5 ฝ่าย + แถบความคืบหน้าด้านบน
              ========================================================= -->
         <section class="vu-top-section" aria-labelledby="secTitle">
             <div class="vu-heading-row">
@@ -60,13 +60,13 @@
                 </a>
                 <div class="vu-heading-col">
                     <div class="vu-title-group">
-                        <h1 class="vu-sec-title" id="secTitle">กลไกความปลอดภัยร่วม X ฝ่าย</h1>
-                        <p class="vu-sec-subtitle" id="secSubtitle">ต้องได้รับการยืนยันรหัสอย่างน้อย 2 ใน 3 ฝ่าย<br class="vu-br-mobile"> เพื่อเริ่มเปิดหีบนับคะแนน</p>
+                        <h1 class="vu-sec-title" id="secTitle">กลไกความปลอดภัยร่วม 5 ฝ่าย</h1>
+                        <p class="vu-sec-subtitle" id="secSubtitle">ต้องได้รับการยืนยันรหัสอย่างน้อย 3 ใน 5 ฝ่าย<br class="vu-br-mobile"> เพื่อเริ่มเปิดหีบนับคะแนน</p>
                     </div>
                     <div class="vu-tracker-group">
-                        <p class="vu-tracker-label" id="trackerLabel">ส่งรหัสแล้ว X / X ฝ่าย</p>
-                        <div class="vu-main-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
-                            <div class="vu-main-progress-fill" id="mainProgressFill" style="width: 70%;"></div>
+                        <p class="vu-tracker-label" id="trackerLabel">ส่งรหัสแล้ว 4 / 5 ฝ่าย</p>
+                        <div class="vu-main-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80">
+                            <div class="vu-main-progress-fill" id="mainProgressFill" style="width: 80%;"></div>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                     <div class="vu-card-status-row">
                         <p class="vu-party-status" id="status-1">
                             <span class="vu-status-main">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                            <span class="vu-status-ref" id="ref-1">(รหัสอ้างอิง: #EC-881B)</span>
+                            <span class="vu-status-ref" id="ref-1"></span>
                         </p>
                     </div>
                 </div>
@@ -103,12 +103,12 @@
                 </div>
                 <div class="vu-card-body">
                     <div class="vu-card-title-row">
-                        <h2 class="vu-party-name" id="name-2">2. ตัวแทนพรรค ก</h2>
+                        <h2 class="vu-party-name" id="name-2">2. ตัวแทนพรรคการเมือง</h2>
                     </div>
                     <div class="vu-card-status-row">
                         <p class="vu-party-status" id="status-2">
                             <span class="vu-status-main">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                            <span class="vu-status-ref" id="ref-2">(รหัสอ้างอิง: #EC-881B)</span>
+                            <span class="vu-status-ref" id="ref-2"></span>
                         </p>
                     </div>
                 </div>
@@ -121,12 +121,12 @@
                 </div>
                 <div class="vu-card-body">
                     <div class="vu-card-title-row">
-                        <h2 class="vu-party-name" id="name-3">3. ตัวแทนพรรค ข</h2>
+                        <h2 class="vu-party-name" id="name-3">3. ตัวแทนพรรคการเมือง</h2>
                     </div>
                     <div class="vu-card-status-row">
                         <p class="vu-party-status" id="status-3">
                             <span class="vu-status-main">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                            <span class="vu-status-ref" id="ref-3">(รหัสอ้างอิง: #EC-881B)</span>
+                            <span class="vu-status-ref" id="ref-3"></span>
                         </p>
                     </div>
                 </div>
@@ -139,12 +139,12 @@
                 </div>
                 <div class="vu-card-body">
                     <div class="vu-card-title-row">
-                        <h2 class="vu-party-name" id="name-4">4. ตัวแทนพรรค ค</h2>
+                        <h2 class="vu-party-name" id="name-4">4. ตัวแทนพรรคการเมือง</h2>
                     </div>
                     <div class="vu-card-status-row">
                         <p class="vu-party-status" id="status-4">
                             <span class="vu-status-main">สถานะ: ยืนยันรหัสปลดล็อกแล้ว</span>
-                            <span class="vu-status-ref" id="ref-4">(รหัสอ้างอิง: #EC-881B)</span>
+                            <span class="vu-status-ref" id="ref-4"></span>
                         </p>
                     </div>
                 </div>
@@ -289,70 +289,7 @@
     <script src="../script/supabase-client.js"></script>
     <script src="../script/voter-identity.js?v=20261102_v2"></script>
     <script src="../script/events.js?v=20261102_v2"></script>
-    <script>
-        (function () {
-            'use strict';
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const eventId = urlParams.get('id') || urlParams.get('event') || 'house-election-2569';
-            const isReferendum = eventId.toLowerCase().includes('ref') || eventId === 'referendum-2569-03';
-
-            const backLink = document.getElementById('backLink');
-            if (backLink && eventId) {
-                backLink.href = `Vote-Status.html?id=${encodeURIComponent(eventId)}`;
-            }
-
-            if (isReferendum) {
-                const name2 = document.getElementById('name-2');
-                if (name2) name2.textContent = '2. ผู้แทนรัฐสภา';
-
-                const name3 = document.getElementById('name-3');
-                if (name3) name3.textContent = '3. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 1';
-
-                const name4 = document.getElementById('name-4');
-                if (name4) name4.textContent = '4. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 2';
-
-                const name5 = document.getElementById('name-5');
-                if (name5) name5.textContent = '5. ผู้แทนภาคประชาชนและผู้สังเกตการณ์ 3';
-            }
-
-            const btnSubmit = document.getElementById('btnSubmitCode');
-            if (btnSubmit) {
-                btnSubmit.addEventListener('click', function () {
-                    const card5 = document.getElementById('card-5');
-                    const iconWrap5 = document.getElementById('iconWrap-5');
-                    const statusMain5 = document.getElementById('statusMain-5');
-                    const ref5 = document.getElementById('ref-5');
-                    const actionRow5 = document.getElementById('actionRow-5');
-
-                    if (card5) card5.classList.remove('vu-card--pending');
-                    if (iconWrap5) {
-                        iconWrap5.classList.remove('vu-card-icon-wrap--pending');
-                        iconWrap5.innerHTML = '<i class="fa-solid fa-check vu-icon-check" aria-hidden="true"></i>';
-                    }
-                    if (statusMain5) {
-                        statusMain5.textContent = 'สถานะ: ยืนยันรหัสปลดล็อกแล้ว';
-                    }
-                    if (ref5) {
-                        ref5.textContent = '(รหัสอ้างอิง: #EC-881B)';
-                        ref5.hidden = false;
-                    }
-                    if (actionRow5) {
-                        actionRow5.style.display = 'none';
-                    }
-
-                    const mainProgressFill = document.getElementById('mainProgressFill');
-                    if (mainProgressFill) mainProgressFill.style.width = '100%';
-
-                    const step3Tag = document.getElementById('step3Tag');
-                    if (step3Tag) step3Tag.textContent = '100%';
-
-                    const processProgressFill = document.getElementById('processProgressFill');
-                    if (processProgressFill) processProgressFill.style.width = '100%';
-                });
-            }
-        })();
-    </script>
+    <script src="../script/vote-unlock.js?v=20261103_v7"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
         crossorigin="anonymous"></script>
