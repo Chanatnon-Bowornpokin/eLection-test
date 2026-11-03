@@ -513,7 +513,7 @@
         const html = rows.map(row => {
             const share = total > 0 ? Number(pct(row.votes, total)) : 0;
             const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
-            const sub = `${row.label} ${fmt(row.votes)} ใบ`;
+            const sub = `${row.label} ${fmt(row.votes)} ใบ (${shareStr}%)`;
             const pctStr = `คิดเป็น ${shareStr}%`;
             return barRowHtml('', sub, pctStr, share);
         }).join('');
@@ -553,7 +553,7 @@
         const html = rows.map(row => {
             const share = total > 0 ? Number(pct(row.votes, total)) : 0;
             const shareStr = total > 0 ? pct(row.votes, total) : '0.0';
-            const sub = `${row.label} ${fmt(row.votes)} คะแนน`;
+            const sub = `${row.label} ${fmt(row.votes)} คะแนน (${shareStr}%)`;
             const pctStr = `คิดเป็น ${shareStr}%`;
             return barRowHtml('', sub, pctStr, share);
         }).join('');
@@ -582,6 +582,22 @@
         });
     }
 
+    function initRealtime() {
+        if (!db || typeof db.channel !== 'function') return;
+        try {
+            db.channel('realtime_vote_results')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'mp_final_box' }, () => {
+                    pollResultCounts();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'referendum_final_box' }, () => {
+                    pollResultCounts();
+                })
+                .subscribe();
+        } catch (e) {
+            console.warn('Realtime subscription not available, falling back to polling', e);
+        }
+    }
+
     async function pollResultCounts() {
         if (!db) return;
 
@@ -605,5 +621,6 @@
     window.renderMpResults = renderMpResults;
 
     renderElections();
+    initRealtime();
     pollResultCounts();
 })();
