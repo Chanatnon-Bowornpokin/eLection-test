@@ -521,6 +521,17 @@ img.btn-sub-icon {
     align-items: center;
 }
 
+.footer-contact-list a {
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+}
+
+.footer-contact-list a:hover,
+.footer-contact-list a:focus-visible {
+    text-decoration: underline;
+}
+
 .footer-contact-list i {
     width: 22px;
     color: #fff;
