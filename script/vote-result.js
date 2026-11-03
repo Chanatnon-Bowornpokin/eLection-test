@@ -2,6 +2,7 @@
  * Vote-Result.html — รายการการเลือกตั้งที่ดูผลได้
  * - ใช้ข้อมูลจาก EVENTS (script/events.js) เหมือนหน้า Vote-Check
  * - ช่องค้นหา + ตัวกรองหมวดหมู่ (Desktop) กรองการ์ดโดยซ่อน/แสดง ไม่ render ใหม่
+ * - รองรับ loadMpResults() และ loadReferendumResults() จาก final_box ทั้งรูปแบบ Column แยก และ JSON / String
  */
 (function () {
     'use strict';
@@ -24,6 +25,12 @@
     const POLL_MS = 5000;
     const resultCounts = new Map();
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
+
+    const DEFAULT_SHARED_SECRET = 'eLection-Threshold-Demo-Shared-Secret-2569';
+    const FALLBACK_SHARED_SECRETS = [
+        'eLection-Threshold-Demo-Shared-Secret-2569',
+        'eLection-ECT-SecretKey-2026-BKK'
+    ];
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
         '&': '&amp;',
@@ -132,56 +139,387 @@
         });
     }
 
-    async function fetchCount(table, column) {
-        if (!db) throw new Error('Supabase client is unavailable');
-        const { count, error } = await db.from(table).select(column, { count: 'exact', head: true });
-        if (error) throw error;
-        return count || 0;
+    // ---- Helpers สำหรับถอดรหัสและอ่านผลคะแนนจาก final_box ----
+    function base64ToBytes(base64) {
+        const clean = String(base64 || '').trim();
+        const bin = atob(clean);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i += 1) {
+            bytes[i] = bin.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    async function tryDecryptAesGcmBuffer(ivBytes, cipherBytes, secretStr) {
+        const enc = new TextEncoder();
+        try {
+            const rawKeyBytes = enc.encode(String(secretStr).padEnd(32, '0')).slice(0, 32);
+            const rawKey = await crypto.subtle.importKey('raw', rawKeyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
+            const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBytes }, rawKey, cipherBytes);
+            return new TextDecoder().decode(plainBuf);
+        } catch {}
+
+        try {
+            const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(String(secretStr)));
+            const shaKey = await crypto.subtle.importKey('raw', hashBuf, { name: 'AES-GCM' }, false, ['decrypt']);
+            const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBytes }, shaKey, cipherBytes);
+            return new TextDecoder().decode(plainBuf);
+        } catch {}
+
+        return null;
+    }
+
+    async function decryptTextWithAesGcm(value, secret = DEFAULT_SHARED_SECRET) {
+        if (value === null || value === undefined) return '';
+        const secretsToTry = [secret, ...FALLBACK_SHARED_SECRETS.filter(s => s !== secret)];
+
+        if (typeof value === 'object') {
+            if (value.iv && value.ciphertext) {
+                try {
+                    const ivBytes = Array.isArray(value.iv) ? new Uint8Array(value.iv) : base64ToBytes(value.iv);
+                    const cipherBytes = Array.isArray(value.ciphertext) ? new Uint8Array(value.ciphertext) : base64ToBytes(value.ciphertext);
+                    for (const sec of secretsToTry) {
+                        const res = await tryDecryptAesGcmBuffer(ivBytes, cipherBytes, sec);
+                        if (res !== null) return res;
+                    }
+                } catch {}
+            }
+            if (typeof value.choice === 'string') return decryptTextWithAesGcm(value.choice, secret);
+            if (typeof value.ciphertext === 'string') return decryptTextWithAesGcm(value.ciphertext, secret);
+            return String(value);
+        }
+
+        const str = String(value).trim();
+        if (!str) return '';
+
+        if (str.startsWith('ENC[AES-GCM::')) {
+            const rawBase64 = str.slice('ENC[AES-GCM::'.length).replace(/\]$/, '');
+            try {
+                const combined = base64ToBytes(rawBase64);
+                const ivBytes = combined.slice(0, 12);
+                const cipherBytes = combined.slice(12);
+                for (const sec of secretsToTry) {
+                    const res = await tryDecryptAesGcmBuffer(ivBytes, cipherBytes, sec);
+                    if (res !== null) return res;
+                }
+            } catch {}
+            return str;
+        }
+
+        if (str.startsWith('{') && str.endsWith('}')) {
+            try {
+                const parsed = JSON.parse(str);
+                if (parsed && typeof parsed === 'object') {
+                    return decryptTextWithAesGcm(parsed, secret);
+                }
+            } catch {}
+        }
+
+        return str;
+    }
+
+    function parseJsonObject(value) {
+        if (!value) return null;
+        if (typeof value === 'object') return value;
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                try {
+                    return JSON.parse(trimmed);
+                } catch {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    function parseChoiceNumber(value) {
+        if (value === null || value === undefined) return null;
+        const raw = String(value).trim().toLowerCase();
+        if (!raw) return null;
+        if (raw === 'abstain' || raw === 'no_vote' || raw === 'ไม่ประสงค์ลงคะแนน' || raw === 'งดออกเสียง' || raw === '0') {
+            return 'abstain';
+        }
+        const num = Number.parseInt(raw, 10);
+        return Number.isInteger(num) && num > 0 ? num : null;
+    }
+
+    function parseReferendumChoice(value) {
+        if (value === null || value === undefined) return null;
+        if (typeof value === 'object') {
+            const inner = value.choice ?? value.vote ?? value.decrypted_vote ?? value.result ?? value.value ?? value.ciphertext;
+            if (inner !== undefined) return parseReferendumChoice(inner);
+        }
+        const str = String(value).trim();
+        if (!str) return null;
+
+        if (str.startsWith('{') && str.endsWith('}')) {
+            const obj = parseJsonObject(str);
+            if (obj) return parseReferendumChoice(obj);
+        }
+
+        const lower = str.toLowerCase();
+        if (['approve', 'yes', 'agree', '1', 'เห็นชอบ'].includes(lower) || str === 'เห็นชอบ') {
+            return 'approve';
+        }
+        if (['disapprove', 'no', 'disagree', '2', 'ไม่เห็นชอบ'].includes(lower) || str === 'ไม่เห็นชอบ') {
+            return 'disapprove';
+        }
+        if (
+            ['abstain', 'no_opinion', 'no opinion', '0', '3', 'ไม่แสดงความคิดเห็น', 'งดออกเสียง', 'ไม่ประสงค์ลงคะแนน'].includes(lower) ||
+            str === 'ไม่แสดงความคิดเห็น' ||
+            str === 'งดออกเสียง'
+        ) {
+            return 'abstain';
+        }
+        return null;
+    }
+
+    /**
+     * 1. การเลือกตั้ง ส.ส. (`loadMpResults()`):
+     * - ดึงข้อมูลจาก `mp_final_box`, `mp_candidates`, และ `party_candidates`
+     * - รองรับการอ่านหมายเลขผู้สมัครและหมายเลขพรรคทั้งแบบแยก Column (`candidate_number` / `party_number`)
+     *   และแบบ JSON ใน `decrypted_vote` หรือ `encrypted_ballot` (`constituency` / `partyList`)
+     * - นำหมายเลขที่ได้ไปเทียบชื่อผู้สมัครและชื่อพรรคให้ตรงกัน 100%
+     */
+    async function loadMpResults() {
+        if (!db) return null;
+
+        const [finalRes, activeStagingRes, candidatesRes, partiesRes] = await Promise.all([
+            db.from('mp_final_box').select('*'),
+            db.from('mp_staging_box').select('voter_id', { count: 'exact', head: true }).eq('status', 'ACTIVE'),
+            db.from('mp_candidates').select('*'),
+            db.from('party_candidates').select('*')
+        ]);
+
+        if (finalRes.error) throw finalRes.error;
+
+        const finalRows = finalRes.data || [];
+        const pendingCount = activeStagingRes.count || 0;
+        const candidates = (candidatesRes.data || []).map(c => ({
+            district_code: c.district_code || c.district || 'BKK-01',
+            candidate_number: Number(c.candidate_number ?? c.number ?? c.id),
+            candidate_name: c.candidate_name || c.full_name_th || c.full_name || c.name || '',
+            party_name: c.party_name || c.party || '',
+            party_number: Number(c.party_number ?? c.number ?? 0)
+        }));
+        const parties = (partiesRes.data || []).map(p => ({
+            party_number: Number(p.party_number ?? p.number ?? p.id),
+            party_name: p.party_name || p.name || ''
+        }));
+
+        const constituencyCounts = new Map();
+        const partyListCounts = new Map();
+        const ballots = [];
+
+        for (const row of finalRows) {
+            const decObj = parseJsonObject(row.decrypted_vote) || {};
+            const encObj = parseJsonObject(row.encrypted_ballot) || {};
+
+            let rawConstituency =
+                row.candidate_number ??
+                row.constituency_number ??
+                row.constituency ??
+                decObj.constituency ??
+                decObj.candidate_number ??
+                decObj.candidateNumber ??
+                encObj.constituency ??
+                encObj.candidate_number ??
+                encObj.candidateNumber ??
+                null;
+
+            let rawPartyList =
+                row.party_number ??
+                row.partylist_number ??
+                row.party_list ??
+                row.partyList ??
+                decObj.partyList ??
+                decObj.party_list ??
+                decObj.party_number ??
+                decObj.partyNumber ??
+                encObj.partyList ??
+                encObj.party_list ??
+                encObj.party_number ??
+                encObj.partyNumber ??
+                null;
+
+            if (typeof rawConstituency === 'string' && rawConstituency.startsWith('ENC[')) {
+                rawConstituency = await decryptTextWithAesGcm(rawConstituency);
+            }
+            if (typeof rawPartyList === 'string' && rawPartyList.startsWith('ENC[')) {
+                rawPartyList = await decryptTextWithAesGcm(rawPartyList);
+            }
+
+            const candidateNumber = parseChoiceNumber(rawConstituency);
+            const partyNumber = parseChoiceNumber(rawPartyList);
+            const districtCode = row.district_code || decObj.district_code || encObj.district_code || 'BKK-01';
+
+            ballots.push({
+                districtCode,
+                candidateNumber,
+                partyNumber
+            });
+
+            if (candidateNumber !== null) {
+                const key = `${districtCode}:${candidateNumber}`;
+                constituencyCounts.set(key, (constituencyCounts.get(key) || 0) + 1);
+            }
+            if (partyNumber !== null) {
+                partyListCounts.set(partyNumber, (partyListCounts.get(partyNumber) || 0) + 1);
+            }
+        }
+
+        const candidateResults = candidates.map(c => {
+            const votes = constituencyCounts.get(`${c.district_code}:${c.candidate_number}`) || 0;
+            return {
+                ...c,
+                votes,
+                percentage: finalRows.length > 0 ? Number(((votes / finalRows.length) * 100).toFixed(1)) : 0
+            };
+        });
+
+        const partyResults = parties.map(p => {
+            const votes = partyListCounts.get(p.party_number) || 0;
+            return {
+                ...p,
+                votes,
+                percentage: finalRows.length > 0 ? Number(((votes / finalRows.length) * 100).toFixed(1)) : 0
+            };
+        });
+
+        resultCounts.set('house-election-2569', {
+            final: finalRows.length,
+            pending: pendingCount,
+            total: finalRows.length + pendingCount
+        });
+
+        return {
+            finalCount: finalRows.length,
+            pendingCount,
+            totalCount: finalRows.length + pendingCount,
+            ballots,
+            candidateResults,
+            partyResults
+        };
+    }
+
+    /**
+     * 2. ประชามติ (`loadReferendumResults()`):
+     * - ดึงข้อมูลจาก `referendum_final_box`
+     * - รองรับการอ่านค่า `row.decrypted_vote` (และ `encrypted_ballot` fallback) ทั้งที่เป็น String
+     *   (`'approve'`, `'disapprove'`, `'abstain'`, `'เห็นชอบ'`, `'ไม่เห็นชอบ'`, `'ไม่แสดงความคิดเห็น'`)
+     *   และ JSON เพื่อนำมาคำนวณผลรวมและเปอร์เซ็นต์อย่างแม่นยำ
+     */
+    async function loadReferendumResults() {
+        if (!db) return null;
+
+        const [finalRes, activeStagingRes] = await Promise.all([
+            db.from('referendum_final_box').select('*'),
+            db.from('referendum_staging_box').select('voter_id', { count: 'exact', head: true }).eq('status', 'ACTIVE')
+        ]);
+
+        if (finalRes.error) throw finalRes.error;
+
+        const finalRows = finalRes.data || [];
+        const pendingCount = activeStagingRes.count || 0;
+        const counts = { approve: 0, disapprove: 0, abstain: 0 };
+
+        for (const row of finalRows) {
+            let rawVote = row.decrypted_vote ?? row.vote ?? row.choice ?? null;
+
+            if (rawVote === null || rawVote === undefined || rawVote === '') {
+                const encObj = parseJsonObject(row.encrypted_ballot);
+                if (encObj) {
+                    rawVote = encObj.decrypted_vote ?? encObj.choice ?? encObj.vote ?? encObj.ciphertext ?? null;
+                } else {
+                    rawVote = row.encrypted_ballot ?? null;
+                }
+            }
+
+            if (typeof rawVote === 'object' && rawVote !== null) {
+                rawVote = rawVote.choice ?? rawVote.vote ?? rawVote.decrypted_vote ?? rawVote.value ?? rawVote.ciphertext ?? '';
+            }
+
+            if (typeof rawVote === 'string' && rawVote.startsWith('ENC[')) {
+                rawVote = await decryptTextWithAesGcm(rawVote);
+            } else if (typeof rawVote === 'string' && rawVote.trim().startsWith('{')) {
+                const parsed = parseJsonObject(rawVote);
+                if (parsed) {
+                    const inner = parsed.choice ?? parsed.vote ?? parsed.decrypted_vote ?? parsed.value ?? parsed.ciphertext ?? '';
+                    rawVote = (typeof inner === 'string' && inner.startsWith('ENC['))
+                        ? await decryptTextWithAesGcm(inner)
+                        : inner;
+                }
+            }
+
+            const normalized = parseReferendumChoice(rawVote);
+            if (normalized && counts[normalized] !== undefined) {
+                counts[normalized] += 1;
+            }
+        }
+
+        const totalProcessed = finalRows.length;
+        const percentages = {
+            approve: totalProcessed > 0 ? Number(((counts.approve / totalProcessed) * 100).toFixed(1)) : 0,
+            disapprove: totalProcessed > 0 ? Number(((counts.disapprove / totalProcessed) * 100).toFixed(1)) : 0,
+            abstain: totalProcessed > 0 ? Number(((counts.abstain / totalProcessed) * 100).toFixed(1)) : 0,
+        };
+
+        resultCounts.set('referendum-2569-03', {
+            final: totalProcessed,
+            pending: pendingCount,
+            total: totalProcessed + pendingCount
+        });
+
+        return {
+            finalCount: totalProcessed,
+            pendingCount,
+            totalCount: totalProcessed + pendingCount,
+            counts,
+            percentages
+        };
+    }
+
+    function updateElectionCardsDOM() {
+        if (!resultList) return;
+        resultList.querySelectorAll('.vote-election-card').forEach(card => {
+            const count = resultCounts.get(card.dataset.electionId);
+            const status = card.querySelector('.vote-election-status');
+            const indicator = card.querySelector('.status-dot');
+            if (!count || !status || !indicator) return;
+
+            status.textContent = count.final > 0
+                ? `ประมวลผลแล้ว ${count.final.toLocaleString('th-TH')} / ${count.total.toLocaleString('th-TH')} ใบ`
+                : count.pending > 0
+                    ? `รอประมวลผล ${count.pending.toLocaleString('th-TH')} ใบ`
+                    : 'ยังไม่มีบัตรที่ประมวลผล';
+            status.setAttribute('aria-label', `สถานะ: ${status.textContent}`);
+
+            indicator.classList.remove('green', 'yellow', 'gray');
+            indicator.classList.add(count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray');
+        });
     }
 
     async function pollResultCounts() {
         if (!db) return;
 
         try {
-            const [mpFinal, mpPending, referendumFinal, referendumPending] = await Promise.all([
-                fetchCount('mp_final_box', 'ballot_id'),
-                fetchCount('mp_staging_box', 'voter_id'),
-                fetchCount('referendum_final_box', 'ballot_id'),
-                fetchCount('referendum_staging_box', 'voter_id'),
+            await Promise.all([
+                loadMpResults(),
+                loadReferendumResults(),
             ]);
-            resultCounts.set('house-election-2569', {
-                final: mpFinal,
-                pending: mpPending,
-                total: mpFinal + mpPending,
-            });
-            resultCounts.set('referendum-2569-03', {
-                final: referendumFinal,
-                pending: referendumPending,
-                total: referendumFinal + referendumPending,
-            });
-
-            resultList.querySelectorAll('.vote-election-card').forEach(card => {
-                const count = resultCounts.get(card.dataset.electionId);
-                const status = card.querySelector('.vote-election-status');
-                const indicator = card.querySelector('.status-dot');
-                if (!count || !status || !indicator) return;
-
-                status.textContent = count.final > 0
-                    ? `ประมวลผลแล้ว ${count.final.toLocaleString('th-TH')} / ${count.total.toLocaleString('th-TH')} ใบ`
-                    : count.pending > 0
-                        ? `รอประมวลผล ${count.pending.toLocaleString('th-TH')} ใบ`
-                        : 'ยังไม่มีบัตรที่ประมวลผล';
-                status.setAttribute('aria-label', `สถานะ: ${status.textContent}`);
-
-                indicator.classList.remove('green', 'yellow', 'gray');
-                indicator.classList.add(count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray');
-            });
+            updateElectionCardsDOM();
         } catch (error) {
             console.warn('Unable to load final box counts for result list', error);
         } finally {
             window.setTimeout(pollResultCounts, POLL_MS);
         }
     }
+
+    // เปิดให้เรียกใช้งานจากภายนอกหรือ Console ได้โดยตรง
+    window.loadMpResults = loadMpResults;
+    window.loadReferendumResults = loadReferendumResults;
 
     renderElections();
     pollResultCounts();

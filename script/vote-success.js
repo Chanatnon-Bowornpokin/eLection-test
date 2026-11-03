@@ -482,7 +482,7 @@ async function checkBallotTrackingStatus(trackingCode) {
 
         if (mpData) {
             const hasBallot = Boolean(mpData.encrypted_ballot);
-            const isTallied = mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
+            const isTallied = mpData.status === 'COUNTED' || mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
             const isActive = mpData.status === 'ACTIVE';
 
             let stageLabel = '';
@@ -530,7 +530,7 @@ async function checkBallotTrackingStatus(trackingCode) {
 
         if (refData) {
             const hasBallot = Boolean(refData.encrypted_ballot);
-            const isTallied = refData.status === 'TALLIED' || refData.status === 'PROCESSED';
+            const isTallied = refData.status === 'COUNTED' || refData.status === 'TALLIED' || refData.status === 'PROCESSED';
             const isActive = refData.status === 'ACTIVE';
 
             let stageLabel = '';

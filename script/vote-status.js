@@ -86,15 +86,22 @@
 
     function renderKpis() {
         const progress = pct(totals.processed, totals.submitted);
+        const isDone = totals.submitted > 0 && totals.processed >= totals.submitted;
+        const countingStatusText = isDone ? 'ปิดหีบแล้ว' : 'กำลัง<br>นับคะแนน';
+
+        const statusEl = document.querySelector('.only-counting [data-bind="countingStatus"]');
+        if (statusEl) {
+            statusEl.innerHTML = countingStatusText;
+        }
 
         if (isReferendum) {
-            setBind('eligible', fmt(totals.submitted));
-            setBind('used', fmt(totals.processed));
+            setBind('eligible', '—');
+            setBind('used', fmt(totals.submitted));
             setBind('usedPct', progress);
-            setBind('ballotDistrict', fmt(referendumVotes.approve));
-            setBind('ballotParty', fmt(referendumVotes.disapprove));
+            setBind('ballotReferendum', fmt(totals.submitted));
+            setBind('ballotDistrict', fmt(totals.submitted));
+            setBind('countedReferendum', fmt(totals.processed));
             setBind('countedDistrict', fmt(totals.processed));
-            setBind('countedParty', fmt(referendumVotes.abstain));
             setBind('countedPct', progress);
         } else {
             setBind('eligible', '—');
@@ -137,7 +144,7 @@
     let areaSelectsInitialized = false;
     let scoreEls = [];
 
-    async function fetchAllRows(table, columns) {
+    async function fetchAllRows(table, columns = '*') {
         if (!db) throw new Error('Supabase client is unavailable');
 
         const rows = [];
@@ -153,9 +160,13 @@
         return rows;
     }
 
-    async function fetchTableCount(table, column) {
+    async function fetchTableCount(table, column, filterStatus = null) {
         if (!db) throw new Error('Supabase client is unavailable');
-        const { count, error } = await db.from(table).select(column, { count: 'exact', head: true });
+        let query = db.from(table).select(column, { count: 'exact', head: true });
+        if (filterStatus) {
+            query = query.eq('status', filterStatus);
+        }
+        const { count, error } = await query;
         if (error) throw error;
         return count || 0;
     }
@@ -165,37 +176,108 @@
         if (!db) throw new Error('Supabase client is unavailable');
 
         const [candidateResult, partyResult] = await Promise.all([
-            db.from('mp_candidates').select('district_code,candidate_number,candidate_name,party_name,party_number'),
-            db.from('party_candidates').select('party_number,party_name'),
+            db.from('mp_candidates').select('*'),
+            db.from('party_candidates').select('*'),
         ]);
         if (candidateResult.error) throw candidateResult.error;
         if (partyResult.error) throw partyResult.error;
-        candidateMetadata = candidateResult.data || [];
-        partyMetadata = partyResult.data || [];
+
+        candidateMetadata = (candidateResult.data || []).map(c => ({
+            district_code: c.district_code || c.district || 'BKK-01',
+            candidate_number: Number(c.candidate_number ?? c.number ?? c.id),
+            candidate_name: c.candidate_name || c.full_name_th || c.full_name || c.name || '',
+            party_name: c.party_name || c.party || '',
+            party_number: Number(c.party_number ?? c.number ?? 0),
+        }));
+
+        partyMetadata = (partyResult.data || []).map(p => ({
+            party_number: Number(p.party_number ?? p.number ?? p.id),
+            party_name: p.party_name || p.name || '',
+        }));
     }
 
-    async function decryptVoteChoice(value) {
-        if (typeof value !== 'string' || !value.startsWith('ENC[AES-GCM::')) return value;
+    const DEFAULT_SHARED_SECRET = 'eLection-Threshold-Demo-Shared-Secret-2569';
+    const FALLBACK_SHARED_SECRETS = [
+        'eLection-Threshold-Demo-Shared-Secret-2569',
+        'eLection-ECT-SecretKey-2026-BKK'
+    ];
 
-        const encoded = value.slice('ENC[AES-GCM::'.length).replace(/\]$/, '');
+    function base64ToBytes(base64) {
+        const clean = String(base64 || '').trim();
+        const bin = atob(clean);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i += 1) {
+            bytes[i] = bin.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    async function tryDecryptAesGcmBuffer(ivBytes, cipherBytes, secretStr) {
+        const enc = new TextEncoder();
         try {
-            const bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
-            const key = await crypto.subtle.importKey(
-                'raw',
-                new TextEncoder().encode('eLection-ECT-SecretKey-2026-BKK'.padEnd(32, '0')),
-                { name: 'AES-GCM' },
-                false,
-                ['decrypt']
-            );
-            const plaintext = await crypto.subtle.decrypt(
-                { name: 'AES-GCM', iv: bytes.slice(0, 12) },
-                key,
-                bytes.slice(12)
-            );
-            return new TextDecoder().decode(plaintext);
-        } catch {
+            const rawKeyBytes = enc.encode(String(secretStr).padEnd(32, '0')).slice(0, 32);
+            const rawKey = await crypto.subtle.importKey('raw', rawKeyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
+            const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBytes }, rawKey, cipherBytes);
+            return new TextDecoder().decode(plainBuf);
+        } catch {}
+
+        try {
+            const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(String(secretStr)));
+            const shaKey = await crypto.subtle.importKey('raw', hashBuf, { name: 'AES-GCM' }, false, ['decrypt']);
+            const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBytes }, shaKey, cipherBytes);
+            return new TextDecoder().decode(plainBuf);
+        } catch {}
+
+        return null;
+    }
+
+    async function decryptVoteChoice(value, secret = DEFAULT_SHARED_SECRET) {
+        if (value === null || value === undefined) return '';
+        const secretsToTry = [secret, ...FALLBACK_SHARED_SECRETS.filter(s => s !== secret)];
+
+        if (typeof value === 'object') {
+            if (value.iv && value.ciphertext) {
+                try {
+                    const ivBytes = Array.isArray(value.iv) ? new Uint8Array(value.iv) : base64ToBytes(value.iv);
+                    const cipherBytes = Array.isArray(value.ciphertext) ? new Uint8Array(value.ciphertext) : base64ToBytes(value.ciphertext);
+                    for (const sec of secretsToTry) {
+                        const res = await tryDecryptAesGcmBuffer(ivBytes, cipherBytes, sec);
+                        if (res !== null) return res;
+                    }
+                } catch {}
+            }
+            if (typeof value.choice === 'string') return decryptVoteChoice(value.choice, secret);
+            if (typeof value.ciphertext === 'string') return decryptVoteChoice(value.ciphertext, secret);
+            return String(value);
+        }
+
+        const str = String(value).trim();
+        if (!str) return '';
+
+        if (str.startsWith('ENC[AES-GCM::')) {
+            const encoded = str.slice('ENC[AES-GCM::'.length).replace(/\]$/, '');
+            try {
+                const bytes = base64ToBytes(encoded);
+                const ivBytes = bytes.slice(0, 12);
+                const cipherBytes = bytes.slice(12);
+                for (const sec of secretsToTry) {
+                    const res = await tryDecryptAesGcmBuffer(ivBytes, cipherBytes, sec);
+                    if (res !== null) return res;
+                }
+            } catch {}
             return null;
         }
+
+        if (str.startsWith('{') && str.endsWith('}')) {
+            try {
+                const parsed = JSON.parse(str);
+                if (parsed && typeof parsed === 'object') {
+                    return decryptVoteChoice(parsed, secret);
+                }
+            } catch {}
+        }
+
+        return str;
     }
 
     function parseEnvelope(value) {
@@ -207,17 +289,173 @@
     }
 
     function choiceNumber(value) {
-        if (String(value || '').toLowerCase() === 'abstain') return 'abstain';
-        const number = Number.parseInt(value, 10);
+        if (value === null || value === undefined) return null;
+        const raw = String(value).trim().toLowerCase();
+        if (!raw) return null;
+        if (raw === 'abstain' || raw === 'no_vote' || raw === 'ไม่ประสงค์ลงคะแนน' || raw === 'งดออกเสียง' || raw === '0') {
+            return 'abstain';
+        }
+        const number = Number.parseInt(raw, 10);
         return Number.isInteger(number) && number > 0 ? number : null;
     }
 
     function referendumChoice(value) {
-        const choice = String(value || '').trim().toLowerCase();
-        if (['approve', 'yes', 'เห็นชอบ'].includes(choice)) return 'approve';
-        if (['disapprove', 'no', 'ไม่เห็นชอบ'].includes(choice)) return 'disapprove';
-        if (['abstain', 'no opinion', 'ไม่แสดงความคิดเห็น', 'งดออกเสียง'].includes(choice)) return 'abstain';
+        if (value === null || value === undefined) return null;
+        if (typeof value === 'object') {
+            const inner = value.choice ?? value.vote ?? value.decrypted_vote ?? value.result ?? value.value ?? value.ciphertext;
+            if (inner !== undefined) return referendumChoice(inner);
+        }
+        const str = String(value).trim();
+        if (!str) return null;
+
+        if (str.startsWith('{') && str.endsWith('}')) {
+            try {
+                const parsed = JSON.parse(str);
+                if (parsed && typeof parsed === 'object') {
+                    return referendumChoice(parsed);
+                }
+            } catch {}
+        }
+
+        const choice = str.toLowerCase();
+        if (['approve', 'yes', 'agree', '1', 'เห็นชอบ'].includes(choice) || str === 'เห็นชอบ') return 'approve';
+        if (['disapprove', 'no', 'disagree', '2', 'ไม่เห็นชอบ'].includes(choice) || str === 'ไม่เห็นชอบ') return 'disapprove';
+        if (['abstain', 'no opinion', 'no_opinion', '0', '3', 'ไม่แสดงความคิดเห็น', 'งดออกเสียง', 'ไม่ประสงค์ลงคะแนน'].includes(choice) || str === 'ไม่แสดงความคิดเห็น' || str === 'งดออกเสียง') return 'abstain';
         return null;
+    }
+
+    /**
+     * 1. การเลือกตั้ง ส.ส. (`loadMpResults()`):
+     * รองรับการอ่านหมายเลขผู้สมัครและหมายเลขพรรคทั้งแบบแยก Column (`candidate_number` / `party_number`)
+     * และแบบ JSON ใน `decrypted_vote` หรือ `encrypted_ballot` (`constituency` / `partyList`)
+     * พร้อมเทียบชื่อผู้สมัครจาก `mp_candidates` และชื่อพรรคจาก `party_candidates` ให้ตรงกัน 100%
+     */
+    async function loadMpResults() {
+        await loadMasterData();
+        if (!areaSelectsInitialized) initAreaSelects();
+
+        const [finalCount, activeStagingCount] = await Promise.all([
+            fetchTableCount('mp_final_box', 'ballot_id'),
+            fetchTableCount('mp_staging_box', 'voter_id', 'ACTIVE'),
+        ]);
+
+        if (finalCount !== lastFinalCount) {
+            cachedFinalRows = await fetchAllRows('mp_final_box', '*');
+            lastFinalCount = finalCount;
+            votesByBallot.length = 0;
+
+            for (const row of cachedFinalRows) {
+                const decEnvelope = parseEnvelope(row.decrypted_vote);
+                const encEnvelope = parseEnvelope(row.encrypted_ballot);
+
+                const rawConstituency =
+                    row.candidate_number ??
+                    row.constituency_number ??
+                    row.constituency ??
+                    decEnvelope.constituency ??
+                    decEnvelope.candidate_number ??
+                    decEnvelope.candidateNumber ??
+                    encEnvelope.constituency ??
+                    encEnvelope.candidate_number ??
+                    encEnvelope.candidateNumber ??
+                    null;
+
+                const rawPartyList =
+                    row.party_number ??
+                    row.partylist_number ??
+                    row.party_list ??
+                    row.partyList ??
+                    decEnvelope.partyList ??
+                    decEnvelope.party_list ??
+                    decEnvelope.party_number ??
+                    decEnvelope.partyNumber ??
+                    encEnvelope.partyList ??
+                    encEnvelope.party_list ??
+                    encEnvelope.party_number ??
+                    encEnvelope.partyNumber ??
+                    null;
+
+                const [candidateChoice, partyChoice] = await Promise.all([
+                    decryptVoteChoice(rawConstituency),
+                    decryptVoteChoice(rawPartyList),
+                ]);
+
+                const districtCode = row.district_code || decEnvelope.district_code || encEnvelope.district_code || 'BKK-01';
+
+                votesByBallot.push({
+                    districtCode,
+                    candidateNumber: choiceNumber(candidateChoice),
+                    partyNumber: choiceNumber(partyChoice),
+                });
+            }
+        }
+
+        totals.submitted = finalCount + activeStagingCount;
+        totals.processed = finalCount;
+        renderKpis();
+        renderScores();
+        return {
+            submitted: totals.submitted,
+            processed: totals.processed,
+            votesByBallot,
+        };
+    }
+
+    /**
+     * 2. ประชามติ (`loadReferendumResults()`):
+     * รองรับการอ่านค่า `row.decrypted_vote` ทั้งที่เป็น String (`'approve'`, `'disapprove'`, `'abstain'`, `'เห็นชอบ'`, ฯลฯ)
+     * และ JSON เพื่อนำมาคำนวณผลรวมและเปอร์เซ็นต์อย่างแม่นยำ
+     */
+    async function loadReferendumResults() {
+        const [finalCount, activeStagingCount] = await Promise.all([
+            fetchTableCount('referendum_final_box', 'ballot_id'),
+            fetchTableCount('referendum_staging_box', 'voter_id', 'ACTIVE'),
+        ]);
+
+        if (finalCount !== lastFinalCount) {
+            cachedFinalRows = await fetchAllRows('referendum_final_box', '*');
+            lastFinalCount = finalCount;
+            referendumVotes.approve = 0;
+            referendumVotes.disapprove = 0;
+            referendumVotes.abstain = 0;
+
+            for (const row of cachedFinalRows) {
+                let rawVote = row.decrypted_vote ?? row.vote ?? row.choice ?? null;
+                if (rawVote === null || rawVote === undefined || rawVote === '') {
+                    const encObj = parseEnvelope(row.encrypted_ballot);
+                    rawVote = encObj.decrypted_vote ?? encObj.choice ?? encObj.vote ?? encObj.ciphertext ?? row.encrypted_ballot ?? null;
+                }
+
+                if (typeof rawVote === 'object' && rawVote !== null) {
+                    rawVote = rawVote.choice ?? rawVote.vote ?? rawVote.decrypted_vote ?? rawVote.value ?? rawVote.ciphertext ?? '';
+                }
+
+                if (typeof rawVote === 'string' && rawVote.startsWith('ENC[')) {
+                    rawVote = await decryptVoteChoice(rawVote);
+                } else if (typeof rawVote === 'string' && rawVote.trim().startsWith('{')) {
+                    const parsed = parseEnvelope(rawVote);
+                    const inner = parsed.choice ?? parsed.vote ?? parsed.decrypted_vote ?? parsed.value ?? parsed.ciphertext ?? '';
+                    rawVote = (typeof inner === 'string' && inner.startsWith('ENC['))
+                        ? await decryptVoteChoice(inner)
+                        : (inner || rawVote);
+                }
+
+                const choice = referendumChoice(rawVote);
+                if (choice && referendumVotes[choice] !== undefined) {
+                    referendumVotes[choice] += 1;
+                }
+            }
+        }
+
+        totals.submitted = finalCount + activeStagingCount;
+        totals.processed = finalCount;
+        renderKpis();
+        renderScores();
+        return {
+            submitted: totals.submitted,
+            processed: totals.processed,
+            referendumVotes: { ...referendumVotes },
+        };
     }
 
     function scoreMessage(message) {
@@ -307,18 +545,68 @@
         if (!isReferendum) return;
 
         const cards = main.querySelectorAll('.only-counting .vs-kpi');
-        if (cards.length < 4) return;
-        cards[1].querySelector('.vs-kpi-title').innerHTML = 'บัตรประชามติ<br>ที่รับเข้าระบบ';
-        cards[1].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>รับเข้าระบบ :</b> <span data-bind="eligible">0</span> ใบ';
-        cards[1].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>ประมวลผลแล้ว :</b> <span data-bind="used">0</span> ใบ';
-        cards[1].querySelector('.vs-kpi-big').innerHTML = 'คิดเป็น <span data-bind="usedPct">0.0</span>%';
-        cards[2].querySelector('.vs-kpi-title').innerHTML = 'ผลการออกเสียง<br>ประชามติ';
-        cards[2].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>เห็นชอบ :</b> <span data-bind="ballotDistrict">0</span> ใบ';
-        cards[2].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>ไม่เห็นชอบ :</b> <span data-bind="ballotParty">0</span> ใบ';
-        cards[3].querySelector('.vs-kpi-title').innerHTML = 'งดออกเสียง<br>และความคืบหน้า';
-        cards[3].querySelectorAll('.vs-kpi-line')[0].innerHTML = '<b>ประมวลผลทั้งหมด :</b> <span data-bind="countedDistrict">0</span> ใบ';
-        cards[3].querySelectorAll('.vs-kpi-line')[1].innerHTML = '<b>งดออกเสียง :</b> <span data-bind="countedParty">0</span> ใบ';
-        cards[3].querySelector('.vs-kpi-big').innerHTML = 'คิดเป็น <span data-bind="countedPct">0.0</span>%';
+        if (cards.length >= 4) {
+            // กล่องที่ 1: "สถานะการเลือกตั้ง" (หรือ สถานะการออกเสียง)
+            const card0Title = cards[0].querySelector('.vs-kpi-title');
+            if (card0Title) card0Title.innerHTML = 'สถานะ<br>การออกเสียง';
+
+            // กล่องที่ 2: "ผู้มาใช้สิทธิสุทธิ"
+            const card1Title = cards[1].querySelector('.vs-kpi-title');
+            if (card1Title) card1Title.innerHTML = 'ผู้มาใช้สิทธิ<br>สุทธิ';
+            const card1Body = cards[1].querySelector('.vs-kpi-body');
+            if (card1Body) {
+                card1Body.innerHTML = `
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ผู้มีสิทธิ :</b> <span data-bind="eligible">—</span> คน</p>
+                        <p class="vs-kpi-line"><b>มาใช้สิทธิ :</b> <span data-bind="used">0</span> คน</p>
+                    </div>
+                    <p class="vs-kpi-big">คิดเป็น <span data-bind="usedPct">0.0</span>%</p>
+                `;
+            }
+
+            // กล่องที่ 3: "บัตรในระบบสุทธิ"
+            const card2Title = cards[2].querySelector('.vs-kpi-title');
+            if (card2Title) card2Title.innerHTML = 'บัตรในระบบ<br>สุทธิ';
+            const card2Body = cards[2].querySelector('.vs-kpi-body');
+            if (card2Body) {
+                card2Body.innerHTML = `
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>บัตรประชามติ :</b> <span data-bind="ballotReferendum">0</span> ใบ</p>
+                    </div>
+                `;
+            }
+
+            // กล่องที่ 4: "นับคะแนนแล้ว"
+            const card3Title = cards[3].querySelector('.vs-kpi-title');
+            if (card3Title) card3Title.innerHTML = 'นับคะแนน<br>แล้ว';
+            const card3Body = cards[3].querySelector('.vs-kpi-body');
+            if (card3Body) {
+                card3Body.innerHTML = `
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>ประมวลผลแล้ว :</b> <span data-bind="countedReferendum">0</span> ใบ</p>
+                    </div>
+                    <p class="vs-kpi-big">คิดเป็น <span data-bind="countedPct">0.0</span>%</p>
+                `;
+            }
+        }
+
+        const waitingCards = main.querySelectorAll('.only-waiting .vs-kpi');
+        if (waitingCards.length >= 4) {
+            const wCard0Title = waitingCards[0].querySelector('.vs-kpi-title');
+            if (wCard0Title) wCard0Title.innerHTML = 'สถานะ<br>การออกเสียง';
+
+            const wCard2Title = waitingCards[2].querySelector('.vs-kpi-title');
+            if (wCard2Title) wCard2Title.innerHTML = 'บัตรในระบบ<br>ขณะนี้';
+            const wCard2Body = waitingCards[2].querySelector('.vs-kpi-body');
+            if (wCard2Body) {
+                wCard2Body.innerHTML = `
+                    <div class="vs-kpi-lines">
+                        <p class="vs-kpi-line"><b>บัตรประชามติ :</b> <span data-bind="ballotReferendum">0</span> ใบ</p>
+                    </div>
+                `;
+            }
+        }
+
         const scoreTitlePrefix = document.querySelector('.vs-score-title-prefix');
         if (scoreTitlePrefix) scoreTitlePrefix.textContent = 'ผลการออกเสียงประชามติแบบเรียลไทม์';
     }
@@ -465,54 +753,11 @@
 
     async function pollLiveResults() {
         try {
-            if (!isReferendum) {
-                await loadMasterData();
-                if (!areaSelectsInitialized) initAreaSelects();
+            if (isReferendum) {
+                await loadReferendumResults();
+            } else {
+                await loadMpResults();
             }
-
-            const finalTable = isReferendum ? 'referendum_final_box' : 'mp_final_box';
-            const stagingTable = isReferendum ? 'referendum_staging_box' : 'mp_staging_box';
-            const columns = isReferendum
-                ? 'ballot_id,decrypted_vote,counted_at'
-                : 'ballot_id,encrypted_ballot,district_code,counted_at';
-            const [finalCount, stagingCount] = await Promise.all([
-                fetchTableCount(finalTable, 'ballot_id'),
-                fetchTableCount(stagingTable, 'voter_id'),
-            ]);
-
-            if (finalCount !== lastFinalCount) {
-                cachedFinalRows = await fetchAllRows(finalTable, columns);
-                lastFinalCount = finalCount;
-                votesByBallot.length = 0;
-                referendumVotes.approve = 0;
-                referendumVotes.disapprove = 0;
-                referendumVotes.abstain = 0;
-
-                if (isReferendum) {
-                    cachedFinalRows.forEach(row => {
-                        const choice = referendumChoice(row.decrypted_vote);
-                        if (choice) referendumVotes[choice] += 1;
-                    });
-                } else {
-                    for (const row of cachedFinalRows) {
-                        const envelope = parseEnvelope(row.encrypted_ballot);
-                        const [candidateChoice, partyChoice] = await Promise.all([
-                            decryptVoteChoice(envelope.constituency),
-                            decryptVoteChoice(envelope.partyList),
-                        ]);
-                        votesByBallot.push({
-                            districtCode: row.district_code,
-                            candidateNumber: choiceNumber(candidateChoice),
-                            partyNumber: choiceNumber(partyChoice),
-                        });
-                    }
-                }
-            }
-
-            totals.submitted = Math.max(stagingCount, finalCount);
-            totals.processed = finalCount;
-            renderKpis();
-            renderScores();
         } catch (error) {
             console.warn('Unable to load live election results from Supabase', error);
             scoreMessage('ไม่สามารถโหลดผลคะแนนจากฐานข้อมูลได้');
@@ -727,7 +972,7 @@
                     if (record) {
                         // หากพบใน staging_box:
                         // ตรวจสอบสถานะของแถวข้อมูล หรือเวลา
-                        const isProcessed = record.status === 'TALLIED' || record.status === 'PROCESSED';
+                        const isProcessed = record.status === 'COUNTED' || record.status === 'TALLIED' || record.status === 'PROCESSED';
                         let determinedStatus;
                         if (isProcessed) {
                             determinedStatus = STATUS_PROCESSED; // ประมวลผลแล้ว
@@ -826,8 +1071,11 @@
     }
 
     // ---------------------------------------------------------------- Boot
-    renderKpis();
+    window.loadMpResults = loadMpResults;
+    window.loadReferendumResults = loadReferendumResults;
+
     applyReferendumLabels();
+    renderKpis();
     initCheckForm();
 
     if (state === 'waiting') {

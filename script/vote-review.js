@@ -187,11 +187,11 @@ function renderReviewCards(currentEventId) {
 /**
  * ฟังก์ชันเข้ารหัสลับจริงด้วย Web Crypto API (AES-GCM 256-bit)
  */
-async function encryptWithWebCrypto(plainText, secretKeyString = 'eLection-ECT-SecretKey-2026-BKK') {
+async function encryptWithWebCrypto(plainText, secretKeyString = 'eLection-Threshold-Demo-Shared-Secret-2569') {
     const enc = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
         'raw',
-        enc.encode(secretKeyString.padEnd(32, '0')),
+        enc.encode(String(secretKeyString).padEnd(32, '0')).slice(0, 32),
         { name: 'AES-GCM' },
         false,
         ['encrypt']
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================================================
 // 🔓 ฟังก์ชันถอดรหัสลับด้วย Web Crypto API (AES-GCM 256-bit)
 // =============================================================================
-async function decryptWithWebCrypto(encryptedString, secretKeyString = 'eLection-ECT-SecretKey-2026-BKK') {
+async function decryptWithWebCrypto(encryptedString, secretKeyString = 'eLection-Threshold-Demo-Shared-Secret-2569') {
     try {
         if (!encryptedString || typeof encryptedString !== 'string') return encryptedString;
         if (!encryptedString.startsWith('ENC[AES-GCM::')) {
@@ -492,19 +492,25 @@ async function decryptWithWebCrypto(encryptedString, secretKeyString = 'eLection
         const iv = combined.slice(0, 12);
         const data = combined.slice(12);
         const enc = new TextEncoder();
-        const keyMaterial = await crypto.subtle.importKey(
-            'raw',
-            enc.encode(secretKeyString.padEnd(32, '0')),
-            { name: 'AES-GCM' },
-            false,
-            ['decrypt']
-        );
-        const decryptedBuffer = await crypto.subtle.decrypt(
-            { name: 'AES-GCM', iv: iv },
-            keyMaterial,
-            data
-        );
-        return new TextDecoder().decode(decryptedBuffer);
+        const secretsToTry = [secretKeyString, 'eLection-Threshold-Demo-Shared-Secret-2569', 'eLection-ECT-SecretKey-2026-BKK'];
+        for (const sec of secretsToTry) {
+            try {
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    enc.encode(String(sec).padEnd(32, '0')).slice(0, 32),
+                    { name: 'AES-GCM' },
+                    false,
+                    ['decrypt']
+                );
+                const decryptedBuffer = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    keyMaterial,
+                    data
+                );
+                return new TextDecoder().decode(decryptedBuffer);
+            } catch {}
+        }
+        return 'DECRYPTION_FAILED';
     } catch (e) {
         return 'DECRYPTION_FAILED';
     }
@@ -732,7 +738,7 @@ async function checkBallotTrackingStatus(trackingCode) {
 
         if (mpData) {
             const hasBallot = Boolean(mpData.encrypted_ballot);
-            const isTallied = mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
+            const isTallied = mpData.status === 'COUNTED' || mpData.status === 'TALLIED' || mpData.status === 'PROCESSED';
             const isActive = mpData.status === 'ACTIVE';
 
             let stageLabel = '';
@@ -780,7 +786,7 @@ async function checkBallotTrackingStatus(trackingCode) {
 
         if (refData) {
             const hasBallot = Boolean(refData.encrypted_ballot);
-            const isTallied = refData.status === 'TALLIED' || refData.status === 'PROCESSED';
+            const isTallied = refData.status === 'COUNTED' || refData.status === 'TALLIED' || refData.status === 'PROCESSED';
             const isActive = refData.status === 'ACTIVE';
 
             let stageLabel = '';
