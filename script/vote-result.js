@@ -63,9 +63,8 @@
             }).format(new Date(`${election.date}T00:00:00`));
             const deadline = election.voteDeadline ? escapeHtml(election.voteDeadline) : '';
             const statusText = STATE_TEXT[meta.state];
-            const indicator = meta.state === 'counting'
-                ? '<img class="vote-election-indicator" src="../img/Custom-Icon/vote-status-pending.svg" alt="">'
-                : '<span class="vote-election-indicator vote-election-indicator--idle" aria-hidden="true"></span>';
+            const indicatorColor = meta.state === 'counting' ? 'yellow' : 'gray';
+            const indicator = `<i class="fa-solid fa-circle vote-election-indicator status-dot ${indicatorColor}" aria-hidden="true"></i>`;
             const href = `Vote-Status.html?id=${encodeURIComponent(electionId)}&state=${meta.state}`;
 
             return `

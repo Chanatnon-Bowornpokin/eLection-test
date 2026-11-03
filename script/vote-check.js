@@ -65,9 +65,8 @@ function setCardStatus(card, voted) {
         status.setAttribute('aria-label', voted ? 'สถานะ: ลงคะแนนแล้ว' : 'สถานะ: ยังไม่ได้ลงคะแนน');
     });
     if (indicator) {
-        indicator.src = voted
-            ? '../img/Custom-Icon/vote-status-cast.svg'
-            : '../img/Custom-Icon/vote-status-pending.svg';
+        indicator.classList.toggle('green', voted);
+        indicator.classList.toggle('yellow', !voted);
     }
     if (action) {
         action.textContent = voted ? 'ลงคะแนนใหม่' : 'ลงคะแนน';
@@ -129,7 +128,7 @@ function renderElections() {
                         <span class="vote-election-date">${escapeHtml(date)}</span>${deadline ? ` <span class="vote-election-deadline">${deadline}</span>` : ''}
                     </p>
                     <div class="vote-election-status-wrap">
-                        <img class="vote-election-indicator" src="../img/Custom-Icon/${voted ? 'vote-status-cast' : 'vote-status-pending'}.svg" alt="">
+                        <i class="fa-solid fa-circle vote-election-indicator status-dot ${voted ? 'green' : 'yellow'}" aria-hidden="true"></i>
                         <span class="vote-election-status" aria-label="สถานะ: ${voted ? 'ลงคะแนนแล้ว' : 'ยังไม่ได้ลงคะแนน'}">${voted ? 'ลงคะแนนแล้ว' : 'ยังไม่ได้ลงคะแนน'}</span>
                     </div>
                 </div>

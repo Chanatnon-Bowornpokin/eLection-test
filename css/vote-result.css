@@ -14,14 +14,6 @@
     display: none;
 }
 
-/* วงกลมสถานะ "ยังไม่ถึงเวลานับคะแนน" (วงกลมขาวขอบดำ) */
-.vote-election-indicator--idle {
-    box-sizing: border-box;
-    border: 1px solid #000;
-    border-radius: 50%;
-    background: #fff;
-}
-
 .vote-result-empty {
     margin: 0;
     padding: 24px 0;

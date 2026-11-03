@@ -165,10 +165,27 @@
 }
 
 .vote-election-indicator {
-    display: block;
+    display: inline-flex;
     width: 31px;
     height: 31px;
     flex: 0 0 31px;
+    align-items: center;
+    justify-content: center;
+    font-size: 31px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.status-dot.green {
+    color: #22c55e;
+}
+
+.status-dot.yellow {
+    color: #fcd50f;
+}
+
+.status-dot.gray {
+    color: #9ca3af;
 }
 
 .vote-election-action {
@@ -320,6 +337,7 @@
         width: 31px;
         height: 31px;
         flex-basis: 31px;
+        font-size: 31px;
     }
 
     .vote-election-action {
@@ -443,6 +461,7 @@
         width: 32px;
         height: 32px;
         flex-basis: 32px;
+        font-size: 32px;
     }
 
     .vote-election-action {
@@ -570,6 +589,7 @@
         width: 32px;
         height: 32px;
         flex-basis: 32px;
+        font-size: 32px;
     }
 
     .vote-election-action {
