@@ -31,3 +31,44 @@ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;
+
+-- Reset all shared demo data through one server-side operation. This avoids
+-- browser-side RLS failures when the Debug Panel is used with the anon key.
+CREATE OR REPLACE FUNCTION public.demo_reset_state()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    DELETE FROM public.mp_final_box;
+    DELETE FROM public.referendum_final_box;
+
+    UPDATE public.mp_staging_box
+       SET status = 'RESET', encrypted_ballot = NULL;
+    UPDATE public.referendum_staging_box
+       SET status = 'RESET', encrypted_ballot = NULL;
+
+    UPDATE public.mock_citizens
+       SET is_claimed = FALSE, claimed_at = NULL
+     WHERE is_claimed = TRUE;
+
+    DELETE FROM public.unlock_approvals
+     WHERE event_type IN ('house-election-2569', 'referendum-2569-03');
+    UPDATE public.key_ceremony_status
+       SET approved = FALSE, status = 0
+     WHERE event_type IN ('house-election-2569', 'referendum-2569-03');
+
+    INSERT INTO public.demo_election_state (event_type, election_time, updated_at)
+    VALUES
+      ('house-election-2569', 'open', NOW()),
+      ('referendum-2569-03', 'open', NOW())
+    ON CONFLICT (event_type) DO UPDATE
+      SET election_time = EXCLUDED.election_time,
+          updated_at = EXCLUDED.updated_at;
+
+    RETURN jsonb_build_object('success', TRUE, 'reset_at', NOW());
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.demo_reset_state() TO anon, authenticated;
