@@ -19,12 +19,48 @@
     };
 
     const STATE_TEXT = {
-        waiting: 'ยังไม่ถึงเวลานับคะแนน',
+        waiting: 'ยังไม่นับคะแนน',
         counting: 'กำลังนับคะแนน',
+        completed: 'ประมวลผลเสร็จสิ้น',
     };
     const POLL_MS = 5000;
     const resultCounts = new Map();
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
+
+    function isDemoElectionOpen() {
+        try {
+            return localStorage.getItem('demo-election-time') === 'open';
+        } catch {
+            return false;
+        }
+    }
+
+    function getResultState(electionId, count) {
+        if (isDemoElectionOpen()) return 'waiting';
+        if (count && count.final > 0 && count.pending === 0) return 'completed';
+        if (count && count.pending > 0) return 'counting';
+        return (RESULT_META[electionId] || {}).state === 'counting' ? 'counting' : 'waiting';
+    }
+
+    function getResultIndicatorClass(state) {
+        return state === 'completed' ? 'green' : state === 'counting' ? 'yellow' : 'gray';
+    }
+
+
+    // Keep system values (for queries) while presenting a Thai district label.
+    function formatDistrictLabel(code) {
+        const value = String(code || '').trim();
+        const match = value.match(/^BKK-(\d{1,2})$/i);
+        return match ? `กรุงเทพมหานคร เขตเลือกตั้งที่ ${Number(match[1])}` : value;
+    }
+
+    function localizeDistrictDropdown() {
+        document.querySelectorAll('select[data-district-select], #districtSelect, #resultDistrictSelect').forEach(select => {
+            select.querySelectorAll('option').forEach(option => {
+                if (option.value) option.textContent = formatDistrictLabel(option.value);
+            });
+        });
+    }
 
     const DEFAULT_SHARED_SECRET = 'eLection-Threshold-Demo-Shared-Secret-2569';
     const FALLBACK_SHARED_SECRETS = [
@@ -73,12 +109,9 @@
             }).format(new Date(`${election.date}T00:00:00`));
             const deadline = election.voteDeadline ? escapeHtml(election.voteDeadline) : '';
             const count = resultCounts.get(electionId);
-            const statusText = count
-                ? (count.final > 0 ? `ประมวลผลแล้ว ${count.final} / ${count.total} ใบ` : `รอประมวลผล ${count.total} ใบ`)
-                : STATE_TEXT[meta.state];
-            const indicatorColor = count
-                ? count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray'
-                : meta.state === 'counting' ? 'yellow' : 'gray';
+            const resultState = getResultState(electionId, count);
+            const statusText = STATE_TEXT[resultState];
+            const indicatorColor = getResultIndicatorClass(resultState);
             const indicator = `<i class="fa-solid fa-circle vote-election-indicator status-dot ${indicatorColor}" aria-hidden="true"></i>`;
             const href = `Vote-Status.html?id=${encodeURIComponent(electionId)}&state=${meta.state}`;
 
@@ -99,6 +132,7 @@
                 </article>
             `;
         }).join('');
+        localizeDistrictDropdown();
     }
 
     // ---- ค้นหา + กรองหมวดหมู่ ----
@@ -527,7 +561,12 @@
             return barRowHtml('', sub, pctStr, share);
         }).join('');
 
-        if (list) list.innerHTML = html;
+        if (list) {
+            list.innerHTML = html;
+            list.querySelectorAll('.vs-bar-text').forEach(node => {
+                node.textContent = node.textContent.replace(/\s*\(\d+(?:\.\d+)?%\)/g, '');
+            });
+        }
         return html;
     }
 
@@ -577,7 +616,12 @@
             return barRowHtml('', sub, pctStr, share);
         }).join('');
 
-        if (list) list.innerHTML = html;
+        if (list) {
+            list.innerHTML = html;
+            list.querySelectorAll('.vs-bar-text').forEach(node => {
+                node.textContent = node.textContent.replace(/\s*\(\d+(?:\.\d+)?%\)/g, '');
+            });
+        }
         return html;
     }
 
@@ -587,17 +631,14 @@
             const count = resultCounts.get(card.dataset.electionId);
             const status = card.querySelector('.vote-election-status');
             const indicator = card.querySelector('.status-dot');
-            if (!count || !status || !indicator) return;
+            if (!status || !indicator) return;
 
-            status.textContent = count.final > 0
-                ? `ประมวลผลแล้ว ${count.final.toLocaleString('th-TH')} / ${count.total.toLocaleString('th-TH')} ใบ`
-                : count.pending > 0
-                    ? `รอประมวลผล ${count.pending.toLocaleString('th-TH')} ใบ`
-                    : 'ยังไม่มีบัตรที่ประมวลผล';
+            const resultState = getResultState(card.dataset.electionId, count);
+            status.textContent = STATE_TEXT[resultState];
             status.setAttribute('aria-label', `สถานะ: ${status.textContent}`);
 
             indicator.classList.remove('green', 'yellow', 'gray');
-            indicator.classList.add(count.final > 0 && count.pending === 0 ? 'green' : count.pending > 0 ? 'yellow' : 'gray');
+            indicator.classList.add(getResultIndicatorClass(resultState));
         });
     }
 
@@ -640,6 +681,10 @@
     window.renderMpResults = renderMpResults;
 
     renderElections();
+    window.addEventListener('demo-time-changed', () => updateElectionCardsDOM());
+    window.addEventListener('storage', event => {
+        if (event.key === 'demo-election-time') updateElectionCardsDOM();
+    });
     initRealtime();
     pollResultCounts();
 })();

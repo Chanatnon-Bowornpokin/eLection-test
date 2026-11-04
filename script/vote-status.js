@@ -22,7 +22,7 @@
     const eventId = params.get('id') || 'house-election-2569';
     const isReferendum = eventId.toLowerCase().includes('ref');
     const requestedState = params.get('state');
-    const state = isReferendum ? 'counting' : (requestedState === 'waiting' || requestedState === 'counting')
+    const state = (requestedState === 'waiting' || requestedState === 'counting')
         ? requestedState
         : (STATE_BY_EVENT[eventId] || 'counting');
     let type = isReferendum ? 'referendum' : (state === 'counting' && params.get('type') === 'constituency') ? 'constituency' : 'partylist';
@@ -42,6 +42,11 @@
     if (typeof EVENTS !== 'undefined' && Array.isArray(EVENTS)) {
         const current = EVENTS.find(item => item.id === eventId);
         if (current) {
+            const heroImg = document.getElementById('statusHeroImg');
+            if (heroImg) {
+                heroImg.src = isReferendum ? '../img/Banner/Referendum_Banner.png' : '../img/Banner/House_Election.png';
+                heroImg.alt = isReferendum ? 'ผลการออกเสียงประชามติ' : 'ผลการเลือกตั้งสมาชิกสภาผู้แทนราษฎร';
+            }
             const holder = document.createElement('div');
             holder.innerHTML = current.title;
             const plainTitle = (holder.textContent || '').trim();
@@ -80,14 +85,34 @@
 
     // -------------------------------------------------------------- Base data
     const totals = {
+        eligible: null,
         submitted: 0,
         processed: 0,
     };
+    let unlockApprovalCount = 0;
+
+    async function loadUnlockApprovalCount() {
+        if (!db || typeof db.from !== 'function') return;
+        try {
+            const { count, error } = await db
+                .from('unlock_approvals')
+                .select('role_index', { count: 'exact', head: true })
+                .eq('event_type', eventId);
+            if (!error) unlockApprovalCount = Number(count || 0);
+        } catch (error) {
+            console.warn('Unable to load unlock approval status', error);
+        }
+    }
 
     function renderKpis() {
+        const turnout = totals.eligible > 0 ? pct(totals.submitted, totals.eligible) : '0.0';
         const progress = pct(totals.processed, totals.submitted);
         const isDone = totals.submitted > 0 && totals.processed >= totals.submitted;
-        const countingStatusText = isDone ? 'ปิดหีบแล้ว' : 'กำลัง<br>นับคะแนน';
+        const countingStatusText = isDone
+            ? 'ประมวลผล<br>เสร็จสิ้น'
+            : unlockApprovalCount >= 3
+                ? 'กำลัง<br>ประมวลผลคะแนน'
+                : 'รอการปลดล็อก<br>เพื่อเริ่มประมวลผล';
 
         const statusEl = document.querySelector('.only-counting [data-bind="countingStatus"]');
         if (statusEl) {
@@ -95,18 +120,18 @@
         }
 
         if (isReferendum) {
-            setBind('eligible', '—');
+            setBind('eligible', totals.eligible === null ? '—' : fmt(totals.eligible));
             setBind('used', fmt(totals.submitted));
-            setBind('usedPct', progress);
+            setBind('usedPct', turnout);
             setBind('ballotReferendum', fmt(totals.submitted));
             setBind('ballotDistrict', fmt(totals.submitted));
             setBind('countedReferendum', fmt(totals.processed));
             setBind('countedDistrict', fmt(totals.processed));
             setBind('countedPct', progress);
         } else {
-            setBind('eligible', '—');
+            setBind('eligible', totals.eligible === null ? '—' : fmt(totals.eligible));
             setBind('used', fmt(totals.submitted));
-            setBind('usedPct', progress);
+            setBind('usedPct', turnout);
             setBind('ballotDistrict', fmt(totals.submitted));
             setBind('ballotParty', fmt(totals.submitted));
             setBind('countedDistrict', fmt(totals.processed));
@@ -168,6 +193,20 @@
         }
         const { count, error } = await query;
         if (error) throw error;
+        return count || 0;
+    }
+
+    async function fetchEligibleVoterCount() {
+        if (!db) return null;
+        const eligibilityColumn = isReferendum ? 'eligible_referendum' : 'eligible_mp';
+        const { count, error } = await db
+            .from('mock_citizens')
+            .select('id', { count: 'exact', head: true })
+            .eq(eligibilityColumn, true);
+        if (error) {
+            console.warn(`Unable to load eligible voter count from mock_citizens (${eligibilityColumn})`, error);
+            return null;
+        }
         return count || 0;
     }
 
@@ -334,9 +373,10 @@
         await loadMasterData();
         if (!areaSelectsInitialized) initAreaSelects();
 
-        const [finalCount, activeStagingCount] = await Promise.all([
+        const [finalCount, activeStagingCount, eligibleCount] = await Promise.all([
             fetchTableCount('mp_final_box', 'ballot_id'),
             fetchTableCount('mp_staging_box', 'voter_id', 'ACTIVE'),
+            fetchEligibleVoterCount(),
         ]);
 
         if (finalCount !== lastFinalCount) {
@@ -392,6 +432,7 @@
 
         totals.submitted = finalCount + activeStagingCount;
         totals.processed = finalCount;
+        totals.eligible = eligibleCount;
         renderKpis();
         renderScores();
         return {
@@ -407,9 +448,10 @@
      * และ JSON เพื่อนำมาคำนวณผลรวมและเปอร์เซ็นต์อย่างแม่นยำ
      */
     async function loadReferendumResults() {
-        const [finalCount, activeStagingCount] = await Promise.all([
+        const [finalCount, activeStagingCount, eligibleCount] = await Promise.all([
             fetchTableCount('referendum_final_box', 'ballot_id'),
             fetchTableCount('referendum_staging_box', 'voter_id', 'ACTIVE'),
+            fetchEligibleVoterCount(),
         ]);
 
         if (finalCount !== lastFinalCount) {
@@ -449,6 +491,7 @@
 
         totals.submitted = finalCount + activeStagingCount;
         totals.processed = finalCount;
+        totals.eligible = eligibleCount;
         renderKpis();
         renderScores();
         return {
@@ -487,6 +530,9 @@
         }).join('');
 
         list.innerHTML = html;
+        list.querySelectorAll('.vs-bar-text').forEach(node => {
+            node.textContent = node.textContent.replace(/\s*\(\d+(?:\.\d+)?%\)/g, '');
+        });
         return html;
     }
 
@@ -565,6 +611,9 @@
             renderMpResults(list, type);
         }
 
+        list.querySelectorAll('.vs-bar-text').forEach(node => {
+            node.textContent = node.textContent.replace(/\s*\(\d+(?:\.\d+)?%\)/g, '');
+        });
         scoreEls = Array.from(list.querySelectorAll('.vs-bar-row')).map(row => ({
             sub: row.querySelector('.vs-bar-sub'),
             text: row.querySelector('.vs-bar-text'),
@@ -580,7 +629,7 @@
         if (cards.length >= 4) {
             // กล่องที่ 1: "สถานะการเลือกตั้ง" (หรือ สถานะการออกเสียง)
             const card0Title = cards[0].querySelector('.vs-kpi-title');
-            if (card0Title) card0Title.innerHTML = 'สถานะ<br>การออกเสียง';
+            if (card0Title) card0Title.innerHTML = 'สถานะ<br>การลงคะแนน';
 
             // กล่องที่ 2: "ผู้มาใช้สิทธิสุทธิ"
             const card1Title = cards[1].querySelector('.vs-kpi-title');
@@ -625,7 +674,7 @@
         const waitingCards = main.querySelectorAll('.only-waiting .vs-kpi');
         if (waitingCards.length >= 4) {
             const wCard0Title = waitingCards[0].querySelector('.vs-kpi-title');
-            if (wCard0Title) wCard0Title.innerHTML = 'สถานะ<br>การออกเสียง';
+            if (wCard0Title) wCard0Title.innerHTML = 'สถานะ<br>การลงคะแนน';
 
             const wCard2Title = waitingCards[2].querySelector('.vs-kpi-title');
             if (wCard2Title) wCard2Title.innerHTML = 'บัตรในระบบ<br>ขณะนี้';
@@ -755,6 +804,11 @@
             .join('');
         selected.province = provinces.includes(selected.province) ? selected.province : provinces[0];
 
+        function districtLabel(code) {
+            const match = String(code || '').match(/^BKK-(\d{1,2})$/i);
+            return match ? `กรุงเทพฯ เขต ${Number(match[1])}` : `เขต ${code}`;
+        }
+
         function fillDistricts() {
             const districts = [...new Set(candidateMetadata
                 .filter(candidate => String(candidate.district_code || '').startsWith(`${selected.province}-`))
@@ -763,6 +817,9 @@
                 .map(code => `<option value="${escapeHtml(code)}">เขต ${escapeHtml(code)}</option>`)
                 .join('');
             selected.district = districts.includes(selected.district) ? selected.district : (districts[0] || '');
+            districtSelect.querySelectorAll('option').forEach(option => {
+                option.textContent = districtLabel(option.value);
+            });
             districtSelect.value = selected.district;
         }
 
@@ -785,6 +842,7 @@
 
     async function pollLiveResults() {
         try {
+            await loadUnlockApprovalCount();
             if (isReferendum) {
                 await loadReferendumResults();
             } else {

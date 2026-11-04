@@ -326,64 +326,17 @@
                 </div>
                 <div class="user-profile-name" id="userProfileName">กำลังดึงข้อมูล...</div>
                 <div class="user-profile-district" id="userProfileDistrict"></div>
-                <div class="user-profile-tags" id="userProfileTags">
-                    <span class="user-tag" id="userTagMp">ส.ส. : ตรวจสอบ...</span>
-                    <span class="user-tag" id="userTagRef">ประชามติ : ตรวจสอบ...</span>
-                </div>
-                <div class="user-profile-actions">
-                    <button type="button" class="user-profile-btn user-profile-btn--primary" id="userProfileNextBtn" title="สลับไปยังตัวตนถัดไปในฐานข้อมูล">
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                        <span>สลับเป็นคนถัดไป</span>
-                    </button>
-                    <button type="button" class="user-profile-btn user-profile-btn--secondary" id="userProfileResetBtn" title="รีเซ็ตฐานข้อมูลทั้งหมดและเริ่มใหม่ที่คนแรก">
-                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-                        <span>รีเซ็ตกลับคนแรก</span>
-                    </button>
-                </div>
             `;
             userIcon.appendChild(dropdown);
-
-            const nextBtn = dropdown.querySelector('#userProfileNextBtn');
-            if (nextBtn) {
-                nextBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    nextBtn.disabled = true;
-                    nextBtn.innerHTML = '<span>กำลังสลับคนถัดไป...</span>';
-                    nextVoter();
-                });
-            }
-
-            const resetBtn = dropdown.querySelector('#userProfileResetBtn');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    resetBtn.disabled = true;
-                    resetBtn.innerHTML = '<span>กำลังรีเซ็ต...</span>';
-                    resetAllVoters();
-                });
-            }
         }
 
         function updateProfileView(voter) {
             const nameEl = dropdown.querySelector('#userProfileName');
             const distEl = dropdown.querySelector('#userProfileDistrict');
-            const tagMp = dropdown.querySelector('#userTagMp');
-            const tagRef = dropdown.querySelector('#userTagRef');
 
             if (voter) {
                 if (nameEl) nameEl.textContent = voter.full_name_th || 'ผู้มีสิทธิเลือกตั้ง';
                 if (distEl) distEl.textContent = voter.district_info || '';
-
-                if (tagMp) {
-                    const ok = voter.eligible_mp !== false;
-                    tagMp.textContent = `ส.ส. : ${ok ? 'มีสิทธิ' : 'ไม่มีสิทธิ'}`;
-                    tagMp.className = `user-tag ${ok ? 'is-eligible' : 'is-ineligible'}`;
-                }
-                if (tagRef) {
-                    const ok = voter.eligible_referendum !== false;
-                    tagRef.textContent = `ประชามติ : ${ok ? 'มีสิทธิ' : 'ไม่มีสิทธิ'}`;
-                    tagRef.className = `user-tag ${ok ? 'is-eligible' : 'is-ineligible'}`;
-                }
             } else {
                 if (nameEl) nameEl.textContent = 'กำลังดึงข้อมูล...';
                 if (distEl) distEl.textContent = '';

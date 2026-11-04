@@ -54,22 +54,35 @@ function writeVoteStatus(status) {
     }
 }
 
+function isElectionClosed() {
+    try {
+        return localStorage.getItem('demo-election-time') === 'closed';
+    } catch {
+        return false;
+    }
+}
+
 function setCardStatus(card, voted) {
     const statuses = card.querySelectorAll('.vote-election-status');
     const indicator = card.querySelector('.vote-election-indicator');
     const action = card.querySelector('.vote-election-action');
 
+    const closed = isElectionClosed();
     card.classList.toggle('is-voted', voted);
+    card.classList.toggle('is-closed', closed);
     statuses.forEach(status => {
-        status.textContent = voted ? 'ลงคะแนนแล้ว' : 'ยังไม่ได้ลงคะแนน';
-        status.setAttribute('aria-label', voted ? 'สถานะ: ลงคะแนนแล้ว' : 'สถานะ: ยังไม่ได้ลงคะแนน');
+        const label = voted ? 'ลงคะแนนแล้ว' : (closed ? 'ไม่ได้มาใช้สิทธิ' : 'ยังไม่ได้ลงคะแนน');
+        status.textContent = label;
+        status.setAttribute('aria-label', `สถานะ: ${label}`);
     });
     if (indicator) {
         indicator.classList.toggle('green', voted);
-        indicator.classList.toggle('yellow', !voted);
+        indicator.classList.toggle('yellow', !voted && !closed);
+        indicator.classList.toggle('red', !voted && closed);
     }
     if (action) {
-        action.textContent = voted ? 'ลงคะแนนใหม่' : 'ลงคะแนน';
+        action.textContent = closed ? 'หมดเวลา' : (voted ? 'ลงคะแนนใหม่' : 'ลงคะแนน');
+        action.disabled = closed;
         action.setAttribute('aria-pressed', String(voted));
     }
 }
@@ -119,8 +132,10 @@ function renderElections() {
 
         const title = escapeHtmlWithBreaks(election.title);
 
+        const closed = isElectionClosed();
+        const statusLabel = voted ? 'ลงคะแนนแล้ว' : (closed ? 'ไม่ได้มาใช้สิทธิ' : 'ยังไม่ได้ลงคะแนน');
         return `
-            <article class="vote-election-card${voted ? ' is-voted' : ''}" data-election-id="${escapeHtml(electionId)}">
+            <article class="vote-election-card${voted ? ' is-voted' : ''}${closed ? ' is-closed' : ''}" data-election-id="${escapeHtml(electionId)}">
                 <div class="vote-election-copy">
                     <span class="vote-election-level">${escapeHtml(election.level)}</span>
                     <h2 class="vote-election-title">${title}</h2>
@@ -128,30 +143,34 @@ function renderElections() {
                         <span class="vote-election-date">${escapeHtml(date)}</span>${deadline ? ` <span class="vote-election-deadline">${deadline}</span>` : ''}
                     </p>
                     <div class="vote-election-status-wrap">
-                        <i class="fa-solid fa-circle vote-election-indicator status-dot ${voted ? 'green' : 'yellow'}" aria-hidden="true"></i>
-                        <span class="vote-election-status" aria-label="สถานะ: ${voted ? 'ลงคะแนนแล้ว' : 'ยังไม่ได้ลงคะแนน'}">${voted ? 'ลงคะแนนแล้ว' : 'ยังไม่ได้ลงคะแนน'}</span>
+                        <i class="fa-solid fa-circle vote-election-indicator status-dot ${voted ? 'green' : (closed ? 'red' : 'yellow')}" aria-hidden="true"></i>
+                        <span class="vote-election-status" aria-label="สถานะ: ${statusLabel}">${statusLabel}</span>
                     </div>
                 </div>
-                <button class="vote-election-action" type="button" aria-pressed="${voted}">${voted ? 'ลงคะแนนใหม่' : 'ลงคะแนน'}</button>
+                <button class="vote-election-action" type="button" aria-pressed="${voted}"${closed ? ' disabled' : ''}>${closed ? 'หมดเวลา' : (voted ? 'ลงคะแนนใหม่' : 'ลงคะแนน')}</button>
             </article>
         `;
     }).join('');
 
-    electionList.addEventListener('click', event => {
+    electionList.onclick = event => {
         const action = event.target.closest('.vote-election-action');
-        if (!action) return;
+        if (!action || action.disabled) return;
 
         const card = action.closest('.vote-election-card');
         const id = card.dataset.electionId;
 
         // นำทางไปหน้าข้อพึงปฏิบัติ พร้อมส่ง query parameter id ไปด้วย
         window.location.href = `Vote-Todo.html?id=${encodeURIComponent(id)}`;
-    });
+    };
 }
 
 // อัปเดตรายการเมื่อดึงข้อมูลผู้โหวตประจำเครื่องสำเร็จ
 window.addEventListener('voter-claimed', () => {
     renderElections();
+});
+window.addEventListener('demo-time-changed', () => renderElections());
+window.addEventListener('storage', event => {
+    if (event.key === 'demo-election-time') renderElections();
 });
 
 renderElections();

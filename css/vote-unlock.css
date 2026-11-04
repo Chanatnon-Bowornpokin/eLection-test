@@ -208,7 +208,7 @@
 }
 
 .vu-icon-check {
-    color: #22c55e;
+    color: #000;
     font-size: 44px;
     line-height: 1;
 }
@@ -439,7 +439,25 @@
     border-radius: 8.57px;
     background: #000;
     box-shadow: inset 0 2.02px 6.3px -1.51px rgba(0, 0, 0, 0.25);
-    transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: width 0.3s ease, background-color 0.4s ease;
+}
+
+.vu-process-progress-fill.is-processing {
+    background-color: #111827;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.18) 75%, transparent 75%);
+    background-size: 28px 28px;
+    animation: vu-progress-stripes 0.8s linear infinite;
+}
+
+.vu-process-progress-fill.is-completed {
+    background-color: #10B981;
+    background-image: none;
+    animation: none;
+}
+
+@keyframes vu-progress-stripes {
+    from { background-position: 0 0; }
+    to { background-position: 28px 0; }
 }
 
 .vu-bottom-secbreak {

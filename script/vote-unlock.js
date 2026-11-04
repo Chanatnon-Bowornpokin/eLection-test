@@ -178,6 +178,27 @@
         return null;
     }
 
+    async function hydrateSharedState() {
+        const client = getSupabaseClient();
+        if (!client) return;
+        const { data, error } = await client
+            .from('unlock_approvals')
+            .select('role_index')
+            .eq('event_type', eventId)
+            .order('role_index');
+        if (error) {
+            const local = safeReadJson(window.localStorage, stateKey, null);
+            if (local && Array.isArray(local.approved)) {
+                state.approved = [...new Set(local.approved.map(Number).filter(role => role >= 1 && role <= 5))];
+                renderStatus();
+            }
+            return;
+        }
+        state.approved = [...new Set((data || []).map(row => Number(row.role_index)).filter(role => role >= 1 && role <= 5))];
+        saveState();
+        renderStatus();
+    }
+
     function partyNameFromRow(row) {
         if (!row || typeof row !== 'object') return '';
         const partyFields = ['party_name_th', 'party_name', 'partyname', 'party_th', 'party', 'name_th', 'name'];
@@ -297,7 +318,10 @@
         if (processProgressTrack) processProgressTrack.setAttribute('aria-valuenow', '0');
 
         const processProgressFill = document.getElementById('processProgressFill');
-        if (processProgressFill) processProgressFill.style.width = '0%';
+        if (processProgressFill) {
+            processProgressFill.style.width = '0%';
+            processProgressFill.classList.remove('is-processing', 'is-completed');
+        }
     }
 
     // ฟังก์ชันอัปเดตสถานะขั้นตอนล่าง โดยใช้สีระบบมาตรฐาน #000000 (ตัดสีเขียว #16A34A / #10B981 ออกทั้งหมด)
@@ -334,7 +358,11 @@
             step3Tag.style.width = 'auto';
         }
         if (processProgressTrack) processProgressTrack.setAttribute('aria-valuenow', String(clamped));
-        if (processProgressFill) processProgressFill.style.width = `${clamped}%`;
+        if (processProgressFill) {
+            processProgressFill.style.width = `${clamped}%`;
+            processProgressFill.classList.toggle('is-processing', clamped > 0 && clamped < 100);
+            processProgressFill.classList.toggle('is-completed', clamped >= 100);
+        }
     }
 
     /**
@@ -750,6 +778,7 @@
         try {
             // Step 1: แสดงสถานะ "กำลังตัดข้อมูลตัวตน..."
             updateStep1UI('กำลังตัดข้อมูลตัวตน...', '#2563EB');
+            updateStep3UI(1, '1%', '#000000');
             await new Promise(resolve => window.setTimeout(resolve, 600));
 
             // พยายามเรียก Supabase RPC ฟังก์ชัน server-side process_decryption_threshold ก่อน
@@ -766,9 +795,19 @@
                         console.log('[VoteUnlock] Server-side RPC process_decryption_threshold completed:', rpcData);
                     }
                 } catch (rpcErr) {
-                    console.info('[VoteUnlock] Fallback to direct client-side database query flow:', rpcErr);
+                    throw new Error(`Server-side decryption RPC failed: ${rpcErr?.message || rpcErr}`);
                 }
             }
+
+            if (!rpcSucceeded) throw new Error('Server-side decryption RPC unavailable');
+            updateStep1UI('สำเร็จ', '#000000');
+            updateStep2UI('สำเร็จ', '#000000');
+            updateStep3UI(100, '100%', '#000000');
+            state.completed = true;
+            saveState();
+            const completedHeader = document.getElementById('processHeader');
+            if (completedHeader) completedHeader.textContent = 'ประมวลผลและเปิดหีบสำเร็จ';
+            return;
 
             // ตัดข้อมูลตัวตน (voter_id) ออกอย่างเด็ดขาด
             updateStep1UI('สำเร็จ', '#000000');
@@ -989,6 +1028,25 @@
             button.textContent = 'ส่งรหัสแล้ว';
         }
 
+        const client = getSupabaseClient();
+        if (client) {
+            const { data: approvalData, error: approvalError } = await client.rpc('submit_unlock_approval', {
+                p_event_type: eventId,
+                p_role_index: roleIndex
+            });
+            if (approvalError) {
+                console.error('[VoteUnlock] Could not record approval on server', approvalError);
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'เธชเนเธเธฃเธซเธฑเธช';
+                }
+                return;
+            }
+            if (Array.isArray(approvalData?.approvals)) {
+                state.approved = [...new Set(approvalData.approvals.map(Number))];
+            }
+        }
+
         const usedIds = new Set(
             Object.values(state.txRefs)
                 .map(ref => Number.parseInt(String(ref).replace(/^#TX-/, ''), 16))
@@ -1012,7 +1070,7 @@
         }
     }
 
-    function init() {
+    async function init() {
         const backLink = document.getElementById('backLink');
         if (backLink) backLink.href = `Vote-Status.html?id=${encodeURIComponent(eventKey)}`;
 
@@ -1035,6 +1093,21 @@
 
         renderNames([]);
         renderStatus();
+        try {
+            await hydrateSharedState();
+        } catch (error) {
+            console.warn('[VoteUnlock] Could not hydrate shared approvals', error);
+        }
+        window.addEventListener('storage', event => {
+            if (event.key === stateKey) {
+                const local = safeReadJson(window.localStorage, stateKey, null);
+                if (local && Array.isArray(local.approved)) {
+                    state.approved = [...new Set(local.approved.map(Number).filter(role => role >= 1 && role <= 5))];
+                    renderStatus();
+                }
+            }
+        });
+        window.addEventListener('demo-approval-changed', () => hydrateSharedState());
 
         if (state.completed) {
             updateStep1UI('สำเร็จ', '#000000');

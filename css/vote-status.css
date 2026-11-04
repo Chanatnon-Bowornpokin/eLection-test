@@ -9,6 +9,8 @@
    Hero placeholder (พื้นที่สีเทา รอ banner จริง) — สัดส่วนเดียวกับ .vote-check-hero img
    -------------------------------------------------------------------------- */
 .vote-status-hero {
+    position: relative;
+    overflow: hidden;
     display: flex;
     box-sizing: border-box;
     align-items: center;
@@ -17,7 +19,16 @@
     background: #a0a0a0;
 }
 
+.vote-status-hero-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
 .vote-status-hero-text {
+    display: none;
     margin: 0;
     color: #000;
     font-size: 4.5vw;

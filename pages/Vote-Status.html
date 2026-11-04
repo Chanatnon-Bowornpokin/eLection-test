@@ -22,6 +22,7 @@
     <link href="../fontawesome/css/brands.css" rel="stylesheet">
     <link href="../fontawesome/css/solid.css" rel="stylesheet">
     <link href="../css/style.css?v=20261104_v1" rel="stylesheet">
+    <link href="../css/debug-panel.css" rel="stylesheet">
     <link href="../css/vote-check.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-searchbox.css?v=20261102_v2" rel="stylesheet">
     <link href="../css/vote-status.css?v=20261102_v8" rel="stylesheet">
@@ -42,7 +43,8 @@
             </div>
         </div>
         <!-- Hero: พื้นที่สีเทารอ banner จริงที่ยังไม่ได้ export (สัดส่วนเดียวกับ .vote-check-hero) -->
-        <div class="vote-check-hero vote-status-hero" role="img" aria-label="พื้นที่สำหรับ banner รายละเอียดการเลือกตั้ง">
+        <div class="vote-check-hero vote-status-hero">
+            <img id="statusHeroImg" class="vote-status-hero-image" src="../img/Banner/House_Election.png" alt="ผลการเลือกตั้ง">
             <p class="vote-status-hero-text">Hero Section<br>ผลการเลือกตั้ง<br>ชื่อ รายละเอียดการเลือกตั้ง</p>
             <div class="carousel-inner-shadow"></div>
         </div>
@@ -56,7 +58,7 @@
              ========================================================= -->
         <section class="vs-kpis only-waiting" aria-label="สถิติภาพรวมการเลือกตั้ง">
             <article class="vs-kpi">
-                <h2 class="vs-kpi-title">สถานะ<br>การเลือกตั้ง</h2>
+                <h2 class="vs-kpi-title">สถานะ<br>การลงคะแนน</h2>
                 <div class="vs-kpi-body">
                     <p class="vs-kpi-status">อยู่ระหว่าง<br>การลงคะแนน</p>
                 </div>
@@ -94,7 +96,7 @@
              ========================================================= -->
         <section class="vs-kpis only-counting" aria-label="สถิติภาพรวมการเลือกตั้ง">
             <article class="vs-kpi">
-                <h2 class="vs-kpi-title">สถานะ<br>การเลือกตั้ง</h2>
+                <h2 class="vs-kpi-title">สถานะ<br>การลงคะแนน</h2>
                 <div class="vs-kpi-body">
                     <p class="vs-kpi-status" data-bind="countingStatus">กำลัง<br>นับคะแนน</p>
                 </div>
@@ -330,7 +332,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../script/supabase-client.js"></script>
-    <script src="../script/voter-identity.js?v=20261102_v2"></script>
+    <script src="../script/debug-panel.js"></script>
+<script src="../script/voter-identity.js?v=20261104_v1"></script>
     <script src="../script/events.js?v=20261102_v2"></script>
     <script src="../script/vote-status.js?v=20261103_v5"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"

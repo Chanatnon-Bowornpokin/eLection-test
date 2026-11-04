@@ -1,4 +1,45 @@
 -- =============================================================================
+
+CREATE TABLE IF NOT EXISTS public.unlock_approvals (
+    event_type TEXT NOT NULL,
+    role_index INTEGER NOT NULL CHECK (role_index BETWEEN 1 AND 5),
+    approved_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (event_type, role_index)
+);
+
+ALTER TABLE public.unlock_approvals ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS unlock_approvals_insert ON public.unlock_approvals;
+CREATE POLICY unlock_approvals_insert ON public.unlock_approvals FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS unlock_approvals_read ON public.unlock_approvals;
+CREATE POLICY unlock_approvals_read ON public.unlock_approvals FOR SELECT TO anon, authenticated USING (true);
+
+CREATE OR REPLACE FUNCTION public.submit_unlock_approval(
+    p_event_type TEXT,
+    p_role_index INTEGER
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_approvals JSONB;
+BEGIN
+    INSERT INTO public.unlock_approvals(event_type, role_index)
+    VALUES (p_event_type, p_role_index)
+    ON CONFLICT (event_type, role_index) DO NOTHING;
+
+    SELECT COALESCE(jsonb_agg(role_index ORDER BY role_index), '[]'::JSONB)
+      INTO v_approvals
+      FROM public.unlock_approvals
+     WHERE event_type = p_event_type;
+    RETURN jsonb_build_object('success', true, 'approvals', v_approvals);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.submit_unlock_approval(TEXT, INTEGER) TO anon, authenticated;
+
+-- =============================================================================
 -- eLection: Database RPC for Server-Side Threshold Decryption & Anonymization
 -- =============================================================================
 -- รันไฟล์ SQL นี้ใน Supabase SQL Editor เพื่อสร้างฟังก์ชัน Backend Server-side Flow
@@ -14,6 +55,7 @@ CREATE OR REPLACE FUNCTION process_decryption_threshold(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     v_approval_count INT := 0;
@@ -24,6 +66,11 @@ DECLARE
     v_decrypted JSONB;
     v_ref_choice TEXT;
 BEGIN
+    SELECT COALESCE(jsonb_agg(role_index ORDER BY role_index), '[]'::JSONB)
+      INTO p_approvals
+      FROM public.unlock_approvals
+     WHERE event_type = p_event_type;
+
     -- 1. ตรวจสอบจำนวนฝ่ายที่ส่งการอนุมัติ: ต้องมีตั้งแต่ 3 ใน 5 ฝ่ายขึ้นไป (>= 60%)
     IF p_approvals IS NOT NULL AND jsonb_typeof(p_approvals) = 'array' THEN
         v_approval_count := jsonb_array_length(p_approvals);
@@ -71,7 +118,7 @@ BEGIN
             ) VALUES (
                 v_ballot_id,
                 v_ref_choice,
-                v_ballot.encrypted_ballot,
+                NULL,
                 NOW()
             );
 
@@ -117,7 +164,7 @@ BEGIN
                 v_ballot_id,
                 COALESCE(v_ballot.district_code, 'BKK-01'),
                 v_decrypted,
-                v_decrypted,
+                NULL,
                 NOW()
             );
 
