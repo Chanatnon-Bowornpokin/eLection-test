@@ -41,8 +41,9 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    DELETE FROM public.mp_final_box;
-    DELETE FROM public.referendum_final_box;
+    -- Keep an explicit predicate for Supabase/Postgres safety checks.
+    DELETE FROM public.mp_final_box WHERE id IS NOT NULL;
+    DELETE FROM public.referendum_final_box WHERE id IS NOT NULL;
 
     UPDATE public.mp_staging_box
        SET status = 'RESET', encrypted_ballot = NULL;
