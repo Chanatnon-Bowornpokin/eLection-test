@@ -45,10 +45,10 @@ BEGIN
     DELETE FROM public.mp_final_box WHERE id IS NOT NULL;
     DELETE FROM public.referendum_final_box WHERE id IS NOT NULL;
 
-    UPDATE public.mp_staging_box
-       SET status = 'RESET', encrypted_ballot = NULL;
-    UPDATE public.referendum_staging_box
-       SET status = 'RESET', encrypted_ballot = NULL;
+    -- Staging encrypted_ballot is NOT NULL, so clear staging rows instead of
+    -- writing NULL. The Debug Panel can generate a fresh batch afterward.
+    DELETE FROM public.mp_staging_box WHERE TRUE;
+    DELETE FROM public.referendum_staging_box WHERE TRUE;
 
     UPDATE public.mock_citizens
        SET is_claimed = FALSE, claimed_at = NULL
