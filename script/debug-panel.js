@@ -2,8 +2,9 @@
     'use strict';
     const params = new URLSearchParams(window.location.search);
     const debugRequested = params.get('debug') === 'true';
-    if (debugRequested) sessionStorage.setItem('election-debug-mode', 'true');
-    const debugEnabled = debugRequested || sessionStorage.getItem('election-debug-mode') === 'true';
+    // Debug is opt-in per URL. Do not persist it in sessionStorage, so a normal
+    // public link remains a normal public page even in the same browser tab.
+    const debugEnabled = debugRequested;
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
     const eventId = params.get('id') || 'house-election-2569';
     const secret = 'eLection-Threshold-Demo-Shared-Secret-2569';
