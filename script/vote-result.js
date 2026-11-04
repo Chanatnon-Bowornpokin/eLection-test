@@ -27,6 +27,20 @@
     const resultCounts = new Map();
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
 
+    async function fetchUnlockApprovalCount(eventId) {
+        if (!db || typeof db.from !== 'function') return 0;
+        try {
+            const { count, error } = await db
+                .from('unlock_approvals')
+                .select('role_index', { count: 'exact', head: true })
+                .eq('event_type', eventId);
+            return error ? 0 : Number(count || 0);
+        } catch (error) {
+            console.warn(`Unable to load unlock approval count for ${eventId}`, error);
+            return 0;
+        }
+    }
+
     function isDemoElectionOpen() {
         try {
             return localStorage.getItem('demo-election-time') === 'open';
@@ -38,7 +52,8 @@
     function getResultState(electionId, count) {
         if (isDemoElectionOpen()) return 'waiting';
         if (count && count.final > 0 && count.pending === 0) return 'completed';
-        if (count && count.pending > 0) return 'counting';
+        if (count && count.pending > 0 && Number(count.approvalCount || 0) >= 3) return 'counting';
+        if (count && count.pending > 0) return 'waiting';
         return (RESULT_META[electionId] || {}).state === 'counting' ? 'counting' : 'waiting';
     }
 
@@ -666,6 +681,14 @@
                 loadMpResults(),
                 loadReferendumResults(),
             ]);
+            const [houseApprovals, referendumApprovals] = await Promise.all([
+                fetchUnlockApprovalCount('house-election-2569'),
+                fetchUnlockApprovalCount('referendum-2569-03'),
+            ]);
+            const houseCount = resultCounts.get('house-election-2569');
+            const referendumCount = resultCounts.get('referendum-2569-03');
+            if (houseCount) houseCount.approvalCount = houseApprovals;
+            if (referendumCount) referendumCount.approvalCount = referendumApprovals;
             updateElectionCardsDOM();
         } catch (error) {
             console.warn('Unable to load final box counts for result list', error);
