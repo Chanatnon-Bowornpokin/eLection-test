@@ -121,6 +121,7 @@
     roles.forEach((role, index) => ceremony.appendChild(button(`ส่งรหัส: ${role}`, 'debug-action', () => submitKey(index + 1))));
 
     const reset = section('Reset Demo Data');
+    reset.appendChild(button('ล้างคะแนน + ผู้มีสิทธิ์', 'debug-danger', resetVotesAndVoters));
     reset.appendChild(button('ล้างข้อมูลและเริ่มรอบใหม่', 'debug-danger', resetDemo));
 
     const badge = el('div', { class: 'debug-status-badge', role: 'status' });
@@ -194,6 +195,39 @@
         renderTime();
         window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: 'open' }));
         notify('รีเซ็ต Demo แล้ว');
+    }
+
+    async function resetVotesAndVoters() {
+        if (!db || !window.confirm('Reset all votes and return every mock voter to unused?')) return;
+        const jobs = [
+            ['mp_final_box', null], ['referendum_final_box', null],
+            ['mp_staging_box', { status: 'RESET', encrypted_ballot: null }],
+            ['referendum_staging_box', { status: 'RESET', encrypted_ballot: null }],
+        ];
+        const errors = [];
+        for (const [table, values] of jobs) {
+            const result = values
+                ? await db.from(table).update(values).neq('id', '00000000-0000-0000-0000-000000000000')
+                : await db.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (result.error) errors.push(`${table}: ${result.error.message}`);
+        }
+        const voterReset = await db.from('mock_citizens')
+            .update({ is_claimed: false, claimed_at: null })
+            .eq('is_claimed', true);
+        if (voterReset.error) errors.push(`mock_citizens: ${voterReset.error.message}`);
+        await db.from('unlock_approvals').delete().in('event_type', ['house-election-2569', 'referendum-2569-03']);
+        await db.from('key_ceremony_status').update({ approved: false, status: 0 }).in('event_type', ['house-election-2569', 'referendum-2569-03']);
+        await db.from('demo_election_state').upsert([
+            { event_type: 'house-election-2569', election_time: 'open', updated_at: new Date().toISOString() },
+            { event_type: 'referendum-2569-03', election_time: 'open', updated_at: new Date().toISOString() },
+        ], { onConflict: 'event_type' });
+        localStorage.removeItem('election_current_voter');
+        localStorage.removeItem('voter_session');
+        localStorage.removeItem('election_unlock_approvals_house-election-2569');
+        localStorage.removeItem('election_unlock_approvals_referendum-2569-03');
+        localStorage.setItem(timeKey, 'open');
+        window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: 'open' }));
+        notify(errors.length ? `Reset completed with errors: ${errors.join(' | ')}` : 'Votes cleared and all mock voters reset');
     }
 
     async function count(table, filter) { const query = db.from(table).select('*', { count: 'exact', head: true }); if (filter) query.eq('status', filter); const result = await query; return result.count || 0; }

@@ -11,12 +11,22 @@
    1. Hero Placeholder (พื้นที่สีเทา รอ banner จริง — สัดส่วนเดียวกับหน้าอื่น)
    -------------------------------------------------------------------------- */
 .vote-unlock-hero {
+    position: relative;
     display: flex;
     box-sizing: border-box;
     align-items: center;
     justify-content: center;
     aspect-ratio: 409.05 / 121;
     background: #a0a0a0;
+    overflow: hidden;
+}
+
+.vote-unlock-hero-banner {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .vote-unlock-hero-text {
