@@ -3,6 +3,12 @@
     color-scheme: light;
 }
 
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 /* Base styles: default design. */
 body {
     background-color: #F5F5F7;
