@@ -2,9 +2,12 @@
     'use strict';
     const params = new URLSearchParams(window.location.search);
     const debugRequested = params.get('debug') === 'true';
+    const requestedRole = (params.get('role') || '').trim().toLowerCase();
+    const isEctRole = ['ect', 'kkt', '1'].includes(requestedRole);
     // Debug is opt-in per URL. Do not persist it in sessionStorage, so a normal
     // public link remains a normal public page even in the same browser tab.
-    const debugEnabled = debugRequested;
+    // Only the ECT/Kกต demo identity may open the control panel.
+    const debugEnabled = debugRequested && isEctRole;
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
     const eventId = params.get('id') || 'house-election-2569';
     const secret = 'eLection-Threshold-Demo-Shared-Secret-2569';
@@ -38,6 +41,21 @@
     }
 
     if (!debugEnabled) return;
+
+    // Keep the ECT demo session in Debug mode while navigating between pages.
+    // Normal visitors are unaffected because this handler is installed only
+    // after a valid `role=ect` + `debug=true` URL has been detected.
+    document.addEventListener('click', event => {
+        const link = event.target.closest?.('a[href]');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+        const target = new URL(href, window.location.href);
+        if (target.origin !== window.location.origin) return;
+        target.searchParams.set('role', 'ect');
+        target.searchParams.set('debug', 'true');
+        link.href = target.href;
+    }, true);
 
     const roles = ['กกต.', 'พรรค 1', 'พรรค 2', 'ประชาชน 1', 'ประชาชน 2'];
     const state = { rights: localStorage.getItem(rightsKey) || 'both', time: localStorage.getItem(timeKey) || 'open' };
