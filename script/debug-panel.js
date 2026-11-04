@@ -4,14 +4,41 @@
     const debugRequested = params.get('debug') === 'true';
     if (debugRequested) sessionStorage.setItem('election-debug-mode', 'true');
     const debugEnabled = debugRequested || sessionStorage.getItem('election-debug-mode') === 'true';
-    if (!debugEnabled) return;
-
     const db = typeof supabaseClient !== 'undefined' ? supabaseClient : null;
     const eventId = params.get('id') || 'house-election-2569';
     const secret = 'eLection-Threshold-Demo-Shared-Secret-2569';
-    const roles = ['กกต.', 'พรรค 1', 'พรรค 2', 'ประชาชน 1', 'ประชาชน 2'];
     const rightsKey = 'demo-voter-rights';
     const timeKey = 'demo-election-time';
+
+    async function syncSharedElectionTime() {
+        if (!db || typeof db.from !== 'function') return;
+        try {
+            const { data, error } = await db
+                .from('demo_election_state')
+                .select('election_time')
+                .eq('event_type', eventId)
+                .maybeSingle();
+            if (!error && data?.election_time) {
+                localStorage.setItem(timeKey, data.election_time);
+                window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: data.election_time }));
+            }
+        } catch (error) {
+            console.warn('Shared demo election time is unavailable; using local fallback', error);
+        }
+    }
+
+    if (db?.from) {
+        syncSharedElectionTime();
+        if (db.channel) {
+            db.channel(`demo-election-time-${eventId}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'demo_election_state', filter: `event_type=eq.${eventId}` }, syncSharedElectionTime)
+                .subscribe();
+        }
+    }
+
+    if (!debugEnabled) return;
+
+    const roles = ['กกต.', 'พรรค 1', 'พรรค 2', 'ประชาชน 1', 'ประชาชน 2'];
     const state = { rights: localStorage.getItem(rightsKey) || 'both', time: localStorage.getItem(timeKey) || 'open' };
 
     const css = document.createElement('link');
@@ -66,10 +93,29 @@
     ballots.appendChild(button('+20 บัตรประชามติ', 'debug-action', () => generateBallots('referendum', 20)));
 
     const time = section('Election Time Simulator');
-    const timeButton = button('', 'debug-toggle', () => { state.time = state.time === 'open' ? 'closed' : 'open'; localStorage.setItem(timeKey, state.time); renderTime(); window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: state.time })); });
+    const timeButton = button('', 'debug-toggle', async () => {
+        state.time = state.time === 'open' ? 'closed' : 'open';
+        localStorage.setItem(timeKey, state.time);
+        renderTime();
+        window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: state.time }));
+        if (db?.from) {
+            const updatedAt = new Date().toISOString();
+            const { error } = await db.from('demo_election_state').upsert([
+                { event_type: 'house-election-2569', election_time: state.time, updated_at: updatedAt },
+                { event_type: 'referendum-2569-03', election_time: state.time, updated_at: updatedAt },
+            ], { onConflict: 'event_type' });
+            if (error) notify(`บันทึกเวลาจำลองแบบรวมศูนย์ไม่สำเร็จ ใช้ค่าเฉพาะเครื่องนี้: ${error.message}`);
+        }
+    });
     time.appendChild(timeButton);
     function renderTime() { timeButton.textContent = state.time === 'open' ? 'เปิดรับคะแนน (ก่อน 17:00)' : 'ปิดหีบเลือกตั้ง (หลัง 17:00)'; timeButton.classList.toggle('is-on', state.time === 'closed'); }
     renderTime();
+    window.addEventListener('demo-time-changed', event => {
+        if (event.detail === 'open' || event.detail === 'closed') {
+            state.time = event.detail;
+            renderTime();
+        }
+    });
 
     const ceremony = section('Key Ceremony Override');
     roles.forEach((role, index) => ceremony.appendChild(button(`ส่งรหัส: ${role}`, 'debug-action', () => submitKey(index + 1))));
@@ -137,6 +183,16 @@
         await db.from('unlock_approvals').delete().eq('event_type', eventId);
         await db.from('key_ceremony_status').update({ approved: false }).eq('event_type', eventId);
         await db.from('key_ceremony_status').update({ status: 0 }).eq('event_type', eventId);
+        // Start every new demo round in the open state for all devices.
+        const openedAt = new Date().toISOString();
+        await db.from('demo_election_state').upsert([
+            { event_type: 'house-election-2569', election_time: 'open', updated_at: openedAt },
+            { event_type: 'referendum-2569-03', election_time: 'open', updated_at: openedAt },
+        ], { onConflict: 'event_type' });
+        state.time = 'open';
+        localStorage.setItem(timeKey, 'open');
+        renderTime();
+        window.dispatchEvent(new CustomEvent('demo-time-changed', { detail: 'open' }));
         notify('รีเซ็ต Demo แล้ว');
     }
 

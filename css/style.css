@@ -1,7 +1,20 @@
+/* Keep the election UI in its light design even when the device/browser uses dark mode. */
+:root {
+    color-scheme: light;
+}
+
 /* Base styles: default design. */
 body {
     background-color: #F5F5F7;
+    color: #111827;
     font-family: "Prompt", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+    color-scheme: light;
 }
 
 .bold {

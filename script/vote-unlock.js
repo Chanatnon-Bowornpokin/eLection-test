@@ -109,6 +109,17 @@
 
     const userRoleIndex = resolveUserRole(urlParams.get('role'), isReferendum);
 
+    function isBallotClosed() {
+        try {
+            const demoTime = window.localStorage.getItem('demo-election-time');
+            if (demoTime === 'closed') return true;
+            if (demoTime === 'open') return false;
+        } catch (error) {
+            // Fall through to the real clock when localStorage is unavailable.
+        }
+        return new Date().getHours() >= 17;
+    }
+
     function generateTxId(usedIds) {
         let value;
         do {
@@ -416,7 +427,8 @@
                     if (actionRow) actionRow.style.display = '';
                     if (button) {
                         button.hidden = false;
-                        button.disabled = isDecrypting || state.completed;
+                        button.disabled = !isBallotClosed() || isDecrypting || state.completed;
+                        button.title = isBallotClosed() ? 'ส่งรหัสอนุมัติ' : 'ส่งรหัสได้หลังปิดหีบเวลา 17:00 น.';
                         button.textContent = 'ส่งรหัส';
                     }
                 } else {
@@ -1019,7 +1031,7 @@
      * ดำเนินการเมื่อผู้ใช้กดปุ่ม [ ส่งรหัส ] ในบทบาทของตนเอง
      */
     async function submitUnlockCodeForRole(roleIndex) {
-        if (state.approved.includes(roleIndex) || isDecrypting || state.completed) return;
+        if (!isBallotClosed() || state.approved.includes(roleIndex) || isDecrypting || state.completed) return;
 
         // ล็อกปุ่มและเปลี่ยนข้อความทันที
         const button = document.getElementById(`btnSubmitCode-${roleIndex}`);
@@ -1108,6 +1120,10 @@
             }
         });
         window.addEventListener('demo-approval-changed', () => hydrateSharedState());
+        window.addEventListener('demo-time-changed', () => renderStatus());
+        window.addEventListener('storage', event => {
+            if (event.key === 'demo-election-time') renderStatus();
+        });
 
         if (state.completed) {
             updateStep1UI('สำเร็จ', '#000000');
