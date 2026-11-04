@@ -169,9 +169,9 @@
         try {
             const session = {
                 citizenId: voter.citizen_id,
-                fullName: voter.full_name_th,
+                fullName: voter.full_name_th || voter.full_name || voter.name || voter.fullName || '',
                 districtCode: voter.district_code || 'BKK-01',
-                districtInfo: voter.district_info || ''
+                districtInfo: voter.district_info || voter.districtInfo || voter.district || ''
             };
             localStorage.setItem(SESSION_KEY, JSON.stringify(session));
         } catch (_) {}
@@ -335,8 +335,9 @@
             const distEl = dropdown.querySelector('#userProfileDistrict');
 
             if (voter) {
-                if (nameEl) nameEl.textContent = voter.full_name_th || 'ผู้มีสิทธิเลือกตั้ง';
-                if (distEl) distEl.textContent = voter.district_info || '';
+                const name = voter.full_name_th || voter.full_name || voter.name || voter.fullName || 'ผู้มีสิทธิเลือกตั้ง';
+                if (nameEl) nameEl.textContent = name;
+                if (distEl) distEl.textContent = voter.district_info || voter.districtInfo || voter.district || '';
             } else {
                 if (nameEl) nameEl.textContent = 'กำลังดึงข้อมูล...';
                 if (distEl) distEl.textContent = '';
@@ -357,9 +358,13 @@
 
             if (willOpen) {
                 const current = getVoter();
-                if (current) {
+                const hasName = current && (current.full_name_th || current.full_name || current.name || current.fullName);
+                if (hasName) {
                     updateProfileView(current);
                 } else {
+                    // Recover from stale/incomplete localStorage records by
+                    // claiming a complete voter record from Supabase.
+                    if (current) localStorage.removeItem(STORAGE_KEY);
                     getOrClaimVoter().then(updateProfileView);
                 }
             }
@@ -430,4 +435,3 @@
     }
 
 })(typeof window !== 'undefined' ? window : this);
-
